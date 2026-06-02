@@ -76,8 +76,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .chip-neu{background:var(--g100);color:var(--g600)}
 .shift-toggle{color:var(--g400);font-size:.85rem;transition:transform .2s;flex-shrink:0}
 .shift-toggle.open{transform:rotate(180deg)}
-.shift-card-body{display:none;border-top:1px solid var(--g200)}
-.shift-card-body.open{display:block}
+.shift-card-body{display:block;border-top:1px solid var(--g200)}
 
 /* detail sections inside a shift */
 .detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--g200)}
@@ -416,7 +415,7 @@ function renderProdList(rows){
             ${safetyIssues>0?`<span class="chip chip-amber">⚠ ${safetyIssues} safety</span>`:''}
           </div>
         </div>
-        <span class="shift-toggle" id="tog-${idx}">▼</span>
+        <span class="shift-toggle" id="tog-${idx}">▲</span>
       </div>
       <div class="shift-card-body" id="body-${idx}">
         <div class="detail-grid">
@@ -565,7 +564,7 @@ function renderBatchList(rows){
             ${safetyIssues>0?`<span class="chip chip-amber">⚠ ${safetyIssues} safety</span>`:''}
           </div>
         </div>
-        <span class="shift-toggle" id="tog-${idx}">▼</span>
+        <span class="shift-toggle" id="tog-${idx}">▲</span>
       </div>
       <div class="shift-card-body" id="body-${idx}">
         <div class="detail-grid">
@@ -599,11 +598,14 @@ function renderBatchList(rows){
   area.innerHTML = html;
 }
 
-// ── Toggle expand ──
+// ── Toggle collapse/expand (default: expanded) ──
 window.toggleShift = function(idx){
-  document.getElementById('body-'+idx)?.classList.toggle('open');
-  const tog = document.getElementById('tog-'+idx);
-  if(tog) tog.classList.toggle('open');
+  const body = document.getElementById('body-'+idx);
+  const tog  = document.getElementById('tog-'+idx);
+  if(!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if(tog) tog.textContent = isOpen ? '▼' : '▲';
 };
 
 // ═══════════════════════════════════════
