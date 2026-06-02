@@ -327,8 +327,8 @@ function fD(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${m}/${d
 const monday=getMonday(new Date());
 const sunday=getSunday(monday);
 
-async function sbGet(table,filters){
-  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}&order=shift_date.desc,created_at.desc`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
+async function sbGet(table, filters, order='shift_date.desc,created_at.desc'){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}&order=${order}`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
   if(!res.ok)throw new Error(await res.text());
   return res.json();
 }
@@ -580,7 +580,7 @@ function showToast(m,w){
 async function loadPaceStrip(){
   try{
     const [targetRows, shiftRows] = await Promise.all([
-      sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=lbs_target`),
+      sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=lbs_target`, 'updated_at.desc'),
       sbGet('eos_production_shifts', `shift_date=gte.${monday}&shift_date=lte.${sunday}&select=lbs_produced`)
     ]);
     if(!targetRows.length) return;
