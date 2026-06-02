@@ -366,7 +366,21 @@ window.submitToWeek=async function(){
   if(!d.lbsPl&&!d.lbsAc){showToast('Enter pounds planned or produced before submitting.','w');return;}
 
   const lbsPl=parseInt(d.lbsPl)||0, lbsAc=parseInt(d.lbsAc)||0;
-  const row={shift_date:d.sd,supervisor:d.sup,lbs_planned:lbsPl,lbs_produced:lbsAc,lbs_variance:lbsAc-lbsPl};
+  const row={
+    shift_date:         d.sd,
+    supervisor:         d.sup,
+    lbs_planned:        lbsPl,
+    lbs_produced:       lbsAc,
+    lbs_variance:       lbsAc-lbsPl,
+    unsafe_conditions:  parseInt(d.uc)||0,
+    near_misses:        parseInt(d.nm)||0,
+    first_aid:          parseInt(d.fa)||0,
+    safety_comments:    d.sc||'',
+    headcount_needed:   parseInt(d.hn)||0,
+    headcount_actual:   parseInt(d.ha)||0,
+    absences:           parseInt(d.ab)||0,
+    comments:           d.comments||''
+  };
 
   const btn=document.getElementById('submitBtn');
   const status=document.getElementById('submitStatus');
