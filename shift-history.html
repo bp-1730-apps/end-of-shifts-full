@@ -266,9 +266,8 @@ const sun = new Date(mon); sun.setDate(sun.getDate()+6);
 document.getElementById('dateFrom').value = mon.toISOString().slice(0,10);
 document.getElementById('dateTo').value   = sun.toISOString().slice(0,10);
 
-// ── Read type from URL param ──
+// ── Read type from URL param (applied after all functions defined below) ──
 const urlType = new URLSearchParams(location.search).get('type');
-if(urlType === 'batching') switchType('batching');
 
 // ── Supabase ──
 async function sbGet(table, filters){
@@ -300,9 +299,17 @@ function safetyClass(v){ return parseInt(v)>0?'chip-red':'chip-gray'; }
 
 // ── Switch type ──
 window.switchType = function(type){
+  if(currentType === type) return;
   currentType = type;
   document.getElementById('tabProd').classList.toggle('active', type==='production');
   document.getElementById('tabBatch').classList.toggle('active', type==='batching');
+  // Clear current results and reload for the new type
+  currentRows = [];
+  document.getElementById('summaryArea').innerHTML = '';
+  document.getElementById('exportBtn').disabled = true;
+  document.getElementById('printBtn').disabled  = true;
+  document.getElementById('recordCount').textContent = '';
+  loadShifts();
 };
 
 // ── Load ──
@@ -815,7 +822,12 @@ window.printReport = function(){
   window.print();
 };
 
-// Auto-load on page open
+// Apply URL param + auto-load after all functions are defined
+if(urlType === 'batching'){
+  currentType = 'batching';
+  document.getElementById('tabProd').classList.remove('active');
+  document.getElementById('tabBatch').classList.add('active');
+}
 loadShifts();
 
 })();
