@@ -146,6 +146,9 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 
 /* export */
 .export-row{display:flex;justify-content:flex-end;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+.view-history-btn{font-size:.72rem;font-weight:700;color:var(--brand);text-decoration:none;background:var(--brand-l);border:1px solid #a7d5b8;border-radius:20px;padding:.2rem .7rem;transition:background .15s}
+.view-history-btn:hover{background:#d1ead9}
+
 .export-btn{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:600;background:var(--white);border:1px solid var(--g200);border-radius:6px;padding:.35rem .75rem;cursor:pointer;color:var(--g600);transition:background .15s,border-color .15s}
 .export-btn:hover{background:var(--g50);border-color:var(--g300)}
 
@@ -288,7 +291,10 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   <div class="log-section">
     <div class="log-hdr">
       <div class="log-hdr-title"><span class="dot"></span>Manufacturing Shifts</div>
-      <span class="log-badge" id="prodLogBadge">0 this week</span>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <span class="log-badge" id="prodLogBadge">0 this week</span>
+        <a href="shift-history.html?type=production" class="view-history-btn">View All →</a>
+      </div>
     </div>
     <div id="prodLog"><div class="log-empty">Loading…</div></div>
   </div>
@@ -296,7 +302,10 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   <div class="log-section">
     <div class="log-hdr">
       <div class="log-hdr-title batching"><span class="dot"></span>Batching Shifts</div>
-      <span class="log-badge batching" id="batchLogBadge">0 this week</span>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <span class="log-badge batching" id="batchLogBadge">0 this week</span>
+        <a href="shift-history.html?type=batching" class="view-history-btn">View All →</a>
+      </div>
     </div>
     <div id="batchLog"><div class="log-empty">Loading…</div></div>
   </div>
