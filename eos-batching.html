@@ -55,6 +55,22 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .pct-warn{background:var(--accent-l);color:var(--accent);border-color:var(--accent-b)}
 .pct-bad{background:#fef2f2;color:#dc2626;border-color:#fca5a5}
 
+/* pace strip */
+.pace-strip{background:var(--white);border:1px solid var(--g200);border-radius:var(--rs);padding:.8rem 1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;box-shadow:var(--sh)}
+.pace-strip-bar-wrap{flex:1;min-width:160px;display:flex;flex-direction:column;gap:.3rem}
+.pace-strip-labels{display:flex;justify-content:space-between;font-size:.68rem;font-weight:600;color:var(--g500)}
+.pace-strip-track{background:var(--g100);border-radius:100px;height:9px;overflow:hidden}
+.pace-strip-fill{height:100%;border-radius:100px;background:var(--brand);transition:width .5s ease}
+.pace-strip-fill.warn{background:var(--accent)}
+.pace-strip-fill.danger{background:#dc2626}
+.pace-chip{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;gap:.1rem}
+.pace-chip .pc-delta{font-family:var(--fm);font-weight:700;font-size:.95rem}
+.pace-chip .pc-sub{font-size:.65rem;color:var(--g400)}
+.pace-chip.ahead .pc-delta{color:var(--brand)}
+.pace-chip.behind .pc-delta{color:#dc2626}
+.pace-chip.warn .pc-delta{color:var(--accent)}
+.pace-strip-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);flex-shrink:0}
+
 /* submit status */
 .submit-status{display:none;align-items:center;gap:.6rem;font-size:.78rem;font-weight:600;padding:.6rem .9rem;border-radius:var(--rs);margin-top:.5rem}
 .submit-status.show{display:flex}
@@ -198,6 +214,24 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
       <span class="hdr-badge">Batching</span>
     </div>
   </header>
+
+  <!-- Pace strip (production weekly target, read-only) -->
+  <div class="pace-strip" id="paceStrip" style="display:none">
+    <div class="pace-strip-label">🎯 Production Pace</div>
+    <div class="pace-strip-bar-wrap">
+      <div class="pace-strip-labels">
+        <span id="ps-left">—</span>
+        <span id="ps-right">—</span>
+      </div>
+      <div class="pace-strip-track">
+        <div class="pace-strip-fill" id="ps-fill" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="pace-chip" id="ps-chip">
+      <div class="pc-delta" id="ps-delta">—</div>
+      <div class="pc-sub" id="ps-sub">projected vs target</div>
+    </div>
+  </div>
 
   <div class="body">
   <form autocomplete="off" id="mainForm">
@@ -542,8 +576,39 @@ function showToast(m,w){
   t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);
 }
 
+// ── Pace strip (reads production target — same weekly goal) ──
+async function loadPaceStrip(){
+  try{
+    const [targetRows, shiftRows] = await Promise.all([
+      sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=lbs_target`),
+      sbGet('eos_production_shifts', `shift_date=gte.${monday}&shift_date=lte.${sunday}&select=lbs_produced`)
+    ]);
+    if(!targetRows.length) return;
+    const lbsTarget   = targetRows[0].lbs_target;
+    const lbsProduced = shiftRows.reduce((s,r)=>s+(r.lbs_produced||0),0);
+    const dow = new Date().getDay();
+    const daysElapsed = Math.max(dow===0?7:dow,1);
+    const projected   = Math.round((lbsProduced/daysElapsed)*7);
+    const delta       = projected-lbsTarget;
+    const pct         = Math.min((lbsProduced/lbsTarget)*100,100);
+    const ahead       = delta>=0;
+    const chipCls     = ahead?'ahead':(Math.abs(delta)<lbsTarget*0.05?'warn':'behind');
+
+    const strip = document.getElementById('paceStrip');
+    strip.style.display='flex';
+    document.getElementById('ps-left').textContent  = lbsProduced.toLocaleString()+' lbs produced';
+    document.getElementById('ps-right').textContent = 'Target: '+lbsTarget.toLocaleString();
+    const fill = document.getElementById('ps-fill');
+    fill.style.width = pct.toFixed(1)+'%';
+    fill.className = 'pace-strip-fill'+(pct>=90?'':(pct>=70?' warn':' danger'));
+    document.getElementById('ps-chip').className = 'pace-chip '+chipCls;
+    document.getElementById('ps-delta').textContent = (ahead?'+':'')+delta.toLocaleString()+' lbs';
+    document.getElementById('ps-sub').textContent   = 'proj. '+projected.toLocaleString()+' / '+lbsTarget.toLocaleString();
+  }catch(e){ console.warn('Pace strip:', e); }
+}
+
 loadWeekPanel();
-})();
+loadPaceStrip();
 </script>
 <div id="printReport"></div>
 </body>
