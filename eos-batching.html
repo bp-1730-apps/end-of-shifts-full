@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Batching Shift Report — Novus Foods Plant 1730</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#fff;--g50:#f8f9fb;--g100:#f1f3f6;--g200:#e2e6ec;--g300:#cdd3dc;
+  --g400:#a0aab8;--g500:#6b7a8d;--g600:#4a5568;--g700:#334155;--g800:#1e293b;--g900:#0f172a;
+  --brand:#1a5632;--brand-l:#e8f5ee;--brand-m:#2d7a4a;
+  --accent:#b8860b;--accent-l:#fdf6e3;--accent-b:#e2c97e;
+  --r:10px;--rs:6px;
+  --fb:'DM Sans',system-ui,sans-serif;--fm:'JetBrains Mono',monospace;
+  --sh:0 4px 12px rgba(15,23,42,.07),0 1px 3px rgba(15,23,42,.05);
+}
+html{font-size:15px}
+body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:100vh;line-height:1.5}
+.app{max-width:900px;margin:0 auto;padding:2rem 1.5rem 5rem}
+
+.hdr{background:var(--brand);color:#fff;display:flex;align-items:center;gap:1.2rem;padding:1.4rem 1.8rem;border-radius:var(--r) var(--r) 0 0;position:relative;box-shadow:var(--sh)}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#daa520,var(--accent))}
+.hdr img{height:46px;width:auto;filter:brightness(0) invert(1);flex-shrink:0}
+.hdr-text h1{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.1rem}
+.hdr-text .sub{font-size:.75rem;opacity:.75;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.hdr-nav{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+.hdr-back{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.75);text-decoration:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:.3rem .8rem;transition:background .15s,color .15s}
+.hdr-back:hover{background:rgba(255,255,255,.2);color:#fff}
+.hdr-badge{background:rgba(184,134,11,.35);border:1px solid rgba(218,165,32,.5);border-radius:20px;padding:.3rem .85rem;font-size:.72rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap;color:#fdf6e3}
+
+.body{background:var(--white);border-radius:0 0 var(--r) var(--r);box-shadow:var(--sh);padding:1.5rem;margin-bottom:1.5rem}
+.sec{background:var(--g50);border:1px solid var(--g200);border-radius:var(--r);padding:1.25rem 1.25rem .75rem;margin-bottom:1rem;transition:border-color .2s,box-shadow .2s}
+.sec:focus-within{border-color:var(--brand-m);box-shadow:0 0 0 3px var(--brand-l)}
+.sl{display:flex;align-items:center;gap:.55rem;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--brand);margin-bottom:1rem}
+.sl .d{width:7px;height:7px;border-radius:50%;background:var(--brand-m);flex-shrink:0}
+.fr{display:grid;gap:.85rem;margin-bottom:.85rem}
+.fr.c2{grid-template-columns:1fr 1fr}
+.fr.c3{grid-template-columns:1fr 1fr 1fr}
+
+.f label{display:block;font-size:.7rem;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem}
+.f input,.f textarea{width:100%;max-width:100%;min-width:0;background:var(--white);border:1px solid var(--g300);border-radius:var(--rs);color:var(--g800);font-family:var(--fb);font-size:.9rem;padding:.55rem .7rem;transition:border-color .15s,box-shadow .15s;outline:none;-webkit-appearance:none}
+.f input:focus,.f textarea:focus{border-color:var(--brand-m);box-shadow:0 0 0 3px var(--brand-l)}
+.f textarea{resize:vertical;min-height:56px}
+.f input::placeholder,.f textarea::placeholder{color:var(--g400)}
+.f input[type=number]{font-family:var(--fm);font-size:.85rem}
+
+/* lbs planned/produced + pct */
+.lbs-row{display:grid;grid-template-columns:1fr 1fr 80px;gap:.85rem;align-items:end;margin-bottom:.85rem}
+.pct-display{font-family:var(--fm);font-weight:700;font-size:1.1rem;text-align:center;padding:.55rem .4rem;border-radius:var(--rs);border:1px solid var(--g200);background:var(--g50);color:var(--g400);transition:background .2s,color .2s,border-color .2s}
+.pct-display label{display:block;font-size:.65rem;font-weight:700;color:var(--g500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem;font-family:var(--fb)}
+.pct-good{background:var(--brand-l);color:var(--brand);border-color:#a7d5b8}
+.pct-warn{background:var(--accent-l);color:var(--accent);border-color:var(--accent-b)}
+.pct-bad{background:#fef2f2;color:#dc2626;border-color:#fca5a5}
+
+/* submit status */
+.submit-status{display:none;align-items:center;gap:.6rem;font-size:.78rem;font-weight:600;padding:.6rem .9rem;border-radius:var(--rs);margin-top:.5rem}
+.submit-status.show{display:flex}
+.submit-status.ok{background:var(--brand-l);color:var(--brand)}
+.submit-status.err{background:#fef2f2;color:#dc2626}
+.submit-status.loading{background:var(--g100);color:var(--g500)}
+
+.abar{display:flex;gap:.85rem;justify-content:flex-end;padding:0 .5rem;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--fb);font-weight:600;font-size:.88rem;padding:.65rem 1.4rem;border-radius:var(--rs);border:none;cursor:pointer;transition:transform .1s,box-shadow .15s,background .15s}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.bs{background:var(--g200);color:var(--g700)}.bs:hover:not(:disabled){background:var(--g300)}
+.bp{background:var(--brand);color:#fff}.bp:hover:not(:disabled){background:var(--brand-m);box-shadow:0 4px 16px rgba(26,86,50,.25)}
+.bd{background:var(--accent-l);color:var(--accent);border:1px solid var(--accent-b)}.bd:hover:not(:disabled){background:#faebc6}
+.bk{background:var(--g800);color:#fff}.bk:hover:not(:disabled){background:var(--g900)}
+
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);padding:.65rem 1.3rem;border-radius:var(--rs);font-size:.85rem;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:999;box-shadow:var(--sh)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* weekly panel */
+.wk-panel{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:1.5rem;overflow:hidden}
+.wk-hdr{background:var(--g800);color:#fff;padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.wk-hdr-left{display:flex;align-items:center;gap:.75rem}
+.wk-icon{width:32px;height:32px;background:rgba(255,255,255,.12);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.wk-title{font-size:1rem;font-weight:700}
+.wk-sub{font-size:.72rem;opacity:.6;font-weight:500;margin-top:.1rem}
+.wk-badge{background:var(--accent);border-radius:12px;padding:.2rem .7rem;font-size:.7rem;font-weight:700;white-space:nowrap}
+.wk-body{padding:1.25rem 1.4rem}
+.wk-empty{text-align:center;padding:2rem;color:var(--g400);font-size:.88rem}
+.wk-totals{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.25rem}
+.wk-tot{background:var(--g50);border:1px solid var(--g200);border-radius:var(--rs);padding:.7rem .9rem}
+.wk-tot .wt-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);margin-bottom:.3rem}
+.wk-tot .wt-val{font-family:var(--fm);font-weight:700;font-size:1.1rem;color:var(--g800)}
+.wk-tot.pos .wt-val{color:var(--brand)}
+.wk-tot.neg .wt-val{color:#dc2626}
+.shift-log{display:flex;flex-direction:column;gap:.5rem}
+.shift-entry{border:1px solid var(--g200);border-radius:var(--rs);overflow:hidden}
+.shift-entry-hdr{display:flex;align-items:center;justify-content:space-between;padding:.55rem .85rem;background:var(--g50);cursor:pointer;user-select:none;gap:.5rem;flex-wrap:wrap}
+.shift-entry-hdr:hover{background:var(--g100)}
+.se-meta{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.se-date{font-family:var(--fm);font-size:.8rem;font-weight:700;color:var(--g700)}
+.se-sup{font-size:.78rem;color:var(--g500)}
+.se-kpis{display:flex;gap:.5rem;flex-wrap:wrap}
+.se-kpi{font-size:.72rem;font-weight:600;padding:.15rem .45rem;border-radius:3px}
+.se-kpi.pos{background:var(--brand-l);color:var(--brand)}
+.se-kpi.neg{background:#fef2f2;color:#dc2626}
+.se-kpi.neu{background:var(--g100);color:var(--g600)}
+.se-toggle{font-size:.75rem;color:var(--g400);flex-shrink:0;transition:transform .2s}
+.se-toggle.open{transform:rotate(180deg)}
+.shift-entry-body{display:none;border-top:1px solid var(--g200);padding:.75rem 1rem;font-size:.82rem}
+.shift-entry-body.open{display:block}
+.wk-footer{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.4rem;background:var(--g50);border-top:1px solid var(--g200);font-size:.75rem;color:var(--g500);flex-wrap:wrap;gap:.5rem}
+
+@media(max-width:640px){
+  .app{padding:.75rem .5rem 3rem}
+  .body{padding:1rem .75rem}
+  .hdr{flex-direction:column;text-align:center;padding:1.2rem 1rem}
+  .hdr img{height:38px}
+  .hdr-nav{margin-left:0}
+  .fr.c2,.fr.c3{grid-template-columns:1fr 1fr}
+  .f input,.f textarea{font-size:16px}
+  .lbs-row{grid-template-columns:1fr 1fr;row-gap:.6rem}
+  .lbs-row .pct-display{grid-column:1/-1}
+  .abar{flex-direction:column}
+  .btn{justify-content:center;padding:.75rem 1rem}
+  .wk-totals{grid-template-columns:1fr 1fr}
+}
+@media(max-width:400px){
+  .fr.c2,.fr.c3{grid-template-columns:1fr}
+  .wk-totals{grid-template-columns:1fr}
+}
+
+/* print */
+@media print{
+  body{background:white!important;margin:0}
+  .app,.toast,.wk-panel{display:none!important}
+  #printReport{display:block!important}
+}
+#printReport{display:none;font-family:'DM Sans',Arial,sans-serif;font-size:10pt;color:#111827;background:white}
+.pr-page{width:100%;max-width:900px;margin:0 auto;padding:0 20pt}
+.pr-hdr{background:#1a5632;color:white;padding:14pt 20pt 12pt;display:flex;align-items:center;justify-content:space-between;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-hdr-left{display:flex;align-items:center;gap:12pt}
+.pr-hdr img{height:34pt;width:auto;filter:brightness(0) invert(1)}
+.pr-hdr h1{font-size:14pt;font-weight:700;margin:0 0 2pt;letter-spacing:-.02em}
+.pr-hdr .pr-sub{font-size:7pt;opacity:.75;text-transform:uppercase;letter-spacing:.08em}
+.pr-hdr-right{text-align:right;font-size:8pt;opacity:.85}
+.pr-gold{height:3pt;background:linear-gradient(90deg,#b8860b,#daa520,#b8860b);print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-meta{display:grid;grid-template-columns:repeat(4,1fr);border:1pt solid #e2e6ec;border-top:none;margin-bottom:10pt}
+.pr-meta-item{padding:6pt 10pt;border-right:1pt solid #e2e6ec}
+.pr-meta-item:last-child{border-right:none}
+.pr-meta-item .mk{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6b7a8d;margin-bottom:2pt}
+.pr-meta-item .mv{font-size:10pt;font-weight:700;color:#111827}
+.pr-kpi-row{display:grid;gap:7pt;margin-bottom:9pt}
+.pr-kpi-row.k3{grid-template-columns:repeat(3,1fr)}
+.pr-kpi{border:1pt solid #e2e6ec;border-radius:4pt;padding:7pt 9pt;background:#f8f9fb;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-kpi .kk{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7a8d;margin-bottom:3pt}
+.pr-kpi .kv{font-size:16pt;font-weight:700;line-height:1}
+.pr-kpi.green{background:#e8f5ee;border-color:#a7d5b8}.pr-kpi.green .kv{color:#1a5632}
+.pr-kpi.amber{background:#fdf6e3;border-color:#e2c97e}.pr-kpi.amber .kv{color:#b8860b}
+.pr-kpi.red{background:#fef2f2;border-color:#fca5a5}.pr-kpi.red .kv{color:#dc2626}
+.pr-kpi.neutral .kv{color:#334155}
+.pr-kpi .ksub{font-size:7pt;color:#6b7a8d;margin-top:2pt}
+.pr-sec-hdr{display:flex;align-items:center;gap:6pt;margin:10pt 0 5pt;page-break-after:avoid}
+.pr-sec-hdr .bar{width:4pt;height:14pt;background:#1a5632;border-radius:2pt;flex-shrink:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-sec-hdr span{font-size:9pt;font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:.05em}
+.pr-sec-hdr::after{content:'';flex:1;height:1pt;background:#e2e6ec}
+.pr-table{width:100%;border-collapse:collapse;font-size:8.5pt;margin-bottom:8pt;page-break-inside:avoid}
+.pr-table th{background:#1a5632;color:white;padding:5pt 7pt;text-align:left;font-size:7pt;font-weight:700;text-transform:uppercase;letter-spacing:.04em;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-table th.c{text-align:center}
+.pr-table td{padding:5pt 7pt;border-bottom:1pt solid #e2e6ec;vertical-align:middle}
+.pr-table td.c{text-align:center}
+.pr-table tr:nth-child(even) td{background:#f8f9fb;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-bar-wrap{margin-bottom:8pt}
+.pr-bar-row{display:flex;align-items:center;gap:6pt;margin-bottom:3pt;font-size:8pt}
+.pr-bar-label{width:72pt;font-size:7.5pt;font-weight:600;color:#334155;flex-shrink:0;line-height:1.3}
+.pr-bar-track{flex:1;background:#e2e6ec;border-radius:3pt;height:10pt;overflow:hidden;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-bar-fill{height:100%;border-radius:3pt;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-bar-val{width:36pt;text-align:right;font-weight:700;flex-shrink:0;font-size:7.5pt}
+.pr-bar-note{width:64pt;font-size:7pt;color:#6b7a8d;flex-shrink:0}
+.pr-notes{background:#f8f9fb;border-left:3pt solid #1a5632;padding:5pt 9pt;border-radius:0 4pt 4pt 0;margin-bottom:6pt;font-size:8.5pt;color:#334155;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-notes .nk{font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7a8d;margin-bottom:2pt}
+.badge{display:inline-block;padding:1pt 5pt;border-radius:3pt;font-size:7pt;font-weight:700;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.badge-green{background:#e8f5ee;color:#1a5632}
+.badge-amber{background:#fdf6e3;color:#b8860b}
+.badge-red{background:#fef2f2;color:#dc2626}
+.badge-gray{background:#f1f3f6;color:#4a5568}
+.pr-footer{margin-top:14pt;padding-top:6pt;border-top:1pt solid #e2e6ec;display:flex;justify-content:space-between;font-size:7pt;color:#a0aab8}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="hdr">
+    <img src="image.png" id="logoImg" alt="Novus Foods">
+    <div class="hdr-text">
+      <h1>Batching Shift Report</h1>
+      <div class="sub">Plant 1730 &bull; Buena Park, CA</div>
+    </div>
+    <div class="hdr-nav">
+      <a class="hdr-back" href="index.html">← Hub</a>
+      <span class="hdr-badge">Batching</span>
+    </div>
+  </header>
+
+  <div class="body">
+  <form autocomplete="off" id="mainForm">
+
+    <div class="sec">
+      <div class="sl"><span class="d"></span>Shift Information</div>
+      <div class="fr c2">
+        <div class="f"><label>Shift Date</label><input type="date" id="b-date" required></div>
+        <div class="f"><label>Supervisor / Manager</label><input type="text" id="b-sup" placeholder="Enter your name" required></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sl"><span class="d"></span>Safety</div>
+      <div class="fr c3">
+        <div class="f"><label>Unsafe Conditions</label><input type="number" id="b-uc" value="0" min="0"></div>
+        <div class="f"><label>Near Misses</label><input type="number" id="b-nm" value="0" min="0"></div>
+        <div class="f"><label>First Aid Incidents</label><input type="number" id="b-fa" value="0" min="0"></div>
+      </div>
+      <div class="fr"><div class="f"><label>Safety Comments</label><textarea id="b-sc" placeholder="Describe any safety observations or incidents…"></textarea></div></div>
+    </div>
+
+    <div class="sec">
+      <div class="sl"><span class="d"></span>Batching Information — Total Pounds</div>
+      <div class="lbs-row">
+        <div class="f"><label>Pounds Planned</label><input type="number" id="b-lbsPl" min="0" placeholder="0"></div>
+        <div class="f"><label>Pounds Produced</label><input type="number" id="b-lbsAc" min="0" placeholder="0"></div>
+        <div class="pct-display" id="b-pctDisplay"><label>Attainment</label><span id="b-pctVal">—</span></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sl"><span class="d"></span>Attendance</div>
+      <div class="fr c3">
+        <div class="f"><label>Headcount Needed</label><input type="number" id="b-hn" min="0"></div>
+        <div class="f"><label>Headcount Actual</label><input type="number" id="b-ha" min="0"></div>
+        <div class="f"><label>Absences</label><input type="number" id="b-ab" value="0" min="0"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sl"><span class="d"></span>Additional Comments</div>
+      <div class="fr"><div class="f"><label>Report any issues or concerns</label><textarea id="b-comments" rows="4" placeholder="Enter any additional notes, issues, or concerns…"></textarea></div></div>
+    </div>
+
+  </form>
+  <div class="submit-status" id="submitStatus"></div>
+  </div>
+
+  <div class="abar">
+    <button type="button" class="btn bs" onclick="clearForm()">Clear Form</button>
+    <button type="button" class="btn bp" id="submitBtn" onclick="submitToWeek()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v7m0 0l-3-3m3 3 3-3M3 13h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Submit to Week
+    </button>
+    <button type="button" class="btn bd" onclick="downloadPDF()">Daily Report</button>
+    <button type="button" class="btn bk" onclick="downloadWeeklyPDF()">Weekly Report</button>
+  </div>
+
+  <!-- Weekly panel -->
+  <div class="wk-panel">
+    <div class="wk-hdr">
+      <div class="wk-hdr-left">
+        <div class="wk-icon">📦</div>
+        <div><div class="wk-title">Weekly Accumulator</div><div class="wk-sub" id="wkSubLabel">Loading…</div></div>
+      </div>
+      <div class="wk-badge" id="wkShiftBadge">0 shifts</div>
+    </div>
+    <div class="wk-body" id="wkBody"><div class="wk-empty">Loading…</div></div>
+    <div class="wk-footer">
+      <span>Resets automatically every Monday at 12:00 AM</span>
+      <a href="index.html" style="font-size:.72rem;font-weight:600;color:var(--brand)">← Back to Hub</a>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+// ── CONFIG ──────────────────────────────
+const SUPABASE_URL  = 'https://easfrwilbxypcdooawtt.supabase.co';
+const SUPABASE_ANON = 'YOUR_ANON_KEY_HERE';
+// ────────────────────────────────────────
+
+function getMonday(d){const dt=new Date(d);dt.setHours(0,0,0,0);const day=dt.getDay();dt.setDate(dt.getDate()-(day===0?6:day-1));return dt.toISOString().slice(0,10);}
+function getSunday(m){const d=new Date(m+'T00:00:00');d.setDate(d.getDate()+6);return d.toISOString().slice(0,10);}
+function fmtWeekRange(m){const mon=new Date(m+'T00:00:00'),sun=new Date(mon);sun.setDate(sun.getDate()+6);const fmt=d=>d.toLocaleDateString([],{month:'short',day:'numeric'});return fmt(mon)+' – '+fmt(sun);}
+function fD(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${m}/${d}/${y}`;}
+
+const monday=getMonday(new Date());
+const sunday=getSunday(monday);
+
+async function sbGet(table,filters){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}&order=shift_date.desc,created_at.desc`,{headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}});
+  if(!res.ok)throw new Error(await res.text());
+  return res.json();
+}
+async function sbInsert(table,row){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{method:'POST',headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(row)});
+  if(!res.ok)throw new Error(await res.text());
+}
+
+document.getElementById('b-date').valueAsDate=new Date();
+
+// Live attainment display
+['b-lbsPl','b-lbsAc'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',updatePct);
+});
+function updatePct(){
+  const pl=parseFloat(document.getElementById('b-lbsPl').value)||0;
+  const ac=parseFloat(document.getElementById('b-lbsAc').value)||0;
+  const disp=document.getElementById('b-pctDisplay');
+  const val=document.getElementById('b-pctVal');
+  if(!pl){val.textContent='—';disp.className='pct-display';return;}
+  const pct=Math.round((ac/pl)*100);
+  val.textContent=pct+'%';
+  disp.className='pct-display '+(pct>=90?'pct-good':pct>=70?'pct-warn':'pct-bad');
+}
+
+function gather(){
+  const v=id=>document.getElementById(id)?.value||'';
+  return{sd:v('b-date'),sup:v('b-sup'),uc:v('b-uc'),nm:v('b-nm'),fa:v('b-fa'),sc:v('b-sc'),lbsPl:v('b-lbsPl'),lbsAc:v('b-lbsAc'),hn:v('b-hn'),ha:v('b-ha'),ab:v('b-ab'),comments:v('b-comments')};
+}
+
+window.submitToWeek=async function(){
+  const d=gather();
+  if(!d.sup){showToast('Enter supervisor name before submitting.','w');return;}
+  if(!d.sd){showToast('Enter shift date before submitting.','w');return;}
+  if(!d.lbsPl&&!d.lbsAc){showToast('Enter pounds planned or produced before submitting.','w');return;}
+
+  const lbsPl=parseInt(d.lbsPl)||0, lbsAc=parseInt(d.lbsAc)||0;
+  const row={shift_date:d.sd,supervisor:d.sup,lbs_planned:lbsPl,lbs_produced:lbsAc,lbs_variance:lbsAc-lbsPl};
+
+  const btn=document.getElementById('submitBtn');
+  const status=document.getElementById('submitStatus');
+  btn.disabled=true;
+  status.className='submit-status show loading';
+  status.textContent='Submitting…';
+
+  try{
+    await sbInsert('eos_batching_shifts',row);
+    status.className='submit-status show ok';
+    status.textContent='✓ Shift submitted successfully.';
+    showToast('Shift saved to Supabase.');
+    clearForm(true);
+    await loadWeekPanel();
+  }catch(err){
+    console.error(err);
+    status.className='submit-status show err';
+    status.textContent='✗ Submit failed: '+err.message;
+    showToast('Submit failed — see status message.','w');
+    btn.disabled=false;
+  }
+};
+
+window.clearForm=function(silent=false){
+  if(!silent&&!confirm('Clear all form data for this shift?'))return;
+  document.getElementById('mainForm').reset();
+  document.getElementById('b-date').valueAsDate=new Date();
+  document.getElementById('b-pctVal').textContent='—';
+  document.getElementById('b-pctDisplay').className='pct-display';
+};
+
+async function loadWeekPanel(){
+  const body=document.getElementById('wkBody');
+  const sub=document.getElementById('wkSubLabel');
+  const badge=document.getElementById('wkShiftBadge');
+  sub.textContent='Week of '+fmtWeekRange(monday);
+
+  try{
+    const rows=await sbGet('eos_batching_shifts',`shift_date=gte.${monday}&shift_date=lte.${sunday}`);
+    badge.textContent=rows.length+(rows.length===1?' shift':' shifts');
+
+    if(!rows.length){body.innerHTML='<div class="wk-empty">No shifts submitted this week yet.</div>';return;}
+
+    let lbsPl=0,lbsAc=0,lbsVar=0;
+    rows.forEach(r=>{lbsPl+=r.lbs_planned||0;lbsAc+=r.lbs_produced||0;lbsVar+=r.lbs_variance||0;});
+    const att=lbsPl>0?Math.round((lbsAc/lbsPl)*100):null;
+
+    let html=`<div class="wk-totals">
+      <div class="wk-tot"><div class="wt-lbl">Total Lbs Planned</div><div class="wt-val">${lbsPl.toLocaleString()}</div></div>
+      <div class="wk-tot"><div class="wt-lbl">Total Lbs Produced</div><div class="wt-val">${lbsAc.toLocaleString()}</div></div>
+      <div class="wk-tot ${att!==null?(att>=90?'pos':att>=70?'':'neg'):''}"><div class="wt-lbl">Weekly Attainment</div><div class="wt-val">${att!==null?att+'%':'—'}</div></div>
+    </div><div class="shift-log">`;
+
+    rows.forEach((r,idx)=>{
+      const pct=r.lbs_planned>0?Math.round((r.lbs_produced/r.lbs_planned)*100):null;
+      const lv=r.lbs_variance||0;
+      html+=`<div class="shift-entry">
+        <div class="shift-entry-hdr" onclick="toggleEntry(${idx})">
+          <div class="se-meta"><span class="se-date">${fD(r.shift_date)}</span><span class="se-sup">${r.supervisor||'—'}</span></div>
+          <div class="se-kpis">
+            <span class="se-kpi neu">${(r.lbs_produced||0).toLocaleString()} / ${(r.lbs_planned||0).toLocaleString()} lbs</span>
+            <span class="se-kpi ${lv>=0?'pos':'neg'}">${lv>0?'+':''}${lv.toLocaleString()} lbs var</span>
+            ${pct!==null?`<span class="se-kpi ${pct>=90?'pos':pct>=70?'neu':'neg'}">${pct}%</span>`:''}
+          </div>
+          <span class="se-toggle" id="se-tog-${idx}">▼</span>
+        </div>
+        <div class="shift-entry-body" id="se-body-${idx}">
+          <strong>Lbs Planned:</strong> ${(r.lbs_planned||0).toLocaleString()} &nbsp;|&nbsp;
+          <strong>Lbs Produced:</strong> ${(r.lbs_produced||0).toLocaleString()} &nbsp;|&nbsp;
+          <strong>Variance:</strong> <span style="font-weight:700;color:${lv>=0?'var(--brand)':'#dc2626'}">${lv>0?'+':''}${lv.toLocaleString()}</span> &nbsp;|&nbsp;
+          <strong>Attainment:</strong> ${pct!==null?pct+'%':'—'}
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+    body.innerHTML=html;
+  }catch(err){
+    console.error(err);
+    body.innerHTML=`<div class="wk-empty">Could not load weekly data: ${err.message}</div>`;
+  }
+}
+
+window.toggleEntry=function(idx){
+  document.getElementById('se-body-'+idx)?.classList.toggle('open');
+  document.getElementById('se-tog-'+idx)?.classList.toggle('open');
+};
+
+// ── helpers ──
+function barColor(p){return p>=90?'#1a5632':p>=70?'#b8860b':'#dc2626';}
+function badgeClass(p){return p>=90?'badge-green':p>=70?'badge-amber':'badge-red';}
+
+// ── Print: daily ──
+function buildReport(d){
+  const logoSrc=document.getElementById('logoImg')?.src||'image.png';
+  const now=new Date().toLocaleString();
+  const lbsPl=parseInt(d.lbsPl)||0,lbsAc=parseInt(d.lbsAc)||0;
+  const att=lbsPl>0?Math.round((lbsAc/lbsPl)*100):null;
+
+  let html=`<div class="pr-page">
+    <div class="pr-hdr"><div class="pr-hdr-left"><img src="${logoSrc}" alt="Novus Foods"><div><h1>Batching Shift Report</h1><div class="pr-sub">Plant 1730 &bull; Buena Park, CA</div></div></div>
+    <div class="pr-hdr-right"><strong>${fD(d.sd)}</strong></div></div>
+    <div class="pr-gold"></div>
+    <div class="pr-meta">
+      <div class="pr-meta-item"><div class="mk">Supervisor</div><div class="mv">${d.sup||'—'}</div></div>
+      <div class="pr-meta-item"><div class="mk">Headcount</div><div class="mv">${d.ha||'—'} / ${d.hn||'—'}</div></div>
+      <div class="pr-meta-item"><div class="mk">Absences</div><div class="mv">${d.ab||'0'}</div></div>
+      <div class="pr-meta-item"><div class="mk">Attainment</div><div class="mv">${att!==null?att+'%':'—'}</div></div>
+    </div>`;
+
+  html+=`<div class="pr-sec-hdr"><div class="bar"></div><span>Safety</span></div>
+    <div class="pr-kpi-row k3">
+      <div class="pr-kpi ${parseInt(d.uc)>0?'red':'green'}"><div class="kk">Unsafe Conditions</div><div class="kv">${d.uc||0}</div></div>
+      <div class="pr-kpi ${parseInt(d.nm)>0?'amber':'green'}"><div class="kk">Near Misses</div><div class="kv">${d.nm||0}</div></div>
+      <div class="pr-kpi ${parseInt(d.fa)>0?'red':'green'}"><div class="kk">First Aid Incidents</div><div class="kv">${d.fa||0}</div></div>
+    </div>`;
+  if(d.sc)html+=`<div class="pr-notes"><div class="nk">Safety Comments</div>${d.sc}</div>`;
+
+  const pct=lbsPl>0?Math.min(Math.round((lbsAc/lbsPl)*100),100):0;
+  const color=lbsPl>0?barColor(pct):'#cdd3dc';
+  html+=`<div class="pr-sec-hdr"><div class="bar"></div><span>Total Pounds</span></div>
+    <div class="pr-bar-wrap">
+      <div class="pr-bar-row">
+        <div class="pr-bar-label">Total Lbs</div>
+        <div class="pr-bar-track"><div class="pr-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        <div class="pr-bar-val" style="color:${color}">${lbsPl>0?pct+'%':'—'}</div>
+        <div class="pr-bar-note">${lbsAc.toLocaleString()} / ${lbsPl.toLocaleString()}</div>
+      </div>
+    </div>`;
+
+  const attPct2=(d.hn&&d.ha)?Math.round(parseInt(d.ha)/parseInt(d.hn)*100):null;
+  html+=`<div class="pr-sec-hdr"><div class="bar"></div><span>Attendance</span></div>
+    <div class="pr-kpi-row k3">
+      <div class="pr-kpi neutral"><div class="kk">Needed</div><div class="kv">${d.hn||'—'}</div></div>
+      <div class="pr-kpi ${attPct2!==null&&attPct2<90?'amber':'green'}"><div class="kk">Actual</div><div class="kv">${d.ha||'—'}</div>${attPct2!==null?`<div class="ksub">${attPct2}% staffed</div>`:''}</div>
+      <div class="pr-kpi ${parseInt(d.ab)>0?'amber':'green'}"><div class="kk">Absences</div><div class="kv">${d.ab||0}</div></div>
+    </div>`;
+
+  if(d.comments)html+=`<div class="pr-notes"><div class="nk">Additional Comments</div>${d.comments}</div>`;
+  html+=`<div class="pr-footer"><span>Plant 1730 Ops Hub &bull; Novus Foods, Buena Park CA</span><span>Generated: ${now}</span></div></div>`;
+  return html;
+}
+
+// ── Print: weekly ──
+async function buildWeeklyReport(){
+  const rows=await sbGet('eos_batching_shifts',`shift_date=gte.${monday}&shift_date=lte.${sunday}`);
+  const logoSrc=document.getElementById('logoImg')?.src||'image.png';
+  const now=new Date().toLocaleString();
+  let lbsPl=0,lbsAc=0;
+  rows.forEach(r=>{lbsPl+=r.lbs_planned||0;lbsAc+=r.lbs_produced||0;});
+  const att=lbsPl>0?Math.round((lbsAc/lbsPl)*100):null;
+  const range=fmtWeekRange(monday);
+
+  let html=`<div class="pr-page">
+    <div class="pr-hdr"><div class="pr-hdr-left"><img src="${logoSrc}" alt="Novus Foods"><div><h1>Batching Weekly Summary</h1><div class="pr-sub">Plant 1730 &bull; Buena Park, CA</div></div></div>
+    <div class="pr-hdr-right"><strong>Week of ${range}</strong><br>${rows.length} shift${rows.length!==1?'s':''}</div></div>
+    <div class="pr-gold"></div>
+    <div class="pr-meta">
+      <div class="pr-meta-item"><div class="mk">Total Lbs Planned</div><div class="mv">${lbsPl.toLocaleString()}</div></div>
+      <div class="pr-meta-item"><div class="mk">Total Lbs Produced</div><div class="mv">${lbsAc.toLocaleString()}</div></div>
+      <div class="pr-meta-item"><div class="mk">Variance</div><div class="mv" style="color:${(lbsAc-lbsPl)>=0?'#1a5632':'#dc2626'}">${(lbsAc-lbsPl)>0?'+':''}${(lbsAc-lbsPl).toLocaleString()}</div></div>
+      <div class="pr-meta-item"><div class="mk">Weekly Attainment</div><div class="mv">${att!==null?att+'%':'—'}</div></div>
+    </div>`;
+
+  html+=`<div class="pr-sec-hdr"><div class="bar"></div><span>Shift Log</span></div>
+    <table class="pr-table"><thead><tr>
+      <th>Date</th><th>Supervisor</th><th class="c">Lbs Planned</th><th class="c">Lbs Produced</th><th class="c">Variance</th><th class="c">Attainment</th>
+    </tr></thead><tbody>`;
+  rows.forEach(r=>{
+    const pct=r.lbs_planned>0?Math.round((r.lbs_produced/r.lbs_planned)*100):null;
+    const lv=r.lbs_variance||0;
+    const color=lv>=0?'#1a5632':'#dc2626';
+    html+=`<tr>
+      <td style="font-family:monospace;font-weight:700">${fD(r.shift_date)}</td>
+      <td>${r.supervisor||'—'}</td>
+      <td class="c">${(r.lbs_planned||0).toLocaleString()}</td>
+      <td class="c">${(r.lbs_produced||0).toLocaleString()}</td>
+      <td class="c"><span style="font-weight:700;color:${color}">${lv>0?'+':''}${lv.toLocaleString()}</span></td>
+      <td class="c">${pct!==null?`<span class="badge ${badgeClass(pct)}">${pct}%</span>`:'<span class="badge badge-gray">—</span>'}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table>`;
+  html+=`<div class="pr-footer"><span>Plant 1730 Ops Hub &bull; Novus Foods, Buena Park CA</span><span>Generated: ${now}</span></div></div>`;
+  return html;
+}
+
+window.downloadPDF=function(){
+  const d=gather();
+  if(!d.sup){showToast('Enter supervisor name before printing.','w');return;}
+  if(!d.sd){showToast('Enter shift date before printing.','w');return;}
+  document.getElementById('printReport').innerHTML=buildReport(d);
+  window.print();
+};
+
+window.downloadWeeklyPDF=async function(){
+  showToast('Fetching weekly data…');
+  try{
+    const html=await buildWeeklyReport();
+    document.getElementById('printReport').innerHTML=html;
+    window.print();
+  }catch(err){showToast('Could not load weekly data.','w');console.error(err);}
+};
+
+function showToast(m,w){
+  const t=document.getElementById('toast');t.textContent=m;
+  t.style.background=w?'#fdf6e3':'#e8f5ee';t.style.color=w?'#92400e':'#15492a';
+  t.style.border=w?'1px solid rgba(217,119,6,.2)':'1px solid rgba(22,163,74,.2)';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+loadWeekPanel();
+})();
+</script>
+<div id="printReport"></div>
+</body>
+</html>
