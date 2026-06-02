@@ -11,7 +11,7 @@
 :root{
   --white:#fff;--g50:#f8f9fb;--g100:#f1f3f6;--g200:#e2e6ec;--g300:#cdd3dc;
   --g400:#a0aab8;--g500:#6b7a8d;--g600:#4a5568;--g700:#334155;--g800:#1e293b;--g900:#0f172a;
-  --brand:#1a5632;--brand-l:#e8f5ee;--brand-m:#2d7a4a;--brand-d:#133d25;
+  --brand:#1a5632;--brand-l:#e8f5ee;--brand-m:#2d7a4a;
   --accent:#b8860b;--accent-l:#fdf6e3;--accent-b:#e2c97e;
   --r:12px;--rs:8px;
   --fb:'DM Sans',system-ui,sans-serif;--fm:'JetBrains Mono',monospace;
@@ -21,22 +21,20 @@
 html{font-size:15px}
 body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:100vh;line-height:1.5}
 
-/* ── HEADER ── */
 .hdr{background:var(--brand);color:#fff;position:relative;overflow:hidden}
 .hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 50%,rgba(255,255,255,.06) 0%,transparent 70%);pointer-events:none}
 .hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#daa520,var(--accent))}
 .hdr-inner{max-width:1000px;margin:0 auto;padding:1.6rem 2rem 1.8rem;display:flex;align-items:center;gap:1.4rem}
-.hdr img{height:52px;width:auto;filter:brightness(0) invert(1);flex-shrink:0;position:relative}
+.hdr img{height:52px;width:auto;filter:brightness(0) invert(1);flex-shrink:0}
 .hdr-text h1{font-size:1.5rem;font-weight:700;letter-spacing:-.025em;margin-bottom:.15rem}
 .hdr-text .sub{font-size:.75rem;opacity:.7;font-weight:500;letter-spacing:.07em;text-transform:uppercase}
 .hdr-right{margin-left:auto;text-align:right;font-size:.75rem;opacity:.65;line-height:1.7;flex-shrink:0}
 .hdr-right .week-label{font-weight:700;font-size:.8rem;opacity:.85}
 
-/* ── MAIN ── */
 .main{max-width:1000px;margin:0 auto;padding:2rem 2rem 4rem}
 
-/* ── WEEK STRIP ── */
-.week-strip{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);padding:1.1rem 1.4rem;margin-bottom:1.75rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;box-shadow:var(--sh)}
+/* week strip */
+.week-strip{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);padding:1.1rem 1.4rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;box-shadow:var(--sh)}
 .week-strip-left{display:flex;align-items:center;gap:.75rem}
 .ws-dot{width:10px;height:10px;border-radius:50%;background:var(--brand);flex-shrink:0}
 .ws-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--g500)}
@@ -46,9 +44,55 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .ws-pulse.live{background:#22c55e;animation:pulse .8s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 
-/* ── KPI SUMMARY ROW ── */
+/* ── PACE TRACKER (hub) ── */
+.pace-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:1.5rem;overflow:hidden}
+.pace-hdr{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.3rem;border-bottom:1px solid var(--g200);gap:1rem;flex-wrap:wrap}
+.pace-hdr-left{display:flex;align-items:center;gap:.6rem}
+.pace-icon{font-size:1.1rem}
+.pace-title{font-size:.92rem;font-weight:700;color:var(--g800)}
+.pace-sub{font-size:.72rem;color:var(--g500);margin-top:.05rem}
+.pace-body{padding:1.2rem 1.3rem;display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.pace-left{display:flex;flex-direction:column;gap:.85rem}
+.pace-right{display:flex;flex-direction:column;gap:.75rem;justify-content:center}
+
+/* target setter */
+.target-setter{display:flex;align-items:flex-end;gap:.5rem}
+.target-setter .f{flex:1}
+.target-setter .f label{display:block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);margin-bottom:.3rem}
+.target-setter input{width:100%;background:var(--white);border:1px solid var(--g300);border-radius:var(--rs);color:var(--g800);font-family:var(--fm);font-size:.95rem;padding:.5rem .65rem;outline:none;transition:border-color .15s,box-shadow .15s}
+.target-setter input:focus{border-color:var(--brand-m);box-shadow:0 0 0 3px var(--brand-l)}
+.target-setter .set-by{flex:1}
+.target-setter .set-by input{font-family:var(--fb);font-size:.85rem}
+.save-target-btn{background:var(--brand);color:#fff;border:none;border-radius:var(--rs);padding:.5rem .95rem;font-family:var(--fb);font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
+.save-target-btn:hover{background:var(--brand-m)}
+.save-target-btn:disabled{opacity:.5;cursor:not-allowed}
+.target-meta{font-size:.7rem;color:var(--g400);margin-top:.15rem}
+
+/* progress bar */
+.pace-bar-wrap{display:flex;flex-direction:column;gap:.4rem}
+.pace-bar-labels{display:flex;justify-content:space-between;font-size:.72rem;font-weight:600;color:var(--g600)}
+.pace-bar-track{background:var(--g100);border-radius:100px;height:14px;overflow:hidden;position:relative}
+.pace-bar-fill{height:100%;border-radius:100px;transition:width .6s ease;background:var(--brand)}
+.pace-bar-fill.warn{background:var(--accent)}
+.pace-bar-fill.danger{background:#dc2626}
+.pace-bar-proj{position:absolute;top:0;height:100%;border-left:2px dashed rgba(0,0,0,.25);transition:left .6s ease}
+
+/* pace stat cards */
+.pace-stats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.pace-stat{background:var(--g50);border:1px solid var(--g200);border-radius:var(--rs);padding:.6rem .8rem}
+.pace-stat .ps-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g400);margin-bottom:.2rem}
+.pace-stat .ps-val{font-family:var(--fm);font-weight:700;font-size:1rem;color:var(--g800);line-height:1}
+.pace-stat .ps-sub{font-size:.68rem;color:var(--g400);margin-top:.15rem}
+.pace-stat.ahead .ps-val{color:var(--brand)}
+.pace-stat.behind .ps-val{color:#dc2626}
+.pace-stat.warn .ps-val{color:var(--accent)}
+.pace-no-target{grid-column:1/-1;text-align:center;padding:1.5rem;color:var(--g400);font-size:.83rem}
+
+/* KPI row */
+.section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g500);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
+.section-label::after{content:'';flex:1;height:1px;background:var(--g200)}
 .kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:.75rem;margin-bottom:1.75rem}
-.kpi{background:var(--white);border:1px solid var(--g200);border-radius:var(--rs);padding:.8rem 1rem;box-shadow:var(--sh);transition:border-color .2s}
+.kpi{background:var(--white);border:1px solid var(--g200);border-radius:var(--rs);padding:.8rem 1rem;box-shadow:var(--sh)}
 .kpi .kk{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400);margin-bottom:.3rem}
 .kpi .kv{font-family:var(--fm);font-weight:700;font-size:1.15rem;color:var(--g800);line-height:1}
 .kpi .ks{font-size:.7rem;color:var(--g400);margin-top:.2rem}
@@ -57,18 +101,14 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .kpi.loading .kv{color:var(--g300);animation:pulse 1s infinite}
 .kpi-divider{grid-column:1/-1;height:1px;background:var(--g200);margin:-.25rem 0}
 
-/* ── SECTION LABEL ── */
-.section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g500);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
-.section-label::after{content:'';flex:1;height:1px;background:var(--g200)}
-
-/* ── REPORT CARDS ── */
+/* cards */
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:2rem}
 .card{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);transition:transform .18s,box-shadow .18s,border-color .18s;display:flex;flex-direction:column;text-decoration:none;color:inherit}
 .card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);border-color:var(--g300)}
 .card-accent{height:4px;background:var(--brand)}
 .card.batching .card-accent{background:var(--accent)}
 .card-body{padding:1.4rem 1.5rem;flex:1;display:flex;flex-direction:column;gap:.65rem}
-.card-icon{width:42px;height:42px;border-radius:10px;background:var(--brand-l);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.card-icon{width:42px;height:42px;border-radius:10px;background:var(--brand-l);display:flex;align-items:center;justify-content:center;font-size:1.3rem}
 .card.batching .card-icon{background:var(--accent-l)}
 .card-title{font-size:1.1rem;font-weight:700;letter-spacing:-.015em;color:var(--g900)}
 .card-desc{font-size:.83rem;color:var(--g500);line-height:1.5}
@@ -78,7 +118,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .card:hover .card-arrow{transform:translateX(3px);color:var(--brand)}
 .card.batching:hover .card-arrow{color:var(--accent)}
 
-/* ── SHIFT LOG TABLE ── */
+/* log tables */
 .log-section{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:1.25rem}
 .log-hdr{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;border-bottom:1px solid var(--g200);gap:1rem;flex-wrap:wrap}
 .log-hdr-title{font-size:.88rem;font-weight:700;color:var(--g800);display:flex;align-items:center;gap:.5rem}
@@ -104,23 +144,26 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .badge-red{background:#fef2f2;color:#dc2626}
 .badge-gray{background:var(--g100);color:var(--g500)}
 
-/* ── FOOTER ── */
+/* export */
+.export-row{display:flex;justify-content:flex-end;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap}
+.export-btn{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:600;background:var(--white);border:1px solid var(--g200);border-radius:6px;padding:.35rem .75rem;cursor:pointer;color:var(--g600);transition:background .15s,border-color .15s}
+.export-btn:hover{background:var(--g50);border-color:var(--g300)}
+
 .hub-footer{text-align:center;font-size:.72rem;color:var(--g400);padding-top:1rem;border-top:1px solid var(--g200)}
 
-/* ── ERROR / LOADING STATES ── */
-.state-msg{padding:1.5rem;text-align:center;color:var(--g400);font-size:.83rem}
-
-/* ── RESPONSIVE ── */
 @media(max-width:700px){
   .main{padding:1rem .75rem 3rem}
   .hdr-inner{padding:1.2rem 1rem 1.4rem;flex-wrap:wrap}
   .hdr-right{display:none}
   .kpi-row{grid-template-columns:repeat(3,1fr)}
   .cards{grid-template-columns:1fr}
+  .pace-body{grid-template-columns:1fr}
+  .target-setter{flex-wrap:wrap}
 }
 @media(max-width:480px){
   .kpi-row{grid-template-columns:repeat(2,1fr)}
   .kpi-divider{display:none}
+  .pace-stats{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -142,7 +185,6 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 
 <main class="main">
 
-  <!-- Week context strip -->
   <div class="week-strip">
     <div class="week-strip-left">
       <div class="ws-dot"></div>
@@ -155,21 +197,63 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
   </div>
 
+  <!-- ══ PACE TRACKER ══ -->
+  <div class="section-label">Weekly Pounds Target</div>
+  <div class="pace-card">
+    <div class="pace-hdr">
+      <div class="pace-hdr-left">
+        <span class="pace-icon">🎯</span>
+        <div>
+          <div class="pace-title">Production Lbs Pace Tracker</div>
+          <div class="pace-sub">Set a weekly pounds target — track actual vs projected through the week</div>
+        </div>
+      </div>
+    </div>
+    <div class="pace-body">
+      <div class="pace-left">
+        <div class="target-setter">
+          <div class="f">
+            <label>Weekly Lbs Target</label>
+            <input type="number" id="targetInput" min="1" placeholder="e.g. 500000">
+          </div>
+          <div class="f set-by">
+            <label>Set by</label>
+            <input type="text" id="targetSetBy" placeholder="Your name">
+          </div>
+          <button class="save-target-btn" id="saveTargetBtn" onclick="saveTarget()">Set Target</button>
+        </div>
+        <div class="target-meta" id="targetMeta"></div>
+        <div class="pace-bar-wrap" id="paceBarWrap" style="display:none">
+          <div class="pace-bar-labels">
+            <span id="paceBarLeft">0 lbs produced</span>
+            <span id="paceBarRight">Target: —</span>
+          </div>
+          <div class="pace-bar-track">
+            <div class="pace-bar-fill" id="paceBarFill" style="width:0%"></div>
+            <div class="pace-bar-proj" id="paceBarProj" style="left:0%;display:none"></div>
+          </div>
+        </div>
+      </div>
+      <div class="pace-right">
+        <div class="pace-stats" id="paceStats">
+          <div class="pace-no-target">Set a weekly target above to see pace projection.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- KPI summary -->
   <div class="section-label">This Week at a Glance</div>
-  <div class="kpi-row" id="kpiRow">
-    <!-- Production -->
+  <div class="kpi-row">
     <div class="kpi loading"><div class="kk">Cases Planned</div><div class="kv" id="k-csPl">—</div><div class="ks">Production</div></div>
     <div class="kpi loading"><div class="kk">Cases Produced</div><div class="kv" id="k-csAc">—</div><div class="ks">Production</div></div>
     <div class="kpi loading"><div class="kk">Cases Variance</div><div class="kv" id="k-csVar">—</div><div class="ks">Production</div></div>
     <div class="kpi-divider"></div>
-    <!-- Batching -->
     <div class="kpi loading"><div class="kk">Lbs Planned</div><div class="kv" id="k-bLbsPl">—</div><div class="ks">Batching</div></div>
     <div class="kpi loading"><div class="kk">Lbs Produced</div><div class="kv" id="k-bLbsAc">—</div><div class="ks">Batching</div></div>
     <div class="kpi loading"><div class="kk">Lbs Attainment</div><div class="kv" id="k-bAtt">—</div><div class="ks">Batching</div></div>
   </div>
 
-  <!-- Report cards -->
   <div class="section-label">Reports</div>
   <div class="cards">
     <a class="card" href="eos-production.html">
@@ -198,7 +282,6 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </a>
   </div>
 
-  <!-- Recent shifts — Production -->
   <div class="section-label">Recent Submissions</div>
 
   <div class="log-section">
@@ -217,8 +300,17 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     <div id="batchLog"><div class="log-empty">Loading…</div></div>
   </div>
 
+  <div class="export-row">
+    <button class="export-btn" onclick="exportData('eos_production_shifts')">
+      ⬇ Export Production (all time)
+    </button>
+    <button class="export-btn" onclick="exportData('eos_batching_shifts')">
+      ⬇ Export Batching (all time)
+    </button>
+  </div>
+
   <div class="hub-footer">
-    Plant 1730 Ops Hub &bull; Novus Foods, Buena Park CA &bull; Data resets every Monday at 12:00 AM
+    Plant 1730 Ops Hub &bull; Novus Foods, Buena Park CA &bull; Shift data retained for 52 weeks &bull; Weekly target resets each Monday
   </div>
 
 </main>
@@ -227,108 +319,213 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 (function(){
 'use strict';
 
-// ── CONFIG ──────────────────────────────
-const SUPABASE_URL = 'https://easfrwilbxypcdooawtt.supabase.co';
+// ── CONFIG ───────────────────────────────────────────
+const SUPABASE_URL  = 'https://easfrwilbxypcdooawtt.supabase.co';
 const SUPABASE_ANON = 'YOUR_ANON_KEY_HERE';
 const PE = 0.85;
-// ────────────────────────────────────────
+// ─────────────────────────────────────────────────────
 
-// Week helpers
-function getMonday(d){
-  const dt=new Date(d); dt.setHours(0,0,0,0);
-  const day=dt.getDay(); dt.setDate(dt.getDate()-(day===0?6:day-1));
-  return dt.toISOString().slice(0,10);
-}
-function getSunday(mondayIso){
-  const d=new Date(mondayIso+'T00:00:00'); d.setDate(d.getDate()+6); return d.toISOString().slice(0,10);
-}
-function fmtWeekRange(mondayIso){
-  const mon=new Date(mondayIso+'T00:00:00'), sun=new Date(mon); sun.setDate(sun.getDate()+6);
-  const fmt=d=>d.toLocaleDateString([],{month:'short',day:'numeric'});
-  return fmt(mon)+' – '+fmt(sun);
-}
-function fD(iso){ if(!iso) return '—'; const [y,m,d]=iso.split('-'); return `${m}/${d}/${y}`; }
-function n(v){ return (v||0).toLocaleString(); }
-function varSpan(v){
-  const num=parseInt(v)||0;
-  if(num===0) return `<span style="color:var(--g400)">0</span>`;
-  const cls=num>0?'var-pos':'var-neg';
-  return `<span class="${cls}">${num>0?'+':''}${num.toLocaleString()}</span>`;
-}
-function attBadge(pl,ac){
-  if(!pl) return '<span class="badge badge-gray">—</span>';
-  const p=Math.round((ac/pl)*100*PE);
-  const cls=p>=90?'badge-green':p>=70?'badge-amber':'badge-red';
-  return `<span class="badge ${cls}">${p}%</span>`;
-}
+// ── Week helpers ──
+function getMonday(d){const dt=new Date(d);dt.setHours(0,0,0,0);const day=dt.getDay();dt.setDate(dt.getDate()-(day===0?6:day-1));return dt.toISOString().slice(0,10);}
+function getSunday(m){const d=new Date(m+'T00:00:00');d.setDate(d.getDate()+6);return d.toISOString().slice(0,10);}
+function fmtWeekRange(m){const mon=new Date(m+'T00:00:00'),sun=new Date(mon);sun.setDate(sun.getDate()+6);const fmt=d=>d.toLocaleDateString([],{month:'short',day:'numeric'});return fmt(mon)+' – '+fmt(sun);}
+function fD(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${m}/${d}/${y}`;}
+function n(v){return(v||0).toLocaleString();}
+function varSpan(v){const num=parseInt(v)||0;if(num===0)return`<span style="color:var(--g400)">0</span>`;return`<span class="${num>0?'var-pos':'var-neg'}">${num>0?'+':''}${num.toLocaleString()}</span>`;}
+function attBadge(pl,ac){if(!pl)return'<span class="badge badge-gray">—</span>';const p=Math.round((ac/pl)*100*PE);return`<span class="badge ${p>=90?'badge-green':p>=70?'badge-amber':'badge-red'}">${p}%</span>`;}
 
 const monday = getMonday(new Date());
 const sunday = getSunday(monday);
-const range  = fmtWeekRange(monday);
 
-// Set header labels
-document.getElementById('hdrWeekLabel').textContent = 'Week of '+range;
+document.getElementById('hdrWeekLabel').textContent = 'Week of '+fmtWeekRange(monday);
 document.getElementById('hdrDate').textContent = new Date().toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
-document.getElementById('wsRange').textContent = range;
+document.getElementById('wsRange').textContent = fmtWeekRange(monday);
 
-async function sbFetch(table, filters=''){
-  const url = `${SUPABASE_URL}/rest/v1/${table}?${filters}&order=shift_date.desc,created_at.desc`;
-  const res = await fetch(url, {
-    headers:{
-      'apikey': SUPABASE_ANON,
-      'Authorization': 'Bearer '+SUPABASE_ANON,
-      'Content-Type': 'application/json'
-    }
+// ── Supabase helpers ──
+async function sbGet(table,filters){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}&order=shift_date.desc,created_at.desc`,{
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
   });
-  if(!res.ok) throw new Error(`${table}: ${res.status}`);
+  if(!res.ok)throw new Error(await res.text());
   return res.json();
 }
+async function sbUpsert(table,row,onConflict){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}?on_conflict=${onConflict}`,{
+    method:'POST',
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=representation'},
+    body:JSON.stringify(row)
+  });
+  if(!res.ok)throw new Error(await res.text());
+  return res.json();
+}
+async function sbInsert(table,row){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}`,{
+    method:'POST',
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify(row)
+  });
+  if(!res.ok)throw new Error(await res.text());
+}
 
+// ── Pace projection ──
+function computePace(lbsProduced, lbsTarget){
+  // Days elapsed this week (Mon=1 … Sun=7), minimum 1 to avoid /0
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=Sun
+  const daysElapsed = Math.max(dayOfWeek === 0 ? 7 : dayOfWeek, 1);
+  const dailyRate   = lbsProduced / daysElapsed;
+  const projected   = Math.round(dailyRate * 7);
+  const delta       = projected - lbsTarget;
+  const pct         = lbsTarget > 0 ? Math.min((lbsProduced / lbsTarget) * 100, 100) : 0;
+  const projPct     = lbsTarget > 0 ? Math.min((projected  / lbsTarget) * 100, 100) : 0;
+  return { daysElapsed, dailyRate, projected, delta, pct, projPct };
+}
+
+function renderPace(lbsProduced, lbsTarget, targetSetBy, updatedAt){
+  const barWrap = document.getElementById('paceBarWrap');
+  const paceStats = document.getElementById('paceStats');
+
+  if(!lbsTarget){
+    barWrap.style.display = 'none';
+    paceStats.innerHTML = '<div class="pace-no-target">Set a weekly target above to see pace projection.</div>';
+    return;
+  }
+
+  const { daysElapsed, dailyRate, projected, delta, pct, projPct } = computePace(lbsProduced, lbsTarget);
+  const ahead = delta >= 0;
+  const statusCls = ahead ? 'ahead' : Math.abs(delta) < lbsTarget * 0.05 ? 'warn' : 'behind';
+
+  // Bar
+  barWrap.style.display = 'flex';
+  document.getElementById('paceBarLeft').textContent  = n(lbsProduced)+' lbs produced';
+  document.getElementById('paceBarRight').textContent = 'Target: '+n(lbsTarget)+' lbs';
+  const fill = document.getElementById('paceBarFill');
+  fill.style.width = pct.toFixed(1)+'%';
+  fill.className = 'pace-bar-fill'+(pct>=90?'':(pct>=70?' warn':' danger'));
+
+  // Projected marker
+  const proj = document.getElementById('paceBarProj');
+  if(projPct > pct && projPct < 100){
+    proj.style.display = 'block';
+    proj.style.left = projPct.toFixed(1)+'%';
+  } else {
+    proj.style.display = 'none';
+  }
+
+  // Stat cards
+  paceStats.innerHTML = `
+    <div class="pace-stat">
+      <div class="ps-lbl">Produced this week</div>
+      <div class="ps-val">${n(lbsProduced)}</div>
+      <div class="ps-sub">${pct.toFixed(1)}% of target</div>
+    </div>
+    <div class="pace-stat">
+      <div class="ps-lbl">Daily run rate</div>
+      <div class="ps-val">${Math.round(dailyRate).toLocaleString()}</div>
+      <div class="ps-sub">lbs / day (${daysElapsed}d elapsed)</div>
+    </div>
+    <div class="pace-stat">
+      <div class="ps-lbl">Projected EoW</div>
+      <div class="ps-val">${n(projected)}</div>
+      <div class="ps-sub">at current run rate</div>
+    </div>
+    <div class="pace-stat ${statusCls}">
+      <div class="ps-lbl">vs Target</div>
+      <div class="ps-val">${ahead?'+':''}${n(delta)}</div>
+      <div class="ps-sub">${ahead?'Projected ahead':'Projected behind'}</div>
+    </div>`;
+}
+
+// ── Target load/save ──
+let currentTarget = null;
+
+async function loadTarget(){
+  try{
+    const rows = await sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=lbs_target,set_by,updated_at`);
+    if(rows.length){
+      currentTarget = rows[0];
+      document.getElementById('targetInput').value  = rows[0].lbs_target;
+      document.getElementById('targetSetBy').value  = rows[0].set_by||'';
+      const updStr = rows[0].updated_at ? new Date(rows[0].updated_at).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      document.getElementById('targetMeta').textContent =
+        `Last set by ${rows[0].set_by||'—'} on ${updStr}`;
+    }
+  }catch(e){console.warn('Could not load target:',e);}
+}
+
+window.saveTarget = async function(){
+  const lbsTarget = parseInt(document.getElementById('targetInput').value);
+  const setBy     = document.getElementById('targetSetBy').value.trim();
+  if(!lbsTarget || lbsTarget < 1){ alert('Enter a valid lbs target.'); return; }
+  const btn = document.getElementById('saveTargetBtn');
+  btn.disabled = true; btn.textContent = 'Saving…';
+  try{
+    await sbUpsert('eos_weekly_targets',
+      { week_start: monday, lbs_target: lbsTarget, set_by: setBy, updated_at: new Date().toISOString() },
+      'week_start'
+    );
+    currentTarget = { lbs_target: lbsTarget, set_by: setBy };
+    document.getElementById('targetMeta').textContent =
+      `Set by ${setBy||'—'} just now`;
+    btn.textContent = '✓ Saved';
+    setTimeout(()=>{ btn.disabled=false; btn.textContent='Set Target'; },2000);
+    // Re-render pace with current lbs data
+    await loadAll();
+  }catch(err){
+    console.error(err);
+    alert('Could not save target: '+err.message);
+    btn.disabled=false; btn.textContent='Set Target';
+  }
+};
+
+// ── Main data load ──
 async function loadAll(){
-  const pulse = document.getElementById('wsPulse');
+  const pulse  = document.getElementById('wsPulse');
   const status = document.getElementById('wsStatus');
   pulse.classList.add('live');
   status.textContent = 'Fetching…';
 
-  try {
+  try{
     const weekFilter = `shift_date=gte.${monday}&shift_date=lte.${sunday}`;
-
     const [prodRows, batchRows] = await Promise.all([
-      sbFetch('eos_production_shifts', weekFilter),
-      sbFetch('eos_batching_shifts',   weekFilter)
+      sbGet('eos_production_shifts', weekFilter),
+      sbGet('eos_batching_shifts',   weekFilter)
     ]);
 
-    // ── Production KPIs ──
-    let csPl=0, csAc=0, csVar=0;
-    prodRows.forEach(r=>{ csPl+=r.cases_planned||0; csAc+=r.cases_produced||0; csVar+=r.cases_variance||0; });
+    // Production KPIs
+    let csPl=0,csAc=0,csVar=0,prodLbsAc=0;
+    prodRows.forEach(r=>{csPl+=r.cases_planned||0;csAc+=r.cases_produced||0;csVar+=r.cases_variance||0;prodLbsAc+=r.lbs_produced||0;});
+    setKpi('k-csPl', n(csPl),  null);
+    setKpi('k-csAc', n(csAc),  null);
+    setKpi('k-csVar',(csVar>0?'+':'')+n(csVar), csVar>=0?'pos':'neg');
 
-    setKpi('k-csPl',  n(csPl),  null);
-    setKpi('k-csAc',  n(csAc),  null);
-    setKpi('k-csVar', (csVar>0?'+':'')+n(csVar), csVar>=0?'pos':'neg');
-
-    // ── Batching KPIs ──
-    let bPl=0, bAc=0;
-    batchRows.forEach(r=>{ bPl+=r.lbs_planned||0; bAc+=r.lbs_produced||0; });
-    const bAtt = bPl>0 ? Math.round((bAc/bPl)*100)+'%' : '—';
-
+    // Batching KPIs
+    let bPl=0,bAc=0;
+    batchRows.forEach(r=>{bPl+=r.lbs_planned||0;bAc+=r.lbs_produced||0;});
+    const bAtt = bPl>0?Math.round((bAc/bPl)*100)+'%':'—';
     setKpi('k-bLbsPl', n(bPl), null);
     setKpi('k-bLbsAc', n(bAc), null);
     setKpi('k-bAtt',   bAtt,   bPl>0?(Math.round((bAc/bPl)*100)>=90?'pos':'neg'):null);
 
-    // ── Shift count badges ──
+    // Badges
     document.getElementById('prodShiftBadge').textContent  = prodRows.length+' shift'+(prodRows.length!==1?'s':'')+' this week';
     document.getElementById('batchShiftBadge').textContent = batchRows.length+' shift'+(batchRows.length!==1?'s':'')+' this week';
     document.getElementById('prodLogBadge').textContent    = prodRows.length+' this week';
     document.getElementById('batchLogBadge').textContent   = batchRows.length+' this week';
 
-    // ── Production log ──
+    // Pace tracker — use production lbs produced vs weekly target
+    const target = currentTarget ? currentTarget.lbs_target : null;
+    renderPace(prodLbsAc, target,
+      currentTarget?.set_by,
+      currentTarget?.updated_at
+    );
+
     renderProdLog(prodRows);
     renderBatchLog(batchRows);
 
     pulse.classList.remove('live');
     status.textContent = 'Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-
-  } catch(err){
+  }catch(err){
     console.error(err);
     pulse.classList.remove('live');
     status.textContent = 'Error loading data';
@@ -338,61 +535,107 @@ async function loadAll(){
   }
 }
 
-function setKpi(id, val, cls){
-  const el=document.getElementById(id); if(!el) return;
+function setKpi(id,val,cls){
+  const el=document.getElementById(id);if(!el)return;
   el.textContent=val;
   el.parentElement.classList.remove('loading','pos','neg');
-  if(cls) el.parentElement.classList.add(cls);
+  if(cls)el.parentElement.classList.add(cls);
 }
 
 function renderProdLog(rows){
   const el=document.getElementById('prodLog');
-  if(!rows.length){ el.innerHTML='<div class="log-empty">No production shifts submitted this week.</div>'; return; }
+  if(!rows.length){el.innerHTML='<div class="log-empty">No production shifts submitted this week.</div>';return;}
   let html=`<table class="log-table"><thead><tr>
     <th>Date</th><th>Supervisor</th>
-    <th class="c">Lbs Planned</th><th class="c">Lbs Produced</th><th class="c">Lbs Var</th>
-    <th class="c">Cases Planned</th><th class="c">Cases Produced</th><th class="c">Cases Var</th>
+    <th class="c">Lbs Pl</th><th class="c">Lbs Ac</th><th class="c">Lbs Var</th>
+    <th class="c">Cases Pl</th><th class="c">Cases Ac</th><th class="c">Cases Var</th>
     <th class="c">Attainment</th>
   </tr></thead><tbody>`;
   rows.forEach(r=>{
     html+=`<tr>
       <td class="date-cell">${fD(r.shift_date)}</td>
       <td class="sup-cell">${r.supervisor||'—'}</td>
-      <td class="c">${n(r.lbs_planned)}</td>
-      <td class="c">${n(r.lbs_produced)}</td>
+      <td class="c">${n(r.lbs_planned)}</td><td class="c">${n(r.lbs_produced)}</td>
       <td class="c">${varSpan(r.lbs_variance)}</td>
-      <td class="c">${n(r.cases_planned)}</td>
-      <td class="c">${n(r.cases_produced)}</td>
+      <td class="c">${n(r.cases_planned)}</td><td class="c">${n(r.cases_produced)}</td>
       <td class="c">${varSpan(r.cases_variance)}</td>
       <td class="c">${attBadge(r.cases_planned,r.cases_produced)}</td>
     </tr>`;
   });
-  html+=`</tbody></table>`;
-  el.innerHTML=html;
+  el.innerHTML=html+'</tbody></table>';
 }
 
 function renderBatchLog(rows){
   const el=document.getElementById('batchLog');
-  if(!rows.length){ el.innerHTML='<div class="log-empty">No batching shifts submitted this week.</div>'; return; }
+  if(!rows.length){el.innerHTML='<div class="log-empty">No batching shifts submitted this week.</div>';return;}
   let html=`<table class="log-table"><thead><tr>
     <th>Date</th><th>Supervisor</th>
-    <th class="c">Lbs Planned</th><th class="c">Lbs Produced</th><th class="c">Lbs Variance</th><th class="c">Attainment</th>
+    <th class="c">Lbs Planned</th><th class="c">Lbs Produced</th>
+    <th class="c">Variance</th><th class="c">Attainment</th>
   </tr></thead><tbody>`;
   rows.forEach(r=>{
     html+=`<tr>
       <td class="date-cell">${fD(r.shift_date)}</td>
       <td class="sup-cell">${r.supervisor||'—'}</td>
-      <td class="c">${n(r.lbs_planned)}</td>
-      <td class="c">${n(r.lbs_produced)}</td>
+      <td class="c">${n(r.lbs_planned)}</td><td class="c">${n(r.lbs_produced)}</td>
       <td class="c">${varSpan(r.lbs_variance)}</td>
       <td class="c">${attBadge(r.lbs_planned,r.lbs_produced)}</td>
     </tr>`;
   });
-  html+=`</tbody></table>`;
-  el.innerHTML=html;
+  el.innerHTML=html+'</tbody></table>';
 }
 
-loadAll();
+// ── Export (all-time) ──
+window.exportData = async function(table){
+  const name = prompt('Your name (for export log):', '');
+  if(name===null) return; // cancelled
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?order=shift_date.asc`,{
+      headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+    });
+    if(!res.ok) throw new Error(await res.text());
+    const rows = await res.json();
+    if(!rows.length){ alert('No records found.'); return; }
+
+    // Flatten to CSV
+    const headers = Object.keys(rows[0]).filter(k=>k!=='lines');
+    const lines   = [headers.join(',')];
+    rows.forEach(r=>{
+      lines.push(headers.map(h=>{
+        const v = r[h];
+        if(v===null||v===undefined) return '';
+        const s = String(v).replace(/"/g,'""');
+        return s.includes(',')||s.includes('"')||s.includes('\n') ? `"${s}"` : s;
+      }).join(','));
+    });
+
+    const blob = new Blob([lines.join('\n')],{type:'text/csv'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `${table}_export_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    // Log the export
+    await sbInsert('eos_export_log',{
+      exported_by: name||'anonymous',
+      table_name:  table,
+      record_count:rows.length,
+      week_range: 'all-time'
+    });
+  }catch(err){
+    console.error(err);
+    alert('Export failed: '+err.message);
+  }
+};
+
+// Init
+(async()=>{
+  await loadTarget();
+  await loadAll();
+})();
+
 })();
 </script>
 </body>
