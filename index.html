@@ -51,7 +51,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .pace-icon{font-size:1.1rem}
 .pace-title{font-size:.92rem;font-weight:700;color:var(--g800)}
 .pace-sub{font-size:.72rem;color:var(--g500);margin-top:.05rem}
-.pace-body{padding:1.2rem 1.3rem;display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.pace-body{padding:1.2rem 1.3rem;display:grid;grid-template-columns:1fr 2fr;gap:1.25rem}
 .pace-left{display:flex;flex-direction:column;gap:.85rem}
 .pace-right{display:flex;flex-direction:column;gap:.75rem;justify-content:center}
 
@@ -78,7 +78,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .pace-bar-proj{position:absolute;top:0;height:100%;border-left:2px dashed rgba(0,0,0,.25);transition:left .6s ease}
 
 /* pace stat cards */
-.pace-stats{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.pace-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem}
 .pace-stat{background:var(--g50);border:1px solid var(--g200);border-radius:var(--rs);padding:.6rem .8rem}
 .pace-stat .ps-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g400);margin-bottom:.2rem}
 .pace-stat .ps-val{font-family:var(--fm);font-weight:700;font-size:1rem;color:var(--g800);line-height:1}
@@ -158,12 +158,13 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   .kpi-row{grid-template-columns:repeat(3,1fr)}
   .cards{grid-template-columns:1fr}
   .pace-body{grid-template-columns:1fr}
+  .pace-stats{grid-template-columns:repeat(3,1fr)}
   .target-setter{flex-wrap:wrap}
 }
 @media(max-width:480px){
   .kpi-row{grid-template-columns:repeat(2,1fr)}
   .kpi-divider{display:none}
-  .pace-stats{grid-template-columns:1fr}
+  .pace-stats{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -342,8 +343,8 @@ document.getElementById('hdrDate').textContent = new Date().toLocaleDateString([
 document.getElementById('wsRange').textContent = fmtWeekRange(monday);
 
 // ── Supabase helpers ──
-async function sbGet(table,filters){
-  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}&order=shift_date.desc,created_at.desc`,{
+async function sbGet(table, filters, order='shift_date.desc,created_at.desc'){
+  const res=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}&order=${order}`,{
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
   });
   if(!res.ok)throw new Error(await res.text());
@@ -367,72 +368,110 @@ async function sbInsert(table,row){
   if(!res.ok)throw new Error(await res.text());
 }
 
-// ── Pace projection ──
+// ── Pace computation ──
 function computePace(lbsProduced, lbsTarget){
-  // Days elapsed this week (Mon=1 … Sun=7), minimum 1 to avoid /0
-  const now = new Date();
-  const dayOfWeek = now.getDay(); // 0=Sun
+  const now        = new Date();
+  const dayOfWeek  = now.getDay(); // 0=Sun
   const daysElapsed = Math.max(dayOfWeek === 0 ? 7 : dayOfWeek, 1);
-  const dailyRate   = lbsProduced / daysElapsed;
-  const projected   = Math.round(dailyRate * 7);
-  const delta       = projected - lbsTarget;
-  const pct         = lbsTarget > 0 ? Math.min((lbsProduced / lbsTarget) * 100, 100) : 0;
-  const projPct     = lbsTarget > 0 ? Math.min((projected  / lbsTarget) * 100, 100) : 0;
-  return { daysElapsed, dailyRate, projected, delta, pct, projPct };
+  const daysLeft    = Math.max(7 - daysElapsed, 0);
+
+  // Daily target assuming 5 production days (Mon–Fri)
+  const workDaysTotal   = 5;
+  const workDayRate     = lbsTarget / workDaysTotal;
+
+  // How many work days have elapsed so far (Mon=1…Fri=5, cap at 5)
+  const workDaysElapsed = Math.min(daysElapsed, workDaysTotal);
+
+  // Where the schedule says you SHOULD be right now
+  const scheduledSoFar = Math.round(workDayRate * workDaysElapsed);
+
+  // The key number: how far ahead or behind schedule RIGHT NOW
+  const scheduleGap    = lbsProduced - scheduledSoFar;
+
+  // End-of-week projection based on actual run rate
+  const dailyRate  = lbsProduced / daysElapsed;
+  const projected  = Math.round(dailyRate * 7);
+  const projDelta  = projected - lbsTarget;
+
+  const pct        = lbsTarget > 0 ? Math.min((lbsProduced  / lbsTarget) * 100, 100) : 0;
+  const schedPct   = lbsTarget > 0 ? Math.min((scheduledSoFar / lbsTarget) * 100, 100) : 0;
+  const projPct    = lbsTarget > 0 ? Math.min((projected     / lbsTarget) * 100, 100) : 0;
+
+  return { daysElapsed, daysLeft, workDaysElapsed, workDaysTotal,
+           workDayRate, scheduledSoFar, scheduleGap,
+           dailyRate, projected, projDelta, pct, schedPct, projPct };
 }
 
-function renderPace(lbsProduced, lbsTarget, targetSetBy, updatedAt){
-  const barWrap = document.getElementById('paceBarWrap');
+function renderPace(lbsProduced, lbsTarget){
+  const barWrap   = document.getElementById('paceBarWrap');
   const paceStats = document.getElementById('paceStats');
 
   if(!lbsTarget){
     barWrap.style.display = 'none';
-    paceStats.innerHTML = '<div class="pace-no-target">Set a weekly target above to see pace projection.</div>';
+    paceStats.innerHTML = '<div class="pace-no-target">Set a weekly target above to see pace tracking.</div>';
     return;
   }
 
-  const { daysElapsed, dailyRate, projected, delta, pct, projPct } = computePace(lbsProduced, lbsTarget);
-  const ahead = delta >= 0;
-  const statusCls = ahead ? 'ahead' : Math.abs(delta) < lbsTarget * 0.05 ? 'warn' : 'behind';
+  const {
+    daysElapsed, daysLeft, workDaysElapsed, workDaysTotal,
+    workDayRate, scheduledSoFar, scheduleGap,
+    dailyRate, projected, projDelta, pct, schedPct, projPct
+  } = computePace(lbsProduced, lbsTarget);
 
-  // Bar
+  const onSchedule   = scheduleGap >= 0;
+  const scheduleCls  = onSchedule ? 'ahead' : Math.abs(scheduleGap) < lbsTarget * 0.03 ? 'warn' : 'behind';
+  const projAhead    = projDelta >= 0;
+  const projCls      = projAhead ? 'ahead' : Math.abs(projDelta) < lbsTarget * 0.05 ? 'warn' : 'behind';
+
+  // Progress bar — actual fill + a schedule marker tick
   barWrap.style.display = 'flex';
   document.getElementById('paceBarLeft').textContent  = n(lbsProduced)+' lbs produced';
-  document.getElementById('paceBarRight').textContent = 'Target: '+n(lbsTarget)+' lbs';
+  document.getElementById('paceBarRight').textContent = 'Weekly target: '+n(lbsTarget)+' lbs';
   const fill = document.getElementById('paceBarFill');
   fill.style.width = pct.toFixed(1)+'%';
-  fill.className = 'pace-bar-fill'+(pct>=90?'':(pct>=70?' warn':' danger'));
+  fill.className = 'pace-bar-fill'+(onSchedule?'':(scheduleGap > -(lbsTarget*0.03)?' warn':' danger'));
 
-  // Projected marker
+  // Dashed marker = where you SHOULD be on the bar right now
   const proj = document.getElementById('paceBarProj');
-  if(projPct > pct && projPct < 100){
+  if(schedPct > 0 && schedPct < 100){
     proj.style.display = 'block';
-    proj.style.left = projPct.toFixed(1)+'%';
+    proj.style.left = schedPct.toFixed(1)+'%';
+    proj.title = 'Schedule: '+n(scheduledSoFar)+' lbs by now';
   } else {
     proj.style.display = 'none';
   }
 
-  // Stat cards
+  // Five stat cards
+  const daysLeftLabel = daysLeft === 0 ? 'last day' : daysLeft+'d left';
+  const lbsPerDayStillNeeded = daysLeft > 0
+    ? Math.round((lbsTarget - lbsProduced) / daysLeft)
+    : 0;
+
   paceStats.innerHTML = `
     <div class="pace-stat">
       <div class="ps-lbl">Produced this week</div>
       <div class="ps-val">${n(lbsProduced)}</div>
-      <div class="ps-sub">${pct.toFixed(1)}% of target</div>
+      <div class="ps-sub">${pct.toFixed(1)}% of ${n(lbsTarget)} target</div>
+    </div>
+    <div class="pace-stat ${scheduleCls}">
+      <div class="ps-lbl">${onSchedule ? '▲ Ahead of schedule' : '▼ Behind schedule'}</div>
+      <div class="ps-val">${onSchedule?'+':''}${n(scheduleGap)} lbs</div>
+      <div class="ps-sub">vs ${n(scheduledSoFar)} expected by day ${workDaysElapsed}</div>
     </div>
     <div class="pace-stat">
-      <div class="ps-lbl">Daily run rate</div>
-      <div class="ps-val">${Math.round(dailyRate).toLocaleString()}</div>
-      <div class="ps-sub">lbs / day (${daysElapsed}d elapsed)</div>
+      <div class="ps-lbl">Daily target</div>
+      <div class="ps-val">${n(Math.round(workDayRate))}</div>
+      <div class="ps-sub">lbs / work day &bull; ${workDaysTotal}d week</div>
     </div>
     <div class="pace-stat">
       <div class="ps-lbl">Projected EoW</div>
       <div class="ps-val">${n(projected)}</div>
-      <div class="ps-sub">at current run rate</div>
+      <div class="ps-sub">${daysLeftLabel} &bull; need ${n(lbsPerDayStillNeeded)} lbs/day</div>
     </div>
-    <div class="pace-stat ${statusCls}">
-      <div class="ps-lbl">vs Target</div>
-      <div class="ps-val">${ahead?'+':''}${n(delta)}</div>
-      <div class="ps-sub">${ahead?'Projected ahead':'Projected behind'}</div>
+    <div class="pace-stat ${projCls}">
+      <div class="ps-lbl">Projected vs target</div>
+      <div class="ps-val">${projAhead?'+':''}${n(projDelta)}</div>
+      <div class="ps-sub">${projAhead?'On pace to meet target':'Off pace — unlikely to hit'}</div>
     </div>`;
 }
 
@@ -441,7 +480,7 @@ let currentTarget = null;
 
 async function loadTarget(){
   try{
-    const rows = await sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=lbs_target,set_by,updated_at`);
+    const rows = await sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=lbs_target,set_by,updated_at`, 'updated_at.desc');
     if(rows.length){
       currentTarget = rows[0];
       document.getElementById('targetInput').value  = rows[0].lbs_target;
@@ -515,10 +554,7 @@ async function loadAll(){
 
     // Pace tracker — use production lbs produced vs weekly target
     const target = currentTarget ? currentTarget.lbs_target : null;
-    renderPace(prodLbsAc, target,
-      currentTarget?.set_by,
-      currentTarget?.updated_at
-    );
+    renderPace(prodLbsAc, target);
 
     renderProdLog(prodRows);
     renderBatchLog(batchRows);
