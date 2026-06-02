@@ -489,14 +489,35 @@ window.submitToWeek = async function(){
   running.forEach(l=>{lbsPl+=parseInt(l.lbsPl)||0;lbsAc+=parseInt(l.lbsAc)||0;csPl+=parseInt(l.csPl)||0;csAc+=parseInt(l.csAc)||0;});
 
   const row={
-    shift_date:    d.sd,
-    supervisor:    d.sup,
-    lbs_planned:   lbsPl,
-    lbs_produced:  lbsAc,
-    lbs_variance:  lbsAc-lbsPl,
-    cases_planned:  csPl,
-    cases_produced: csAc,
-    cases_variance: csAc-csPl,
+    shift_date:         d.sd,
+    supervisor:         d.sup,
+    // Safety
+    unsafe_conditions:  parseInt(d.uc)||0,
+    near_misses:        parseInt(d.nm)||0,
+    first_aid:          parseInt(d.fa)||0,
+    safety_comments:    d.sc||'',
+    // Materials
+    shortages:          d.sh||'',
+    stos:               d.sto||'',
+    // Attendance
+    absences:           parseInt(d.ab)||0,
+    headcount_needed:   parseInt(d.hn)||0,
+    headcount_present:  parseInt(d.hp)||0,
+    // SAP
+    sap_completed:      parseInt(d.sapC)||0,
+    sap_open:           parseInt(d.sapO)||0,
+    sap_reason:         d.sapR||'',
+    // Trainings & Quality
+    training_notes:     d.tr||'',
+    quality_notes:      d.qa||'',
+    // Production totals
+    lbs_planned:        lbsPl,
+    lbs_produced:       lbsAc,
+    lbs_variance:       lbsAc-lbsPl,
+    cases_planned:      csPl,
+    cases_produced:     csAc,
+    cases_variance:     csAc-csPl,
+    // Line detail
     lines: running.map(l=>({
       line:l.line,
       lbs_planned:parseInt(l.lbsPl)||0,lbs_produced:parseInt(l.lbsAc)||0,lbs_variance:parseInt(l.lbsVar)||0,
