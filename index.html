@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EOS Reports — Novus Foods Plant 1730</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#fff;--g50:#f8f9fb;--g100:#f1f3f6;--g200:#e2e6ec;--g300:#cdd3dc;
+  --g400:#a0aab8;--g500:#6b7a8d;--g600:#4a5568;--g700:#334155;--g800:#1e293b;--g900:#0f172a;
+  --brand:#1a5632;--brand-l:#e8f5ee;--brand-m:#2d7a4a;--brand-d:#133d25;
+  --accent:#b8860b;--accent-l:#fdf6e3;--accent-b:#e2c97e;
+  --r:12px;--rs:8px;
+  --fb:'DM Sans',system-ui,sans-serif;--fm:'JetBrains Mono',monospace;
+  --sh:0 4px 16px rgba(15,23,42,.08),0 1px 4px rgba(15,23,42,.05);
+  --sh-lg:0 12px 40px rgba(15,23,42,.12),0 2px 8px rgba(15,23,42,.06);
+}
+html{font-size:15px}
+body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:100vh;line-height:1.5}
+
+/* ── HEADER ── */
+.hdr{background:var(--brand);color:#fff;position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 50%,rgba(255,255,255,.06) 0%,transparent 70%);pointer-events:none}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#daa520,var(--accent))}
+.hdr-inner{max-width:1000px;margin:0 auto;padding:1.6rem 2rem 1.8rem;display:flex;align-items:center;gap:1.4rem}
+.hdr img{height:52px;width:auto;filter:brightness(0) invert(1);flex-shrink:0;position:relative}
+.hdr-text h1{font-size:1.5rem;font-weight:700;letter-spacing:-.025em;margin-bottom:.15rem}
+.hdr-text .sub{font-size:.75rem;opacity:.7;font-weight:500;letter-spacing:.07em;text-transform:uppercase}
+.hdr-right{margin-left:auto;text-align:right;font-size:.75rem;opacity:.65;line-height:1.7;flex-shrink:0}
+.hdr-right .week-label{font-weight:700;font-size:.8rem;opacity:.85}
+
+/* ── MAIN ── */
+.main{max-width:1000px;margin:0 auto;padding:2rem 2rem 4rem}
+
+/* ── WEEK STRIP ── */
+.week-strip{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);padding:1.1rem 1.4rem;margin-bottom:1.75rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;box-shadow:var(--sh)}
+.week-strip-left{display:flex;align-items:center;gap:.75rem}
+.ws-dot{width:10px;height:10px;border-radius:50%;background:var(--brand);flex-shrink:0}
+.ws-label{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--g500)}
+.ws-range{font-size:.88rem;font-weight:600;color:var(--g800);margin-left:.25rem}
+.ws-status{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--g400);font-weight:500}
+.ws-pulse{width:7px;height:7px;border-radius:50%;background:var(--g300)}
+.ws-pulse.live{background:#22c55e;animation:pulse .8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+/* ── KPI SUMMARY ROW ── */
+.kpi-row{display:grid;grid-template-columns:repeat(6,1fr);gap:.75rem;margin-bottom:1.75rem}
+.kpi{background:var(--white);border:1px solid var(--g200);border-radius:var(--rs);padding:.8rem 1rem;box-shadow:var(--sh);transition:border-color .2s}
+.kpi .kk{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400);margin-bottom:.3rem}
+.kpi .kv{font-family:var(--fm);font-weight:700;font-size:1.15rem;color:var(--g800);line-height:1}
+.kpi .ks{font-size:.7rem;color:var(--g400);margin-top:.2rem}
+.kpi.pos .kv{color:var(--brand)}
+.kpi.neg .kv{color:#dc2626}
+.kpi.loading .kv{color:var(--g300);animation:pulse 1s infinite}
+.kpi-divider{grid-column:1/-1;height:1px;background:var(--g200);margin:-.25rem 0}
+
+/* ── SECTION LABEL ── */
+.section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g500);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
+.section-label::after{content:'';flex:1;height:1px;background:var(--g200)}
+
+/* ── REPORT CARDS ── */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:2rem}
+.card{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);transition:transform .18s,box-shadow .18s,border-color .18s;display:flex;flex-direction:column;text-decoration:none;color:inherit}
+.card:hover{transform:translateY(-2px);box-shadow:var(--sh-lg);border-color:var(--g300)}
+.card-accent{height:4px;background:var(--brand)}
+.card.batching .card-accent{background:var(--accent)}
+.card-body{padding:1.4rem 1.5rem;flex:1;display:flex;flex-direction:column;gap:.65rem}
+.card-icon{width:42px;height:42px;border-radius:10px;background:var(--brand-l);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.card.batching .card-icon{background:var(--accent-l)}
+.card-title{font-size:1.1rem;font-weight:700;letter-spacing:-.015em;color:var(--g900)}
+.card-desc{font-size:.83rem;color:var(--g500);line-height:1.5}
+.card-meta{display:flex;align-items:center;gap:.5rem;margin-top:auto;padding-top:.5rem}
+.card-shifts{font-size:.72rem;font-weight:600;background:var(--g100);border:1px solid var(--g200);border-radius:20px;padding:.2rem .65rem;color:var(--g600)}
+.card-arrow{margin-left:auto;color:var(--g400);font-size:1rem;transition:transform .15s}
+.card:hover .card-arrow{transform:translateX(3px);color:var(--brand)}
+.card.batching:hover .card-arrow{color:var(--accent)}
+
+/* ── SHIFT LOG TABLE ── */
+.log-section{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:1.25rem}
+.log-hdr{display:flex;align-items:center;justify-content:space-between;padding:.85rem 1.25rem;border-bottom:1px solid var(--g200);gap:1rem;flex-wrap:wrap}
+.log-hdr-title{font-size:.88rem;font-weight:700;color:var(--g800);display:flex;align-items:center;gap:.5rem}
+.log-hdr-title .dot{width:8px;height:8px;border-radius:50%;background:var(--brand);flex-shrink:0}
+.log-hdr-title.batching .dot{background:var(--accent)}
+.log-badge{font-size:.68rem;font-weight:700;background:var(--brand-l);color:var(--brand);border-radius:10px;padding:.15rem .55rem}
+.log-badge.batching{background:var(--accent-l);color:var(--accent)}
+.log-empty{padding:2rem;text-align:center;color:var(--g400);font-size:.85rem}
+.log-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.log-table th{background:var(--g50);padding:.5rem .9rem;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);text-align:left;border-bottom:1px solid var(--g200)}
+.log-table th.c{text-align:center}
+.log-table td{padding:.55rem .9rem;border-bottom:1px solid var(--g100);vertical-align:middle}
+.log-table td.c{text-align:center;font-family:var(--fm);font-size:.78rem}
+.log-table tr:last-child td{border-bottom:none}
+.log-table tr:hover td{background:var(--g50)}
+.var-pos{color:var(--brand);font-weight:700}
+.var-neg{color:#dc2626;font-weight:700}
+.sup-cell{font-weight:600;color:var(--g700)}
+.date-cell{font-family:var(--fm);font-size:.78rem;font-weight:700;color:var(--g600)}
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.68rem;font-weight:700}
+.badge-green{background:var(--brand-l);color:var(--brand)}
+.badge-amber{background:var(--accent-l);color:var(--accent)}
+.badge-red{background:#fef2f2;color:#dc2626}
+.badge-gray{background:var(--g100);color:var(--g500)}
+
+/* ── FOOTER ── */
+.hub-footer{text-align:center;font-size:.72rem;color:var(--g400);padding-top:1rem;border-top:1px solid var(--g200)}
+
+/* ── ERROR / LOADING STATES ── */
+.state-msg{padding:1.5rem;text-align:center;color:var(--g400);font-size:.83rem}
+
+/* ── RESPONSIVE ── */
+@media(max-width:700px){
+  .main{padding:1rem .75rem 3rem}
+  .hdr-inner{padding:1.2rem 1rem 1.4rem;flex-wrap:wrap}
+  .hdr-right{display:none}
+  .kpi-row{grid-template-columns:repeat(3,1fr)}
+  .cards{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .kpi-divider{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-inner">
+    <img src="image.png" alt="Novus Foods">
+    <div class="hdr-text">
+      <h1>End of Shift Reports</h1>
+      <div class="sub">Plant 1730 &bull; Buena Park, CA</div>
+    </div>
+    <div class="hdr-right">
+      <div class="week-label" id="hdrWeekLabel">Loading…</div>
+      <div id="hdrDate">—</div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- Week context strip -->
+  <div class="week-strip">
+    <div class="week-strip-left">
+      <div class="ws-dot"></div>
+      <span class="ws-label">Current Week</span>
+      <span class="ws-range" id="wsRange">—</span>
+    </div>
+    <div class="ws-status">
+      <div class="ws-pulse" id="wsPulse"></div>
+      <span id="wsStatus">Loading…</span>
+    </div>
+  </div>
+
+  <!-- KPI summary -->
+  <div class="section-label">This Week at a Glance</div>
+  <div class="kpi-row" id="kpiRow">
+    <!-- Production -->
+    <div class="kpi loading"><div class="kk">Cases Planned</div><div class="kv" id="k-csPl">—</div><div class="ks">Production</div></div>
+    <div class="kpi loading"><div class="kk">Cases Produced</div><div class="kv" id="k-csAc">—</div><div class="ks">Production</div></div>
+    <div class="kpi loading"><div class="kk">Cases Variance</div><div class="kv" id="k-csVar">—</div><div class="ks">Production</div></div>
+    <div class="kpi-divider"></div>
+    <!-- Batching -->
+    <div class="kpi loading"><div class="kk">Lbs Planned</div><div class="kv" id="k-bLbsPl">—</div><div class="ks">Batching</div></div>
+    <div class="kpi loading"><div class="kk">Lbs Produced</div><div class="kv" id="k-bLbsAc">—</div><div class="ks">Batching</div></div>
+    <div class="kpi loading"><div class="kk">Lbs Attainment</div><div class="kv" id="k-bAtt">—</div><div class="ks">Batching</div></div>
+  </div>
+
+  <!-- Report cards -->
+  <div class="section-label">Reports</div>
+  <div class="cards">
+    <a class="card" href="eos-production.html">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-icon">🏭</div>
+        <div class="card-title">Manufacturing</div>
+        <div class="card-desc">Line-by-line production output, pounds &amp; cases planned vs produced, variances, safety, attendance, SAP, and materials.</div>
+        <div class="card-meta">
+          <span class="card-shifts" id="prodShiftBadge">— shifts this week</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </div>
+    </a>
+    <a class="card batching" href="eos-batching.html">
+      <div class="card-accent"></div>
+      <div class="card-body">
+        <div class="card-icon">📦</div>
+        <div class="card-title">Batching</div>
+        <div class="card-desc">Total pounds planned vs produced, safety, attendance, and shift notes for the batching department.</div>
+        <div class="card-meta">
+          <span class="card-shifts" id="batchShiftBadge">— shifts this week</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <!-- Recent shifts — Production -->
+  <div class="section-label">Recent Submissions</div>
+
+  <div class="log-section">
+    <div class="log-hdr">
+      <div class="log-hdr-title"><span class="dot"></span>Manufacturing Shifts</div>
+      <span class="log-badge" id="prodLogBadge">0 this week</span>
+    </div>
+    <div id="prodLog"><div class="log-empty">Loading…</div></div>
+  </div>
+
+  <div class="log-section">
+    <div class="log-hdr">
+      <div class="log-hdr-title batching"><span class="dot"></span>Batching Shifts</div>
+      <span class="log-badge batching" id="batchLogBadge">0 this week</span>
+    </div>
+    <div id="batchLog"><div class="log-empty">Loading…</div></div>
+  </div>
+
+  <div class="hub-footer">
+    Plant 1730 Ops Hub &bull; Novus Foods, Buena Park CA &bull; Data resets every Monday at 12:00 AM
+  </div>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+
+// ── CONFIG ──────────────────────────────
+const SUPABASE_URL = 'https://easfrwilbxypcdooawtt.supabase.co';
+const SUPABASE_ANON = 'YOUR_ANON_KEY_HERE';
+const PE = 0.85;
+// ────────────────────────────────────────
+
+// Week helpers
+function getMonday(d){
+  const dt=new Date(d); dt.setHours(0,0,0,0);
+  const day=dt.getDay(); dt.setDate(dt.getDate()-(day===0?6:day-1));
+  return dt.toISOString().slice(0,10);
+}
+function getSunday(mondayIso){
+  const d=new Date(mondayIso+'T00:00:00'); d.setDate(d.getDate()+6); return d.toISOString().slice(0,10);
+}
+function fmtWeekRange(mondayIso){
+  const mon=new Date(mondayIso+'T00:00:00'), sun=new Date(mon); sun.setDate(sun.getDate()+6);
+  const fmt=d=>d.toLocaleDateString([],{month:'short',day:'numeric'});
+  return fmt(mon)+' – '+fmt(sun);
+}
+function fD(iso){ if(!iso) return '—'; const [y,m,d]=iso.split('-'); return `${m}/${d}/${y}`; }
+function n(v){ return (v||0).toLocaleString(); }
+function varSpan(v){
+  const num=parseInt(v)||0;
+  if(num===0) return `<span style="color:var(--g400)">0</span>`;
+  const cls=num>0?'var-pos':'var-neg';
+  return `<span class="${cls}">${num>0?'+':''}${num.toLocaleString()}</span>`;
+}
+function attBadge(pl,ac){
+  if(!pl) return '<span class="badge badge-gray">—</span>';
+  const p=Math.round((ac/pl)*100*PE);
+  const cls=p>=90?'badge-green':p>=70?'badge-amber':'badge-red';
+  return `<span class="badge ${cls}">${p}%</span>`;
+}
+
+const monday = getMonday(new Date());
+const sunday = getSunday(monday);
+const range  = fmtWeekRange(monday);
+
+// Set header labels
+document.getElementById('hdrWeekLabel').textContent = 'Week of '+range;
+document.getElementById('hdrDate').textContent = new Date().toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'});
+document.getElementById('wsRange').textContent = range;
+
+async function sbFetch(table, filters=''){
+  const url = `${SUPABASE_URL}/rest/v1/${table}?${filters}&order=shift_date.desc,created_at.desc`;
+  const res = await fetch(url, {
+    headers:{
+      'apikey': SUPABASE_ANON,
+      'Authorization': 'Bearer '+SUPABASE_ANON,
+      'Content-Type': 'application/json'
+    }
+  });
+  if(!res.ok) throw new Error(`${table}: ${res.status}`);
+  return res.json();
+}
+
+async function loadAll(){
+  const pulse = document.getElementById('wsPulse');
+  const status = document.getElementById('wsStatus');
+  pulse.classList.add('live');
+  status.textContent = 'Fetching…';
+
+  try {
+    const weekFilter = `shift_date=gte.${monday}&shift_date=lte.${sunday}`;
+
+    const [prodRows, batchRows] = await Promise.all([
+      sbFetch('eos_production_shifts', weekFilter),
+      sbFetch('eos_batching_shifts',   weekFilter)
+    ]);
+
+    // ── Production KPIs ──
+    let csPl=0, csAc=0, csVar=0;
+    prodRows.forEach(r=>{ csPl+=r.cases_planned||0; csAc+=r.cases_produced||0; csVar+=r.cases_variance||0; });
+
+    setKpi('k-csPl',  n(csPl),  null);
+    setKpi('k-csAc',  n(csAc),  null);
+    setKpi('k-csVar', (csVar>0?'+':'')+n(csVar), csVar>=0?'pos':'neg');
+
+    // ── Batching KPIs ──
+    let bPl=0, bAc=0;
+    batchRows.forEach(r=>{ bPl+=r.lbs_planned||0; bAc+=r.lbs_produced||0; });
+    const bAtt = bPl>0 ? Math.round((bAc/bPl)*100)+'%' : '—';
+
+    setKpi('k-bLbsPl', n(bPl), null);
+    setKpi('k-bLbsAc', n(bAc), null);
+    setKpi('k-bAtt',   bAtt,   bPl>0?(Math.round((bAc/bPl)*100)>=90?'pos':'neg'):null);
+
+    // ── Shift count badges ──
+    document.getElementById('prodShiftBadge').textContent  = prodRows.length+' shift'+(prodRows.length!==1?'s':'')+' this week';
+    document.getElementById('batchShiftBadge').textContent = batchRows.length+' shift'+(batchRows.length!==1?'s':'')+' this week';
+    document.getElementById('prodLogBadge').textContent    = prodRows.length+' this week';
+    document.getElementById('batchLogBadge').textContent   = batchRows.length+' this week';
+
+    // ── Production log ──
+    renderProdLog(prodRows);
+    renderBatchLog(batchRows);
+
+    pulse.classList.remove('live');
+    status.textContent = 'Updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+
+  } catch(err){
+    console.error(err);
+    pulse.classList.remove('live');
+    status.textContent = 'Error loading data';
+    ['prodLog','batchLog'].forEach(id=>{
+      document.getElementById(id).innerHTML='<div class="log-empty">Could not load data. Check Supabase config.</div>';
+    });
+  }
+}
+
+function setKpi(id, val, cls){
+  const el=document.getElementById(id); if(!el) return;
+  el.textContent=val;
+  el.parentElement.classList.remove('loading','pos','neg');
+  if(cls) el.parentElement.classList.add(cls);
+}
+
+function renderProdLog(rows){
+  const el=document.getElementById('prodLog');
+  if(!rows.length){ el.innerHTML='<div class="log-empty">No production shifts submitted this week.</div>'; return; }
+  let html=`<table class="log-table"><thead><tr>
+    <th>Date</th><th>Supervisor</th>
+    <th class="c">Lbs Planned</th><th class="c">Lbs Produced</th><th class="c">Lbs Var</th>
+    <th class="c">Cases Planned</th><th class="c">Cases Produced</th><th class="c">Cases Var</th>
+    <th class="c">Attainment</th>
+  </tr></thead><tbody>`;
+  rows.forEach(r=>{
+    html+=`<tr>
+      <td class="date-cell">${fD(r.shift_date)}</td>
+      <td class="sup-cell">${r.supervisor||'—'}</td>
+      <td class="c">${n(r.lbs_planned)}</td>
+      <td class="c">${n(r.lbs_produced)}</td>
+      <td class="c">${varSpan(r.lbs_variance)}</td>
+      <td class="c">${n(r.cases_planned)}</td>
+      <td class="c">${n(r.cases_produced)}</td>
+      <td class="c">${varSpan(r.cases_variance)}</td>
+      <td class="c">${attBadge(r.cases_planned,r.cases_produced)}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table>`;
+  el.innerHTML=html;
+}
+
+function renderBatchLog(rows){
+  const el=document.getElementById('batchLog');
+  if(!rows.length){ el.innerHTML='<div class="log-empty">No batching shifts submitted this week.</div>'; return; }
+  let html=`<table class="log-table"><thead><tr>
+    <th>Date</th><th>Supervisor</th>
+    <th class="c">Lbs Planned</th><th class="c">Lbs Produced</th><th class="c">Lbs Variance</th><th class="c">Attainment</th>
+  </tr></thead><tbody>`;
+  rows.forEach(r=>{
+    html+=`<tr>
+      <td class="date-cell">${fD(r.shift_date)}</td>
+      <td class="sup-cell">${r.supervisor||'—'}</td>
+      <td class="c">${n(r.lbs_planned)}</td>
+      <td class="c">${n(r.lbs_produced)}</td>
+      <td class="c">${varSpan(r.lbs_variance)}</td>
+      <td class="c">${attBadge(r.lbs_planned,r.lbs_produced)}</td>
+    </tr>`;
+  });
+  html+=`</tbody></table>`;
+  el.innerHTML=html;
+}
+
+loadAll();
+})();
+</script>
+</body>
+</html>
