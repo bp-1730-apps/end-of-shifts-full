@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shift History — Novus Foods Plant 1730</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#fff;--g50:#f8f9fb;--g100:#f1f3f6;--g200:#e2e6ec;--g300:#cdd3dc;
+  --g400:#a0aab8;--g500:#6b7a8d;--g600:#4a5568;--g700:#334155;--g800:#1e293b;--g900:#0f172a;
+  --brand:#1a5632;--brand-l:#e8f5ee;--brand-m:#2d7a4a;
+  --accent:#b8860b;--accent-l:#fdf6e3;--accent-b:#e2c97e;
+  --r:10px;--rs:6px;
+  --fb:'DM Sans',system-ui,sans-serif;--fm:'JetBrains Mono',monospace;
+  --sh:0 4px 12px rgba(15,23,42,.07),0 1px 3px rgba(15,23,42,.05);
+}
+html{font-size:15px}
+body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:100vh}
+.app{max-width:1100px;margin:0 auto;padding:2rem 1.5rem 5rem}
+
+/* header */
+.hdr{background:var(--brand);color:#fff;display:flex;align-items:center;gap:1.2rem;padding:1.4rem 1.8rem;border-radius:var(--r) var(--r) 0 0;position:relative;box-shadow:var(--sh)}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#daa520,var(--accent))}
+.hdr img{height:44px;width:auto;filter:brightness(0) invert(1);flex-shrink:0}
+.hdr-text h1{font-size:1.25rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.1rem}
+.hdr-text .sub{font-size:.73rem;opacity:.72;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.hdr-nav{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+.hdr-back{display:inline-flex;align-items:center;gap:.35rem;font-size:.75rem;font-weight:600;color:rgba(255,255,255,.75);text-decoration:none;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:.3rem .8rem;transition:background .15s}
+.hdr-back:hover{background:rgba(255,255,255,.2);color:#fff}
+
+/* toolbar */
+.toolbar{background:var(--white);border-bottom:1px solid var(--g200);display:flex;align-items:center;gap:1rem;padding:.9rem 1.4rem;flex-wrap:wrap}
+.type-tabs{display:flex;gap:0;border:1px solid var(--g200);border-radius:var(--rs);overflow:hidden}
+.type-tab{padding:.45rem 1.1rem;font-size:.82rem;font-weight:600;border:none;background:var(--g50);color:var(--g500);cursor:pointer;transition:background .15s,color .15s;border-right:1px solid var(--g200)}
+.type-tab:last-child{border-right:none}
+.type-tab.active{background:var(--brand);color:#fff}
+.date-range{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.date-range label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g500)}
+.date-range input[type=date]{background:var(--white);border:1px solid var(--g300);border-radius:var(--rs);color:var(--g800);font-family:var(--fb);font-size:.85rem;padding:.4rem .6rem;outline:none}
+.date-range input[type=date]:focus{border-color:var(--brand-m);box-shadow:0 0 0 3px var(--brand-l)}
+.toolbar-btn{display:inline-flex;align-items:center;gap:.4rem;font-size:.82rem;font-weight:600;padding:.45rem 1rem;border-radius:var(--rs);border:none;cursor:pointer;transition:background .15s}
+.btn-load{background:var(--brand);color:#fff}.btn-load:hover{background:var(--brand-m)}
+.btn-export{background:var(--g100);color:var(--g700);border:1px solid var(--g200)}.btn-export:hover{background:var(--g200)}
+.btn-export:disabled{opacity:.4;cursor:not-allowed}
+.toolbar-right{margin-left:auto;display:flex;align-items:center;gap:.6rem}
+.record-count{font-size:.75rem;color:var(--g400);font-weight:500}
+
+/* summary cards */
+.summary-row{display:grid;gap:.75rem;margin-bottom:1.25rem}
+.summary-row.prod{grid-template-columns:repeat(7,1fr)}
+.summary-row.batch{grid-template-columns:repeat(5,1fr)}
+.sum-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--rs);padding:.7rem .9rem;box-shadow:var(--sh)}
+.sum-card .sk{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400);margin-bottom:.25rem}
+.sum-card .sv{font-family:var(--fm);font-weight:700;font-size:1.05rem;color:var(--g800);line-height:1}
+.sum-card .ss{font-size:.68rem;color:var(--g400);margin-top:.15rem}
+.sum-card.pos .sv{color:var(--brand)}
+.sum-card.neg .sv{color:#dc2626}
+
+/* shift list */
+.shift-list{display:flex;flex-direction:column;gap:.6rem}
+.shift-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.shift-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.1rem;cursor:pointer;user-select:none;gap:.75rem;flex-wrap:wrap;transition:background .15s}
+.shift-card-hdr:hover{background:var(--g50)}
+.shift-hdr-left{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+.shift-date{font-family:var(--fm);font-size:.88rem;font-weight:700;color:var(--g800)}
+.shift-sup{font-size:.82rem;color:var(--g500);font-weight:500}
+.shift-chips{display:flex;gap:.4rem;flex-wrap:wrap}
+.chip{font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:3px}
+.chip-green{background:var(--brand-l);color:var(--brand)}
+.chip-amber{background:var(--accent-l);color:var(--accent)}
+.chip-red{background:#fef2f2;color:#dc2626}
+.chip-gray{background:var(--g100);color:var(--g600)}
+.chip-neu{background:var(--g100);color:var(--g600)}
+.shift-toggle{color:var(--g400);font-size:.85rem;transition:transform .2s;flex-shrink:0}
+.shift-toggle.open{transform:rotate(180deg)}
+.shift-card-body{display:none;border-top:1px solid var(--g200)}
+.shift-card-body.open{display:block}
+
+/* detail sections inside a shift */
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--g200)}
+.detail-section{padding:1rem 1.2rem;border-right:1px solid var(--g200)}
+.detail-section:last-child{border-right:none}
+.detail-section.full{grid-column:1/-1;border-right:none}
+.detail-section.half{grid-column:span 1}
+.ds-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--brand);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+.ds-title::after{content:'';flex:1;height:1px;background:var(--g200)}
+.ds-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.3rem;font-size:.8rem}
+.ds-lbl{color:var(--g500);font-weight:500}
+.ds-val{font-family:var(--fm);font-weight:700;font-size:.82rem;color:var(--g800)}
+.ds-val.pos{color:var(--brand)}
+.ds-val.neg{color:#dc2626}
+.ds-text{font-size:.8rem;color:var(--g700);line-height:1.5;margin-top:.2rem}
+.ds-empty{font-size:.75rem;color:var(--g400);font-style:italic}
+.badge-sm{display:inline-block;padding:.1rem .4rem;border-radius:3px;font-size:.68rem;font-weight:700}
+.badge-green{background:var(--brand-l);color:var(--brand)}
+.badge-amber{background:var(--accent-l);color:var(--accent)}
+.badge-red{background:#fef2f2;color:#dc2626}
+.badge-gray{background:var(--g100);color:var(--g500)}
+
+/* line table */
+.line-table{width:100%;border-collapse:collapse;font-size:.78rem}
+.line-table th{background:var(--g50);padding:.4rem .75rem;font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);text-align:left;border-bottom:1px solid var(--g200)}
+.line-table th.c{text-align:center}
+.line-table td{padding:.45rem .75rem;border-bottom:1px solid var(--g100);vertical-align:middle}
+.line-table td.c{text-align:center;font-family:var(--fm);font-size:.76rem}
+.line-table tr:last-child td{border-bottom:none}
+.line-name{font-family:var(--fm);font-weight:700;color:var(--brand);font-size:.8rem}
+.line-offline{color:var(--g400);font-style:italic}
+.var-pos{color:var(--brand);font-weight:700}
+.var-neg{color:#dc2626;font-weight:700}
+
+/* empty / loading states */
+.state-box{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);padding:3rem;text-align:center;color:var(--g400);font-size:.88rem;box-shadow:var(--sh)}
+.state-box svg{display:block;margin:0 auto .75rem;opacity:.3}
+
+@media(max-width:768px){
+  .app{padding:.75rem .5rem 3rem}
+  .hdr{flex-direction:column;text-align:center;padding:1.2rem 1rem}
+  .hdr img{height:36px}
+  .hdr-nav{margin-left:0}
+  .toolbar{flex-direction:column;align-items:flex-start}
+  .toolbar-right{margin-left:0;width:100%;justify-content:flex-end}
+  .summary-row.prod{grid-template-columns:repeat(3,1fr)}
+  .summary-row.batch{grid-template-columns:repeat(3,1fr)}
+  .detail-grid{grid-template-columns:1fr}
+  .detail-section{border-right:none;border-bottom:1px solid var(--g200)}
+}
+@media(max-width:480px){
+  .summary-row.prod,.summary-row.batch{grid-template-columns:1fr 1fr}
+}
+
+/* print */
+@media print{
+  body{background:white!important;margin:0}
+  .app,.toolbar{display:none!important}
+  #printReport{display:block!important}
+}
+#printReport{display:none;font-family:'DM Sans',Arial,sans-serif;font-size:9.5pt;color:#111827;background:white}
+.pr-page{width:100%;max-width:900px;margin:0 auto;padding:0 18pt}
+.pr-hdr{background:#1a5632;color:white;padding:12pt 18pt 10pt;display:flex;align-items:center;justify-content:space-between;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-hdr-left{display:flex;align-items:center;gap:10pt}
+.pr-hdr img{height:30pt;filter:brightness(0) invert(1)}
+.pr-hdr h1{font-size:13pt;font-weight:700;margin:0 0 1pt}
+.pr-hdr .pr-sub{font-size:7pt;opacity:.7;text-transform:uppercase;letter-spacing:.07em}
+.pr-hdr-right{font-size:8pt;opacity:.8;text-align:right}
+.pr-gold{height:2.5pt;background:linear-gradient(90deg,#b8860b,#daa520,#b8860b);print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-sec{margin-top:10pt;page-break-inside:avoid}
+.pr-sec-hdr{display:flex;align-items:center;gap:5pt;margin-bottom:4pt}
+.pr-sec-hdr .bar{width:3pt;height:12pt;background:#1a5632;border-radius:2pt;flex-shrink:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-sec-hdr span{font-size:8.5pt;font-weight:700;color:#111827;text-transform:uppercase;letter-spacing:.04em}
+.pr-sec-hdr::after{content:'';flex:1;height:1pt;background:#e2e6ec}
+.pr-kpi-row{display:grid;gap:5pt;margin-bottom:7pt}
+.pr-kpi-row.k3{grid-template-columns:repeat(3,1fr)}
+.pr-kpi-row.k4{grid-template-columns:repeat(4,1fr)}
+.pr-kpi-row.k5{grid-template-columns:repeat(5,1fr)}
+.pr-kpi-row.k7{grid-template-columns:repeat(7,1fr)}
+.pr-kpi{border:1pt solid #e2e6ec;border-radius:3pt;padding:5pt 7pt;background:#f8f9fb;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-kpi .kk{font-size:6pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7a8d;margin-bottom:2pt}
+.pr-kpi .kv{font-size:13pt;font-weight:700;line-height:1;color:#111827}
+.pr-kpi.green{background:#e8f5ee;border-color:#a7d5b8}.pr-kpi.green .kv{color:#1a5632}
+.pr-kpi.amber{background:#fdf6e3;border-color:#e2c97e}.pr-kpi.amber .kv{color:#b8860b}
+.pr-kpi.red{background:#fef2f2;border-color:#fca5a5}.pr-kpi.red .kv{color:#dc2626}
+.pr-kpi.neutral .kv{color:#334155}
+.pr-notes{background:#f8f9fb;border-left:2.5pt solid #1a5632;padding:4pt 7pt;border-radius:0 3pt 3pt 0;margin-bottom:5pt;font-size:8pt;color:#334155;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-notes .nk{font-size:6pt;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#6b7a8d;margin-bottom:1pt}
+.pr-table{width:100%;border-collapse:collapse;font-size:7.5pt;margin-bottom:6pt}
+.pr-table th{background:#1a5632;color:white;padding:4pt 6pt;text-align:left;font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.03em;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-table th.c{text-align:center}
+.pr-table td{padding:4pt 6pt;border-bottom:1pt solid #e2e6ec;vertical-align:middle}
+.pr-table td.c{text-align:center}
+.pr-table tr:nth-child(even) td{background:#f8f9fb;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.pr-table .ln{font-weight:700;color:#1a5632;font-family:monospace}
+.pr-table .vp{font-weight:700;color:#1a5632}
+.pr-table .vn{font-weight:700;color:#dc2626}
+.pr-table .lo{font-weight:700;color:#a0aab8}
+.badge{display:inline-block;padding:1pt 4pt;border-radius:2pt;font-size:6.5pt;font-weight:700;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.badge-green{background:#e8f5ee;color:#1a5632}
+.badge-amber{background:#fdf6e3;color:#b8860b}
+.badge-red{background:#fef2f2;color:#dc2626}
+.badge-gray{background:#f1f3f6;color:#4a5568}
+.pr-shift-break{page-break-before:always;margin-top:0}
+.pr-footer{margin-top:12pt;padding-top:5pt;border-top:1pt solid #e2e6ec;display:flex;justify-content:space-between;font-size:6.5pt;color:#a0aab8}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="hdr">
+    <img src="image.png" id="logoImg" alt="Novus Foods">
+    <div class="hdr-text">
+      <h1>Shift History</h1>
+      <div class="sub">Plant 1730 &bull; Buena Park, CA</div>
+    </div>
+    <div class="hdr-nav">
+      <a class="hdr-back" href="index.html">← Hub</a>
+    </div>
+  </header>
+
+  <div style="background:var(--white);border-radius:0 0 var(--r) var(--r);box-shadow:var(--sh);margin-bottom:1.5rem;overflow:hidden">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="type-tabs">
+        <button class="type-tab active" id="tabProd" onclick="switchType('production')">🏭 Manufacturing</button>
+        <button class="type-tab" id="tabBatch" onclick="switchType('batching')">📦 Batching</button>
+      </div>
+      <div class="date-range">
+        <label>From</label>
+        <input type="date" id="dateFrom">
+        <label>To</label>
+        <input type="date" id="dateTo">
+      </div>
+      <button class="toolbar-btn btn-load" onclick="loadShifts()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M7 4v3l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Load
+      </button>
+      <div class="toolbar-right">
+        <span class="record-count" id="recordCount"></span>
+        <button class="toolbar-btn btn-export" id="exportBtn" onclick="exportCSV()" disabled>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v7m0 0L4.5 5.5M7 8l2.5-2.5M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Export CSV
+        </button>
+        <button class="toolbar-btn btn-export" id="printBtn" onclick="printReport()" disabled>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="4" width="10" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M4 4V2h6v2M4 9h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Print PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary cards -->
+    <div style="padding:1.1rem 1.4rem 0" id="summaryArea"></div>
+
+    <!-- Shift list -->
+    <div style="padding:.5rem 1.4rem 1.4rem" id="shiftListArea">
+      <div class="state-box">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Select a date range and click Load to view shift history.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="printReport"></div>
+
+<script>
+(function(){
+'use strict';
+
+// ── CONFIG ──────────────────────────────
+const SUPABASE_URL  = 'https://mnvveafizcirdutkficj.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1udnZlYWZpemNpcmR1dGtmaWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MDk3MzMsImV4cCI6MjA5NTk4NTczM30.unTqlW_e5Z0eaY3aMR8jdyKKUbk3bV_aMVUMcduPJqg';
+const PE = 0.85;
+// ────────────────────────────────────────
+
+let currentType  = 'production';
+let currentRows  = [];
+
+// ── Init date range: current week ──
+function getMonday(d){const dt=new Date(d);dt.setHours(0,0,0,0);const day=dt.getDay();dt.setDate(dt.getDate()-(day===0?6:day-1));return dt;}
+const mon = getMonday(new Date());
+const sun = new Date(mon); sun.setDate(sun.getDate()+6);
+document.getElementById('dateFrom').value = mon.toISOString().slice(0,10);
+document.getElementById('dateTo').value   = sun.toISOString().slice(0,10);
+
+// ── Read type from URL param ──
+const urlType = new URLSearchParams(location.search).get('type');
+if(urlType === 'batching') switchType('batching');
+
+// ── Supabase ──
+async function sbGet(table, filters){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}&order=shift_date.desc,created_at.desc`,{
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
+  });
+  if(!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+// ── Helpers ──
+function fD(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${m}/${d}/${y}`;}
+function n(v){return(parseInt(v)||0).toLocaleString();}
+function pctBadge(pl,ac){
+  if(!pl) return '<span class="badge-sm badge-gray">—</span>';
+  const p=Math.round((ac/pl)*100*PE);
+  return `<span class="badge-sm ${p>=90?'badge-green':p>=70?'badge-amber':'badge-red'}">${p}%</span>`;
+}
+function rawPct(pl,ac){
+  if(!pl) return '—';
+  return Math.round((ac/pl)*100)+'%';
+}
+function varSpan(v,cls=''){
+  const num=parseInt(v)||0;
+  if(num===0) return `<span class="ds-val">0</span>`;
+  return `<span class="ds-val ${num>0?'pos':'neg'}">${num>0?'+':''}${num.toLocaleString()}</span>`;
+}
+function safetyClass(v){ return parseInt(v)>0?'chip-red':'chip-gray'; }
+
+// ── Switch type ──
+window.switchType = function(type){
+  currentType = type;
+  document.getElementById('tabProd').classList.toggle('active', type==='production');
+  document.getElementById('tabBatch').classList.toggle('active', type==='batching');
+};
+
+// ── Load ──
+window.loadShifts = async function(){
+  const from = document.getElementById('dateFrom').value;
+  const to   = document.getElementById('dateTo').value;
+  if(!from||!to){ alert('Select a date range first.'); return; }
+
+  const listArea    = document.getElementById('shiftListArea');
+  const summaryArea = document.getElementById('summaryArea');
+  listArea.innerHTML    = '<div class="state-box">Loading…</div>';
+  summaryArea.innerHTML = '';
+  document.getElementById('exportBtn').disabled = true;
+  document.getElementById('printBtn').disabled  = true;
+  document.getElementById('recordCount').textContent = '';
+
+  try{
+    const table   = currentType==='production' ? 'eos_production_shifts' : 'eos_batching_shifts';
+    const filters = `shift_date=gte.${from}&shift_date=lte.${to}`;
+    currentRows   = await sbGet(table, filters);
+
+    document.getElementById('recordCount').textContent = currentRows.length + ' shift' + (currentRows.length!==1?'s':'') + ' found';
+
+    if(!currentRows.length){
+      listArea.innerHTML = `<div class="state-box">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        No shifts found for this date range.
+      </div>`;
+      summaryArea.innerHTML = '';
+      return;
+    }
+
+    document.getElementById('exportBtn').disabled = false;
+    document.getElementById('printBtn').disabled  = false;
+
+    if(currentType==='production'){
+      renderProdSummary(currentRows);
+      renderProdList(currentRows);
+    } else {
+      renderBatchSummary(currentRows);
+      renderBatchList(currentRows);
+    }
+  }catch(err){
+    console.error(err);
+    listArea.innerHTML = `<div class="state-box">Error loading data: ${err.message}</div>`;
+  }
+};
+
+// ═══════════════════════════════════════
+// PRODUCTION RENDER
+// ═══════════════════════════════════════
+function renderProdSummary(rows){
+  let lbsPl=0,lbsAc=0,csPl=0,csAc=0,uc=0,nm=0,fa=0,ab=0,hn=0,hp=0;
+  rows.forEach(r=>{
+    lbsPl+=r.lbs_planned||0; lbsAc+=r.lbs_produced||0;
+    csPl+=r.cases_planned||0; csAc+=r.cases_produced||0;
+    uc+=r.unsafe_conditions||0; nm+=r.near_misses||0; fa+=r.first_aid||0;
+    ab+=r.absences||0; hn+=r.headcount_needed||0; hp+=r.headcount_present||0;
+  });
+  const lbsVar=lbsAc-lbsPl, csVar=csAc-csPl;
+  const avgAtt = rows.filter(r=>r.cases_planned>0).map(r=>Math.round((r.cases_produced/r.cases_planned)*100*PE));
+  const avgAttVal = avgAtt.length ? Math.round(avgAtt.reduce((a,b)=>a+b)/avgAtt.length) : null;
+
+  document.getElementById('summaryArea').innerHTML = `
+    <div class="summary-row prod">
+      <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
+      <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
+      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
+      <div class="sum-card"><div class="sk">Cases Planned</div><div class="sv">${n(csPl)}</div></div>
+      <div class="sum-card"><div class="sk">Cases Produced</div><div class="sv">${n(csAc)}</div></div>
+      <div class="sum-card ${csVar>=0?'pos':'neg'}"><div class="sk">Cases Variance</div><div class="sv">${csVar>0?'+':''}${n(csVar)}</div></div>
+      <div class="sum-card ${avgAttVal!==null?(avgAttVal>=90?'pos':avgAttVal>=70?'':'neg'):''}">
+        <div class="sk">Avg Attainment</div>
+        <div class="sv">${avgAttVal!==null?avgAttVal+'%':'—'}</div>
+        <div class="ss">${rows.length} shifts</div>
+      </div>
+    </div>`;
+}
+
+function renderProdList(rows){
+  const area = document.getElementById('shiftListArea');
+  let html = '<div class="shift-list">';
+
+  rows.forEach((r, idx)=>{
+    const csAtt = r.cases_planned>0 ? Math.round((r.cases_produced/r.cases_planned)*100*PE) : null;
+    const attChip = csAtt!==null
+      ? `<span class="chip ${csAtt>=90?'chip-green':csAtt>=70?'chip-amber':'chip-red'}">${csAtt}% att.</span>`
+      : '';
+    const lv = (r.lbs_produced||0)-(r.lbs_planned||0);
+    const cv = (r.cases_produced||0)-(r.cases_planned||0);
+    const safetyIssues = (r.unsafe_conditions||0)+(r.near_misses||0)+(r.first_aid||0);
+
+    html += `
+    <div class="shift-card">
+      <div class="shift-card-hdr" onclick="toggleShift(${idx})">
+        <div class="shift-hdr-left">
+          <span class="shift-date">${fD(r.shift_date)}</span>
+          <span class="shift-sup">${r.supervisor||'—'}</span>
+          <div class="shift-chips">
+            ${attChip}
+            <span class="chip chip-neu">${n(r.lbs_produced)} lbs</span>
+            <span class="chip ${lv>=0?'chip-green':'chip-red'}">${lv>=0?'+':''}${n(lv)} lbs var</span>
+            <span class="chip chip-neu">${n(r.cases_produced)} cs</span>
+            ${safetyIssues>0?`<span class="chip chip-amber">⚠ ${safetyIssues} safety</span>`:''}
+          </div>
+        </div>
+        <span class="shift-toggle" id="tog-${idx}">▼</span>
+      </div>
+      <div class="shift-card-body" id="body-${idx}">
+        <div class="detail-grid">
+
+          <!-- Safety -->
+          <div class="detail-section">
+            <div class="ds-title">Safety</div>
+            <div class="ds-row"><span class="ds-lbl">Unsafe Conditions</span><span class="ds-val ${parseInt(r.unsafe_conditions)>0?'neg':''}">${r.unsafe_conditions||0}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Near Misses</span><span class="ds-val ${parseInt(r.near_misses)>0?'neg':''}">${r.near_misses||0}</span></div>
+            <div class="ds-row"><span class="ds-lbl">First Aid</span><span class="ds-val ${parseInt(r.first_aid)>0?'neg':''}">${r.first_aid||0}</span></div>
+            ${r.safety_comments?`<div class="ds-text">${r.safety_comments}</div>`:''}
+          </div>
+
+          <!-- Attendance -->
+          <div class="detail-section">
+            <div class="ds-title">Attendance</div>
+            <div class="ds-row"><span class="ds-lbl">Needed</span><span class="ds-val">${r.headcount_needed||'—'}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Present</span><span class="ds-val">${r.headcount_present||'—'}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Absences</span><span class="ds-val ${parseInt(r.absences)>0?'neg':''}">${r.absences||0}</span></div>
+            ${(r.headcount_needed&&r.headcount_present)?`<div class="ds-row"><span class="ds-lbl">Staffed</span><span class="ds-val">${Math.round((r.headcount_present/r.headcount_needed)*100)}%</span></div>`:''}
+          </div>
+
+          <!-- SAP -->
+          <div class="detail-section">
+            <div class="ds-title">SAP</div>
+            <div class="ds-row"><span class="ds-lbl">Orders Completed</span><span class="ds-val">${r.sap_completed||'—'}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Orders Open</span><span class="ds-val ${parseInt(r.sap_open)>0?'neg':''}">${r.sap_open||0}</span></div>
+            ${r.sap_reason?`<div class="ds-text">${r.sap_reason}</div>`:''}
+          </div>
+
+          <!-- Materials -->
+          <div class="detail-section">
+            <div class="ds-title">Materials</div>
+            ${r.shortages?`<div class="ds-text"><strong>Shortages:</strong> ${r.shortages}</div>`:`<div class="ds-empty">No shortages</div>`}
+            ${r.stos?`<div class="ds-text" style="margin-top:.35rem"><strong>STOs:</strong> ${r.stos}</div>`:''}
+          </div>
+
+          <!-- Training & Quality -->
+          <div class="detail-section">
+            <div class="ds-title">Training &amp; Quality</div>
+            ${r.training_notes?`<div class="ds-text"><strong>Training:</strong> ${r.training_notes}</div>`:`<div class="ds-empty">No training notes</div>`}
+            ${r.quality_notes?`<div class="ds-text" style="margin-top:.35rem"><strong>Quality:</strong> ${r.quality_notes}</div>`:''}
+          </div>
+
+          <!-- Production totals -->
+          <div class="detail-section">
+            <div class="ds-title">Production Totals</div>
+            <div class="ds-row"><span class="ds-lbl">Lbs Planned</span><span class="ds-val">${n(r.lbs_planned)}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Lbs Produced</span><span class="ds-val">${n(r.lbs_produced)}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Lbs Variance</span>${varSpan(lv)}</div>
+            <div class="ds-row"><span class="ds-lbl">Cases Planned</span><span class="ds-val">${n(r.cases_planned)}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Cases Produced</span><span class="ds-val">${n(r.cases_produced)}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Cases Variance</span>${varSpan(cv)}</div>
+            <div class="ds-row"><span class="ds-lbl">Attainment</span><span class="ds-val">${csAtt!==null?csAtt+'%':'—'}</span></div>
+          </div>
+
+        </div>
+
+        <!-- Line breakdown -->
+        <div style="padding:.9rem 1.2rem">
+          <div class="ds-title" style="margin-bottom:.6rem">Line Breakdown</div>
+          <table class="line-table">
+            <thead><tr>
+              <th>Line</th>
+              <th class="c">Lbs Planned</th><th class="c">Lbs Produced</th><th class="c">Lbs Var</th>
+              <th class="c">Cases Planned</th><th class="c">Cases Produced</th><th class="c">Cases Var</th>
+              <th class="c">Attainment</th><th>Notes</th>
+            </tr></thead>
+            <tbody>`;
+
+    const lines = Array.isArray(r.lines) ? r.lines : (typeof r.lines === 'string' ? JSON.parse(r.lines) : []);
+    lines.forEach(l=>{
+      const isOff = !l.lbs_planned && !l.lbs_produced && !l.cases_planned && !l.cases_produced;
+      if(isOff){
+        html += `<tr><td class="line-name">${l.line}</td><td class="c line-offline" colspan="7">Offline this shift</td><td class="line-offline">${l.notes||''}</td></tr>`;
+        return;
+      }
+      const lv2=l.lbs_variance||0, cv2=l.cases_variance||0;
+      const att2=l.cases_planned>0?Math.round((l.cases_produced/l.cases_planned)*100*PE):null;
+      html+=`<tr>
+        <td class="line-name">${l.line}</td>
+        <td class="c">${n(l.lbs_planned)}</td><td class="c">${n(l.lbs_produced)}</td>
+        <td class="c ${lv2>=0?'var-pos':'var-neg'}">${lv2>=0?'+':''}${n(lv2)}</td>
+        <td class="c">${n(l.cases_planned)}</td><td class="c">${n(l.cases_produced)}</td>
+        <td class="c ${cv2>=0?'var-pos':'var-neg'}">${cv2>=0?'+':''}${n(cv2)}</td>
+        <td class="c">${att2!==null?`<span class="badge-sm ${att2>=90?'badge-green':att2>=70?'badge-amber':'badge-red'}">${att2}%</span>`:'—'}</td>
+        <td style="font-size:.75rem;color:var(--g500)">${l.notes||''}</td>
+      </tr>`;
+    });
+
+    html += `</tbody></table></div></div></div>`;
+  });
+
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+// BATCHING RENDER
+// ═══════════════════════════════════════
+function renderBatchSummary(rows){
+  let lbsPl=0,lbsAc=0,uc=0,nm=0,fa=0,ab=0;
+  rows.forEach(r=>{
+    lbsPl+=r.lbs_planned||0; lbsAc+=r.lbs_produced||0;
+    uc+=r.unsafe_conditions||0; nm+=r.near_misses||0; fa+=r.first_aid||0;
+    ab+=r.absences||0;
+  });
+  const lbsVar=lbsAc-lbsPl;
+  const att = lbsPl>0?Math.round((lbsAc/lbsPl)*100):null;
+
+  document.getElementById('summaryArea').innerHTML = `
+    <div class="summary-row batch">
+      <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
+      <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
+      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
+      <div class="sum-card ${att!==null?(att>=90?'pos':att>=70?'':'neg'):''}">
+        <div class="sk">Attainment</div><div class="sv">${att!==null?att+'%':'—'}</div>
+        <div class="ss">${rows.length} shifts</div>
+      </div>
+      <div class="sum-card ${(uc+nm+fa)>0?'neg':''}">
+        <div class="sk">Safety Incidents</div><div class="sv">${uc+nm+fa}</div>
+        <div class="ss">${uc} UC &bull; ${nm} NM &bull; ${fa} FA</div>
+      </div>
+    </div>`;
+}
+
+function renderBatchList(rows){
+  const area = document.getElementById('shiftListArea');
+  let html = '<div class="shift-list">';
+
+  rows.forEach((r, idx)=>{
+    const lv=(r.lbs_produced||0)-(r.lbs_planned||0);
+    const att=r.lbs_planned>0?Math.round((r.lbs_produced/r.lbs_planned)*100):null;
+    const safetyIssues=(r.unsafe_conditions||0)+(r.near_misses||0)+(r.first_aid||0);
+
+    html+=`
+    <div class="shift-card">
+      <div class="shift-card-hdr" onclick="toggleShift(${idx})">
+        <div class="shift-hdr-left">
+          <span class="shift-date">${fD(r.shift_date)}</span>
+          <span class="shift-sup">${r.supervisor||'—'}</span>
+          <div class="shift-chips">
+            ${att!==null?`<span class="chip ${att>=90?'chip-green':att>=70?'chip-amber':'chip-red'}">${att}% att.</span>`:''}
+            <span class="chip chip-neu">${n(r.lbs_produced)} lbs</span>
+            <span class="chip ${lv>=0?'chip-green':'chip-red'}">${lv>=0?'+':''}${n(lv)} lbs var</span>
+            ${safetyIssues>0?`<span class="chip chip-amber">⚠ ${safetyIssues} safety</span>`:''}
+          </div>
+        </div>
+        <span class="shift-toggle" id="tog-${idx}">▼</span>
+      </div>
+      <div class="shift-card-body" id="body-${idx}">
+        <div class="detail-grid">
+          <div class="detail-section">
+            <div class="ds-title">Safety</div>
+            <div class="ds-row"><span class="ds-lbl">Unsafe Conditions</span><span class="ds-val ${parseInt(r.unsafe_conditions)>0?'neg':''}">${r.unsafe_conditions||0}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Near Misses</span><span class="ds-val ${parseInt(r.near_misses)>0?'neg':''}">${r.near_misses||0}</span></div>
+            <div class="ds-row"><span class="ds-lbl">First Aid</span><span class="ds-val ${parseInt(r.first_aid)>0?'neg':''}">${r.first_aid||0}</span></div>
+            ${r.safety_comments?`<div class="ds-text">${r.safety_comments}</div>`:''}
+          </div>
+          <div class="detail-section">
+            <div class="ds-title">Batching Totals</div>
+            <div class="ds-row"><span class="ds-lbl">Lbs Planned</span><span class="ds-val">${n(r.lbs_planned)}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Lbs Produced</span><span class="ds-val">${n(r.lbs_produced)}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Variance</span>${varSpan(lv)}</div>
+            <div class="ds-row"><span class="ds-lbl">Attainment</span><span class="ds-val">${att!==null?att+'%':'—'}</span></div>
+          </div>
+          <div class="detail-section">
+            <div class="ds-title">Attendance</div>
+            <div class="ds-row"><span class="ds-lbl">Needed</span><span class="ds-val">${r.headcount_needed||'—'}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Actual</span><span class="ds-val">${r.headcount_actual||'—'}</span></div>
+            <div class="ds-row"><span class="ds-lbl">Absences</span><span class="ds-val ${parseInt(r.absences)>0?'neg':''}">${r.absences||0}</span></div>
+            ${r.comments?`<div class="ds-text" style="margin-top:.4rem">${r.comments}</div>`:''}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  html += '</div>';
+  area.innerHTML = html;
+}
+
+// ── Toggle expand ──
+window.toggleShift = function(idx){
+  document.getElementById('body-'+idx)?.classList.toggle('open');
+  const tog = document.getElementById('tog-'+idx);
+  if(tog) tog.classList.toggle('open');
+};
+
+// ═══════════════════════════════════════
+// CSV EXPORT
+// ═══════════════════════════════════════
+window.exportCSV = function(){
+  if(!currentRows.length) return;
+  const from = document.getElementById('dateFrom').value;
+  const to   = document.getElementById('dateTo').value;
+
+  let rows, headers, filename;
+
+  if(currentType === 'production'){
+    // Flatten production: one row per LINE per shift
+    headers = [
+      'shift_date','supervisor',
+      'unsafe_conditions','near_misses','first_aid','safety_comments',
+      'shortages','stos',
+      'absences','headcount_needed','headcount_present',
+      'sap_completed','sap_open','sap_reason',
+      'training_notes','quality_notes',
+      'shift_lbs_planned','shift_lbs_produced','shift_lbs_variance',
+      'shift_cases_planned','shift_cases_produced','shift_cases_variance',
+      'line','line_lbs_planned','line_lbs_produced','line_lbs_variance',
+      'line_cases_planned','line_cases_produced','line_cases_variance',
+      'line_notes'
+    ];
+    rows = [];
+    currentRows.forEach(r=>{
+      const lines = Array.isArray(r.lines)?r.lines:(typeof r.lines==='string'?JSON.parse(r.lines||'[]'):[]);
+      if(!lines.length){
+        // shift with no lines
+        rows.push([r.shift_date,r.supervisor,
+          r.unsafe_conditions||0,r.near_misses||0,r.first_aid||0,r.safety_comments||'',
+          r.shortages||'',r.stos||'',
+          r.absences||0,r.headcount_needed||0,r.headcount_present||0,
+          r.sap_completed||0,r.sap_open||0,r.sap_reason||'',
+          r.training_notes||'',r.quality_notes||'',
+          r.lbs_planned||0,r.lbs_produced||0,r.lbs_variance||0,
+          r.cases_planned||0,r.cases_produced||0,r.cases_variance||0,
+          '','','','','','','',''
+        ]);
+      } else {
+        lines.forEach(l=>{
+          rows.push([r.shift_date,r.supervisor,
+            r.unsafe_conditions||0,r.near_misses||0,r.first_aid||0,r.safety_comments||'',
+            r.shortages||'',r.stos||'',
+            r.absences||0,r.headcount_needed||0,r.headcount_present||0,
+            r.sap_completed||0,r.sap_open||0,r.sap_reason||'',
+            r.training_notes||'',r.quality_notes||'',
+            r.lbs_planned||0,r.lbs_produced||0,r.lbs_variance||0,
+            r.cases_planned||0,r.cases_produced||0,r.cases_variance||0,
+            l.line,l.lbs_planned||0,l.lbs_produced||0,l.lbs_variance||0,
+            l.cases_planned||0,l.cases_produced||0,l.cases_variance||0,
+            l.notes||''
+          ]);
+        });
+      }
+    });
+    filename = `production_shifts_${from}_to_${to}.csv`;
+  } else {
+    headers = [
+      'shift_date','supervisor',
+      'lbs_planned','lbs_produced','lbs_variance',
+      'unsafe_conditions','near_misses','first_aid','safety_comments',
+      'headcount_needed','headcount_actual','absences','comments'
+    ];
+    rows = currentRows.map(r=>[
+      r.shift_date,r.supervisor||'',
+      r.lbs_planned||0,r.lbs_produced||0,r.lbs_variance||0,
+      r.unsafe_conditions||0,r.near_misses||0,r.first_aid||0,r.safety_comments||'',
+      r.headcount_needed||0,r.headcount_actual||0,r.absences||0,r.comments||''
+    ]);
+    filename = `batching_shifts_${from}_to_${to}.csv`;
+  }
+
+  const escape = v => {
+    const s = String(v==null?'':v).replace(/"/g,'""');
+    return (s.includes(',')||s.includes('"')||s.includes('\n')) ? `"${s}"` : s;
+  };
+  const csv = [headers.join(','), ...rows.map(r=>r.map(escape).join(','))].join('\n');
+  const blob = new Blob([csv],{type:'text/csv'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+};
+
+// ═══════════════════════════════════════
+// PRINT REPORT
+// ═══════════════════════════════════════
+window.printReport = function(){
+  if(!currentRows.length) return;
+  const from = document.getElementById('dateFrom').value;
+  const to   = document.getElementById('dateTo').value;
+  const logoSrc = document.getElementById('logoImg')?.src||'image.png';
+  const now = new Date().toLocaleString();
+  const label = currentType==='production'?'Manufacturing':'Batching';
+
+  let html = `<div class="pr-page">
+    <div class="pr-hdr">
+      <div class="pr-hdr-left"><img src="${logoSrc}" alt="Novus Foods"><div>
+        <h1>${label} Shift History</h1>
+        <div class="pr-sub">Plant 1730 &bull; Buena Park, CA</div>
+      </div></div>
+      <div class="pr-hdr-right">${fD(from)} — ${fD(to)}<br>${currentRows.length} shifts</div>
+    </div>
+    <div class="pr-gold"></div>`;
+
+  if(currentType==='production'){
+    // Aggregate summary
+    let lbsPl=0,lbsAc=0,csPl=0,csAc=0,uc=0,nm=0,fa=0,ab=0,hn=0,hp=0;
+    currentRows.forEach(r=>{
+      lbsPl+=r.lbs_planned||0;lbsAc+=r.lbs_produced||0;
+      csPl+=r.cases_planned||0;csAc+=r.cases_produced||0;
+      uc+=r.unsafe_conditions||0;nm+=r.near_misses||0;fa+=r.first_aid||0;
+      ab+=r.absences||0;hn+=r.headcount_needed||0;hp+=r.headcount_present||0;
+    });
+    const lbsVar=lbsAc-lbsPl, csVar=csAc-csPl;
+    const avgAttArr=currentRows.filter(r=>r.cases_planned>0).map(r=>Math.round((r.cases_produced/r.cases_planned)*100*PE));
+    const avgAtt=avgAttArr.length?Math.round(avgAttArr.reduce((a,b)=>a+b)/avgAttArr.length):null;
+
+    html+=`<div class="pr-sec"><div class="pr-sec-hdr"><div class="bar"></div><span>Period Summary</span></div>
+      <div class="pr-kpi-row k7">
+        <div class="pr-kpi neutral"><div class="kk">Lbs Planned</div><div class="kv">${n(lbsPl)}</div></div>
+        <div class="pr-kpi neutral"><div class="kk">Lbs Produced</div><div class="kv">${n(lbsAc)}</div></div>
+        <div class="pr-kpi ${lbsVar>=0?'green':'red'}"><div class="kk">Lbs Variance</div><div class="kv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
+        <div class="pr-kpi neutral"><div class="kk">Cases Planned</div><div class="kv">${n(csPl)}</div></div>
+        <div class="pr-kpi neutral"><div class="kk">Cases Produced</div><div class="kv">${n(csAc)}</div></div>
+        <div class="pr-kpi ${csVar>=0?'green':'red'}"><div class="kk">Cases Variance</div><div class="kv">${csVar>0?'+':''}${n(csVar)}</div></div>
+        <div class="pr-kpi ${avgAtt!==null?(avgAtt>=90?'green':avgAtt>=70?'amber':'red'):'neutral'}"><div class="kk">Avg Attainment</div><div class="kv">${avgAtt!==null?avgAtt+'%':'—'}</div></div>
+      </div></div>`;
+
+    // Per-shift
+    currentRows.forEach((r, idx)=>{
+      const lv=(r.lbs_produced||0)-(r.lbs_produced||0);
+      const cv=(r.cases_produced||0)-(r.cases_planned||0);
+      const att=r.cases_planned>0?Math.round((r.cases_produced/r.cases_planned)*100*PE):null;
+      html+=`<div class="${idx>0?'pr-shift-break':''} pr-sec">
+        <div class="pr-sec-hdr"><div class="bar"></div><span>Shift — ${fD(r.shift_date)} &bull; ${r.supervisor||'—'}</span></div>
+        <div class="pr-kpi-row k5">
+          <div class="pr-kpi ${parseInt(r.unsafe_conditions)>0?'red':'green'}"><div class="kk">Unsafe</div><div class="kv">${r.unsafe_conditions||0}</div></div>
+          <div class="pr-kpi ${parseInt(r.near_misses)>0?'amber':'green'}"><div class="kk">Near Misses</div><div class="kv">${r.near_misses||0}</div></div>
+          <div class="pr-kpi ${parseInt(r.first_aid)>0?'red':'green'}"><div class="kk">First Aid</div><div class="kv">${r.first_aid||0}</div></div>
+          <div class="pr-kpi neutral"><div class="kk">HC Needed</div><div class="kv">${r.headcount_needed||'—'}</div></div>
+          <div class="pr-kpi neutral"><div class="kk">HC Present</div><div class="kv">${r.headcount_present||'—'}</div></div>
+        </div>
+        <div class="pr-kpi-row k4">
+          <div class="pr-kpi neutral"><div class="kk">SAP Completed</div><div class="kv">${r.sap_completed||'—'}</div></div>
+          <div class="pr-kpi ${parseInt(r.sap_open)>0?'amber':'green'}"><div class="kk">SAP Open</div><div class="kv">${r.sap_open||0}</div></div>
+          <div class="pr-kpi neutral"><div class="kk">Lbs Produced</div><div class="kv">${n(r.lbs_produced)}</div></div>
+          <div class="pr-kpi ${att!==null?(att>=90?'green':att>=70?'amber':'red'):'neutral'}"><div class="kk">Attainment</div><div class="kv">${att!==null?att+'%':'—'}</div></div>
+        </div>`;
+      if(r.safety_comments) html+=`<div class="pr-notes"><div class="nk">Safety</div>${r.safety_comments}</div>`;
+      if(r.shortages)        html+=`<div class="pr-notes"><div class="nk">Shortages</div>${r.shortages}</div>`;
+      if(r.stos)             html+=`<div class="pr-notes"><div class="nk">STOs</div>${r.stos}</div>`;
+      if(r.training_notes)   html+=`<div class="pr-notes"><div class="nk">Training</div>${r.training_notes}</div>`;
+      if(r.quality_notes)    html+=`<div class="pr-notes"><div class="nk">Quality</div>${r.quality_notes}</div>`;
+
+      const lines=Array.isArray(r.lines)?r.lines:(typeof r.lines==='string'?JSON.parse(r.lines||'[]'):[]);
+      if(lines.length){
+        html+=`<table class="pr-table"><thead><tr>
+          <th>Line</th><th class="c">Lbs Pl</th><th class="c">Lbs Ac</th><th class="c">Lbs Var</th>
+          <th class="c">Cs Pl</th><th class="c">Cs Ac</th><th class="c">Cs Var</th><th class="c">Att.</th><th>Notes</th>
+        </tr></thead><tbody>`;
+        lines.forEach(l=>{
+          const isOff=!l.lbs_planned&&!l.lbs_produced&&!l.cases_planned&&!l.cases_produced;
+          if(isOff){html+=`<tr><td class="ln">${l.line}</td><td class="lo" colspan="7">Offline</td><td></td></tr>`;return;}
+          const lv2=l.lbs_variance||0,cv2=l.cases_variance||0;
+          const a2=l.cases_planned>0?Math.round((l.cases_produced/l.cases_planned)*100*PE):null;
+          html+=`<tr><td class="ln">${l.line}</td>
+            <td class="c">${n(l.lbs_planned)}</td><td class="c">${n(l.lbs_produced)}</td>
+            <td class="c ${lv2>=0?'vp':'vn'}">${lv2>=0?'+':''}${n(lv2)}</td>
+            <td class="c">${n(l.cases_planned)}</td><td class="c">${n(l.cases_produced)}</td>
+            <td class="c ${cv2>=0?'vp':'vn'}">${cv2>=0?'+':''}${n(cv2)}</td>
+            <td class="c">${a2!==null?`<span class="badge ${a2>=90?'badge-green':a2>=70?'badge-amber':'badge-red'}">${a2}%</span>`:'—'}</td>
+            <td style="font-size:7pt;color:#4a5568">${l.notes||''}</td></tr>`;
+        });
+        html+=`</tbody></table>`;
+      }
+      html+=`</div>`;
+    });
+
+  } else {
+    // Batching print
+    let lbsPl=0,lbsAc=0;
+    currentRows.forEach(r=>{lbsPl+=r.lbs_planned||0;lbsAc+=r.lbs_produced||0;});
+    const att=lbsPl>0?Math.round((lbsAc/lbsPl)*100):null;
+    html+=`<div class="pr-sec"><div class="pr-sec-hdr"><div class="bar"></div><span>Period Summary</span></div>
+      <div class="pr-kpi-row k3">
+        <div class="pr-kpi neutral"><div class="kk">Lbs Planned</div><div class="kv">${n(lbsPl)}</div></div>
+        <div class="pr-kpi neutral"><div class="kk">Lbs Produced</div><div class="kv">${n(lbsAc)}</div></div>
+        <div class="pr-kpi ${att!==null?(att>=90?'green':att>=70?'amber':'red'):'neutral'}"><div class="kk">Attainment</div><div class="kv">${att!==null?att+'%':'—'}</div></div>
+      </div></div>`;
+    html+=`<table class="pr-table"><thead><tr>
+      <th>Date</th><th>Supervisor</th><th class="c">Lbs Pl</th><th class="c">Lbs Ac</th>
+      <th class="c">Variance</th><th class="c">Att.</th><th class="c">UC</th><th class="c">NM</th><th class="c">FA</th>
+    </tr></thead><tbody>`;
+    currentRows.forEach(r=>{
+      const lv=(r.lbs_produced||0)-(r.lbs_planned||0);
+      const a=r.lbs_planned>0?Math.round((r.lbs_produced/r.lbs_planned)*100):null;
+      html+=`<tr>
+        <td style="font-family:monospace;font-weight:700">${fD(r.shift_date)}</td>
+        <td>${r.supervisor||'—'}</td>
+        <td class="c">${n(r.lbs_planned)}</td><td class="c">${n(r.lbs_produced)}</td>
+        <td class="c ${lv>=0?'vp':'vn'}">${lv>=0?'+':''}${n(lv)}</td>
+        <td class="c">${a!==null?`<span class="badge ${a>=90?'badge-green':a>=70?'badge-amber':'badge-red'}">${a}%</span>`:'—'}</td>
+        <td class="c">${r.unsafe_conditions||0}</td><td class="c">${r.near_misses||0}</td><td class="c">${r.first_aid||0}</td>
+      </tr>`;
+    });
+    html+=`</tbody></table>`;
+  }
+
+  html+=`<div class="pr-footer"><span>Plant 1730 Ops Hub &bull; Novus Foods, Buena Park CA</span><span>Generated: ${now}</span></div></div>`;
+  document.getElementById('printReport').innerHTML = html;
+  window.print();
+};
+
+// Auto-load on page open
+loadShifts();
+
+})();
+</script>
+</body>
+</html>
