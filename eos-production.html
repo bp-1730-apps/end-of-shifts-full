@@ -23,7 +23,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 
 .hdr{background:var(--brand);color:#fff;display:flex;align-items:center;gap:1.2rem;padding:1.4rem 1.8rem;border-radius:var(--r) var(--r) 0 0;position:relative;box-shadow:var(--sh)}
 .hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#daa520,var(--accent))}
-.hdr img{height:46px;width:auto;filter:brightness(0) invert(1);flex-shrink:0}
+.hdr img{height:44px;width:auto;object-fit:contain;flex-shrink:0;background:#fff;border-radius:6px;padding:4px 8px}
 .hdr-text h1{font-size:1.35rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.1rem}
 .hdr-text .sub{font-size:.75rem;opacity:.75;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
 .hdr-nav{margin-left:auto;display:flex;align-items:center;gap:.75rem}
@@ -161,7 +161,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   .app{padding:.75rem .5rem 3rem}
   .body{padding:1rem .75rem}
   .hdr{flex-direction:column;text-align:center;padding:1.2rem 1rem}
-  .hdr img{height:38px}
+  .hdr img{height:36px}
   .hdr-nav{margin-left:0}
   .fr.c2{grid-template-columns:1fr 1fr}
   .fr.c3,.fr.c4{grid-template-columns:1fr 1fr}
@@ -189,7 +189,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .pr-page{width:100%;max-width:900px;margin:0 auto;padding:0 20pt}
 .pr-hdr{background:#1a5632;color:white;padding:14pt 20pt 12pt;display:flex;align-items:center;justify-content:space-between;print-color-adjust:exact;-webkit-print-color-adjust:exact}
 .pr-hdr-left{display:flex;align-items:center;gap:12pt}
-.pr-hdr img{height:34pt;width:auto;filter:brightness(0) invert(1)}
+.pr-hdr img{height:36pt;width:auto;object-fit:contain;background:#fff;border-radius:4pt;padding:3pt 6pt}
 .pr-hdr h1{font-size:14pt;font-weight:700;margin:0 0 2pt;letter-spacing:-.02em}
 .pr-hdr .pr-sub{font-size:7pt;opacity:.75;text-transform:uppercase;letter-spacing:.08em}
 .pr-hdr-right{text-align:right;font-size:8pt;opacity:.85}
