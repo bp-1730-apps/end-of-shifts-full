@@ -111,7 +111,16 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .var-pos{color:var(--brand);font-weight:700}
 .var-neg{color:#dc2626;font-weight:700}
 
-/* empty / loading states */
+/* week navigator */
+.week-nav{display:flex;align-items:center;gap:0;border:1px solid var(--g200);border-radius:var(--rs);overflow:hidden;background:var(--white)}
+.week-nav-btn{width:34px;height:36px;border:none;background:var(--g50);color:var(--g600);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0;line-height:1}
+.week-nav-btn:hover{background:var(--g200);color:var(--g900)}
+.week-nav-btn:disabled{opacity:.3;cursor:not-allowed}
+.week-nav-label{padding:0 .9rem;font-size:.82rem;font-weight:700;color:var(--g800);white-space:nowrap;line-height:36px;border-left:1px solid var(--g200);border-right:1px solid var(--g200);min-width:188px;text-align:center}
+.btn-custom{background:var(--g50);color:var(--g600);border:1px solid var(--g200)}.btn-custom:hover{background:var(--g100);color:var(--g800)}
+.btn-custom.active{background:var(--brand-l);color:var(--brand);border-color:#a7d5b8}
+
+
 .state-box{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);padding:3rem;text-align:center;color:var(--g400);font-size:.88rem;box-shadow:var(--sh)}
 .state-box svg{display:block;margin:0 auto .75rem;opacity:.3}
 
@@ -120,7 +129,9 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   .hdr{flex-direction:column;text-align:center;padding:1.2rem 1rem}
   .hdr img{height:36px}
   .hdr-nav{margin-left:0}
-  .toolbar{flex-direction:column;align-items:flex-start}
+  .toolbar{flex-direction:column;align-items:flex-start;gap:.65rem}
+  .week-nav{width:100%}
+  .week-nav-label{flex:1;min-width:0}
   .toolbar-right{margin-left:0;width:100%;justify-content:flex-end}
   .summary-row.prod{grid-template-columns:repeat(3,1fr)}
   .summary-row.batch{grid-template-columns:repeat(3,1fr)}
@@ -206,16 +217,27 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
         <button class="type-tab active" id="tabProd" onclick="switchType('production')">🏭 Manufacturing</button>
         <button class="type-tab" id="tabBatch" onclick="switchType('batching')">📦 Batching</button>
       </div>
-      <div class="date-range">
+
+      <!-- Week navigator -->
+      <div class="week-nav">
+        <button class="week-nav-btn" onclick="stepWeek(-1)" title="Previous week">‹</button>
+        <div class="week-nav-label" id="weekNavLabel">—</div>
+        <button class="week-nav-btn" onclick="stepWeek(1)" id="weekNavNext" title="Next week">›</button>
+      </div>
+
+      <!-- Custom range (collapsible) -->
+      <div class="date-range" id="customRangeWrap" style="display:none">
         <label>From</label>
         <input type="date" id="dateFrom">
         <label>To</label>
         <input type="date" id="dateTo">
+        <button class="toolbar-btn btn-load" onclick="loadShifts()">Go</button>
       </div>
-      <button class="toolbar-btn btn-load" onclick="loadShifts()">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="M7 4v3l2 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Load
+      <button class="toolbar-btn btn-custom" id="customToggleBtn" onclick="toggleCustomRange()" title="Custom date range">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="2" width="11" height="10" rx="1.2" stroke="currentColor" stroke-width="1.4"/><path d="M4 1v2M9 1v2M1 5h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Custom
       </button>
+
       <div class="toolbar-right">
         <span class="record-count" id="recordCount"></span>
         <button class="toolbar-btn btn-export" id="exportBtn" onclick="exportCSV()" disabled>
@@ -257,13 +279,56 @@ const PE = 0.85;
 
 let currentType  = 'production';
 let currentRows  = [];
+let activeWeekMonday = null; // ISO date string of current nav week
+let usingCustomRange = false;
 
-// ── Init date range: current week ──
-function getMonday(d){const dt=new Date(d);dt.setHours(0,0,0,0);const day=dt.getDay();dt.setDate(dt.getDate()-(day===0?6:day-1));return dt;}
-const mon = getMonday(new Date());
-const sun = new Date(mon); sun.setDate(sun.getDate()+6);
-document.getElementById('dateFrom').value = mon.toISOString().slice(0,10);
-document.getElementById('dateTo').value   = sun.toISOString().slice(0,10);
+// ── Week helpers ──
+function getMonday(d){
+  const dt=new Date(d); dt.setHours(0,0,0,0);
+  const day=dt.getDay();
+  dt.setDate(dt.getDate()-(day===0?6:day-1));
+  return dt;
+}
+function isoDate(d){ return d.toISOString().slice(0,10); }
+function addDays(d, n){ const dt=new Date(d); dt.setDate(dt.getDate()+n); return dt; }
+function fmtWeekLabel(mondayDt){
+  const sun = addDays(mondayDt, 6);
+  const fmt = d => d.toLocaleDateString([], {month:'short', day:'numeric'});
+  const yr  = sun.getFullYear();
+  return `${fmt(mondayDt)} – ${fmt(sun)}, ${yr}`;
+}
+
+// ── Init week navigator to current week ──
+activeWeekMonday = getMonday(new Date());
+renderWeekNav();
+
+function renderWeekNav(){
+  document.getElementById('weekNavLabel').textContent = fmtWeekLabel(activeWeekMonday);
+  // Disable next if already on current week
+  const thisMonday = getMonday(new Date());
+  document.getElementById('weekNavNext').disabled =
+    isoDate(activeWeekMonday) >= isoDate(thisMonday);
+}
+
+window.stepWeek = function(dir){
+  usingCustomRange = false;
+  document.getElementById('customRangeWrap').style.display = 'none';
+  document.getElementById('customToggleBtn').classList.remove('active');
+  activeWeekMonday = addDays(activeWeekMonday, dir * 7);
+  renderWeekNav();
+  loadShifts();
+};
+
+window.toggleCustomRange = function(){
+  usingCustomRange = !usingCustomRange;
+  document.getElementById('customRangeWrap').style.display = usingCustomRange ? 'flex' : 'none';
+  document.getElementById('customToggleBtn').classList.toggle('active', usingCustomRange);
+  if(usingCustomRange){
+    // Pre-fill with active week range
+    document.getElementById('dateFrom').value = isoDate(activeWeekMonday);
+    document.getElementById('dateTo').value   = isoDate(addDays(activeWeekMonday, 6));
+  }
+};
 
 // ── Read type from URL param (applied after all functions defined below) ──
 const urlType = new URLSearchParams(location.search).get('type');
@@ -313,9 +378,15 @@ window.switchType = function(type){
 
 // ── Load ──
 window.loadShifts = async function(){
-  const from = document.getElementById('dateFrom').value;
-  const to   = document.getElementById('dateTo').value;
-  if(!from||!to){ alert('Select a date range first.'); return; }
+  let from, to;
+  if(usingCustomRange){
+    from = document.getElementById('dateFrom').value;
+    to   = document.getElementById('dateTo').value;
+    if(!from||!to){ alert('Select a date range first.'); return; }
+  } else {
+    from = isoDate(activeWeekMonday);
+    to   = isoDate(addDays(activeWeekMonday, 6));
+  }
 
   const listArea    = document.getElementById('shiftListArea');
   const summaryArea = document.getElementById('summaryArea');
@@ -332,12 +403,21 @@ window.loadShifts = async function(){
 
     document.getElementById('recordCount').textContent = currentRows.length + ' shift' + (currentRows.length!==1?'s':'') + ' found';
 
+    // Week context label
+    const weekLabel = usingCustomRange
+      ? `${fD(from)} – ${fD(to)}`
+      : fmtWeekLabel(activeWeekMonday);
+    document.getElementById('summaryArea').innerHTML =
+      `<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--g500);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem">
+        <span style="width:6px;height:6px;border-radius:50%;background:var(--brand);display:inline-block"></span>
+        ${weekLabel}
+       </div>`;
+
     if(!currentRows.length){
       listArea.innerHTML = `<div class="state-box">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         No shifts found for this date range.
       </div>`;
-      summaryArea.innerHTML = '';
       return;
     }
 
@@ -372,7 +452,7 @@ function renderProdSummary(rows){
   const avgAtt = rows.filter(r=>r.cases_planned>0).map(r=>Math.round((r.cases_produced/r.cases_planned)*100*PE));
   const avgAttVal = avgAtt.length ? Math.round(avgAtt.reduce((a,b)=>a+b)/avgAtt.length) : null;
 
-  document.getElementById('summaryArea').innerHTML = `
+  document.getElementById('summaryArea').innerHTML +=  `
     <div class="summary-row prod">
       <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
       <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
@@ -526,7 +606,7 @@ function renderBatchSummary(rows){
   const lbsVar=lbsAc-lbsPl;
   const att = lbsPl>0?Math.round((lbsAc/lbsPl)*100):null;
 
-  document.getElementById('summaryArea').innerHTML = `
+  document.getElementById('summaryArea').innerHTML += `
     <div class="summary-row batch">
       <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
       <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
