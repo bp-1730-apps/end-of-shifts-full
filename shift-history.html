@@ -590,6 +590,11 @@ function renderBatchSummaryCards(rows, label){
 window.selectDay = function(idx, dateStr){
   const todayStr = isoDate(new Date());
   const isFuture = dateStr > todayStr;
+  const isToday  = dateStr === todayStr;
+  const hasShift = !!currentByDate[dateStr];
+
+  // Today with no shift yet → treat as projection
+  const showProjection = isFuture || (isToday && !hasShift);
 
   // Deselect → revert to week totals
   if(selectedDayIdx === idx){
@@ -612,8 +617,8 @@ window.selectDay = function(idx, dateStr){
   document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('day-btn-'+idx)?.classList.add('active');
 
-  // ── Future day → projection ──
-  if(isFuture){
+  // ── Future day or today with no shift → projection ──
+  if(showProjection){
     renderProjection(dateStr);
     return;
   }
@@ -889,11 +894,12 @@ function renderProdList(rows){
     const isFuture = dateStr > todayStr;
     const isToday  = dateStr === todayStr;
 
-    if(isFuture){
+    if(isFuture || (isToday && !r)){
+      const label = isFuture ? 'Projection' : 'Today · Projection';
       strip+=`<div class="day-btn day-btn-future" id="day-btn-${idx}" onclick="selectDay(${idx},'${dateStr}')">
         <div class="db-name">${dayShort(dateStr)}</div>
         <div class="db-date">${shortDate(dateStr)}</div>
-        <div class="db-future-tag">Projection</div>
+        <div class="db-future-tag">${label}</div>
       </div>`;
       return;
     }
