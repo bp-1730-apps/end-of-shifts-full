@@ -405,8 +405,8 @@ window.toggleCustomRange = function(){
 const urlType = new URLSearchParams(location.search).get('type');
 
 // ── Supabase ──
-async function sbGet(table, filters){
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}&order=shift_date.desc,created_at.desc`,{
+async function sbGet(table, filters, order='shift_date.desc,created_at.desc'){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${filters}&order=${order}`,{
     headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON}
   });
   if(!res.ok) throw new Error(await res.text());
@@ -804,7 +804,7 @@ async function renderProjection(dateStr){
         if(hcVal>0){ scheduledHC=hcVal; hcSource='scheduled'; }
         if(lbsVal>0){ dayLbsTarget=lbsVal; }
       }
-    }catch(e){ /* fall through */ }
+    }catch(e){ console.warn('Could not fetch weekly targets for projection:', e.message); }
 
     // Fall back to historical median headcount if none scheduled
     if(!scheduledHC){
