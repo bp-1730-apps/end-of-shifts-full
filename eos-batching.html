@@ -590,35 +590,46 @@ function showToast(m,w){
   t.classList.add('show');setTimeout(()=>t.classList.remove('show'),4000);
 }
 
-// ── Pace strip (reads production target — same weekly goal) ──
+// ── Pace strip (reads production daily target) ──
 async function loadPaceStrip(){
   try{
+    const DAY_COLS=['mon','tue','wed','thu','fri','sat','sun'];
+    const todayDow=new Date().getDay();
+    const todayColName='lbs_target_'+DAY_COLS[todayDow===0?6:todayDow-1];
+    const cols=DAY_COLS.map(c=>'lbs_target_'+c).join(',');
+    const iD=d=>d.toISOString().slice(0,10);
     const [targetRows, shiftRows] = await Promise.all([
-      sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=lbs_target`, 'updated_at.desc'),
-      sbGet('eos_production_shifts', `shift_date=gte.${monday}&shift_date=lte.${sunday}&select=lbs_produced`)
+      sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=${cols}`, 'updated_at.desc'),
+      sbGet('eos_production_shifts', `shift_date=gte.${monday}&shift_date=lte.${sunday}&select=lbs_produced,shift_date`)
     ]);
     if(!targetRows.length) return;
-    const lbsTarget   = targetRows[0].lbs_target;
-    const lbsProduced = shiftRows.reduce((s,r)=>s+(r.lbs_produced||0),0);
-    const dow = new Date().getDay();
-    const daysElapsed = Math.max(dow===0?7:dow,1);
-    const projected   = Math.round((lbsProduced/daysElapsed)*7);
-    const delta       = projected-lbsTarget;
-    const pct         = Math.min((lbsProduced/lbsTarget)*100,100);
-    const ahead       = delta>=0;
-    const chipCls     = ahead?'ahead':(Math.abs(delta)<lbsTarget*0.05?'warn':'behind');
-
-    const strip = document.getElementById('paceStrip');
+    const t=targetRows[0];
+    const todayTarget=parseInt(t[todayColName])||0;
+    const byDate={};shiftRows.forEach(r=>{byDate[r.shift_date]=r.lbs_produced||0;});
+    const todayActual=byDate[iD(new Date())]||0;
+    const todayIdx=todayDow===0?6:todayDow-1;
+    let wtdTarget=0,wtdActual=0;
+    for(let i=0;i<=todayIdx;i++){
+      wtdTarget+=parseInt(t['lbs_target_'+DAY_COLS[i]])||0;
+      const dt=new Date(monday+'T12:00:00');dt.setDate(dt.getDate()+i);
+      wtdActual+=byDate[iD(dt)]||0;
+    }
+    const gap=todayActual-todayTarget;
+    const wtdGap=wtdActual-wtdTarget;
+    const pct=todayTarget>0?Math.min((todayActual/todayTarget)*100,100):0;
+    const ahead=gap>=0;
+    const chipCls=ahead?'ahead':(Math.abs(gap)<todayTarget*0.05?'warn':'behind');
+    const strip=document.getElementById('paceStrip');
     strip.style.display='flex';
-    document.getElementById('ps-left').textContent  = lbsProduced.toLocaleString()+' lbs produced';
-    document.getElementById('ps-right').textContent = 'Target: '+lbsTarget.toLocaleString();
-    const fill = document.getElementById('ps-fill');
-    fill.style.width = pct.toFixed(1)+'%';
-    fill.className = 'pace-strip-fill'+(pct>=90?'':(pct>=70?' warn':' danger'));
-    document.getElementById('ps-chip').className = 'pace-chip '+chipCls;
-    document.getElementById('ps-delta').textContent = (ahead?'+':'')+delta.toLocaleString()+' lbs';
-    document.getElementById('ps-sub').textContent   = 'proj. '+projected.toLocaleString()+' / '+lbsTarget.toLocaleString();
-  }catch(e){ console.warn('Pace strip:', e); }
+    document.getElementById('ps-left').textContent=todayActual.toLocaleString()+' lbs today';
+    document.getElementById('ps-right').textContent='Today target: '+todayTarget.toLocaleString();
+    const fill=document.getElementById('ps-fill');
+    fill.style.width=pct.toFixed(1)+'%';
+    fill.className='pace-strip-fill'+(ahead?'':(Math.abs(gap)<todayTarget*0.05?' warn':' danger'));
+    document.getElementById('ps-chip').className='pace-chip '+chipCls;
+    document.getElementById('ps-delta').textContent=(ahead?'+':'')+gap.toLocaleString()+' lbs today';
+    document.getElementById('ps-sub').textContent='WTD: '+(wtdGap>=0?'+':'')+wtdGap.toLocaleString()+' vs '+wtdTarget.toLocaleString();
+  }catch(e){ console.warn('Pace strip:',e); }
 }
 
 loadWeekPanel();
