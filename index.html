@@ -65,7 +65,14 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .daily-cell .da-pos{color:var(--brand)}
 .daily-cell .da-neg{color:#dc2626}
 .daily-cell .da-none{color:var(--g300)}
-.target-row{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.daily-cell .hc-input{font-size:.78rem;padding:.38rem .4rem;border-color:var(--g200);color:var(--g600);background:var(--g50)}
+.daily-cell .hc-input:focus{border-color:var(--brand-m);box-shadow:0 0 0 3px var(--brand-l);background:var(--white)}
+.daily-cell .hc-input.today-input{border-color:var(--brand-m);background:var(--brand-l)}
+.grid-row-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g400);display:flex;align-items:center;padding:.15rem 0 .3rem;gap:.4rem}
+.grid-row-lbl::after{content:'';flex:1;height:1px;background:var(--g200)}
+.daily-grid-wrap{display:flex;flex-direction:column;gap:.2rem}
+.daily-grid-row-label{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem}
+display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
 .set-by-wrap{display:flex;align-items:center;gap:.5rem;flex:1;min-width:180px}
 .set-by-wrap label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);white-space:nowrap}
 .set-by-wrap input{flex:1;background:var(--white);border:1px solid var(--g300);border-radius:var(--rs);color:var(--g800);font-family:var(--fb);font-size:.85rem;padding:.45rem .6rem;outline:none;transition:border-color .15s}
@@ -217,9 +224,12 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
     <div class="pace-body">
 
-      <!-- Daily input grid -->
-      <div class="daily-grid" id="dailyGrid">
-        <!-- Rendered by JS -->
+      <!-- Daily input grids -->
+      <div class="daily-grid-wrap">
+        <div class="grid-row-lbl">Lbs Target</div>
+        <div class="daily-grid" id="dailyGrid"><!-- Rendered by JS --></div>
+        <div class="grid-row-lbl" style="margin-top:.5rem">Scheduled Headcount</div>
+        <div class="daily-grid" id="hcGrid"><!-- Rendered by JS --></div>
       </div>
 
       <!-- Set by + Save -->
@@ -245,7 +255,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   <div class="kpi-row">
     <div class="kpi loading"><div class="kk">Cases Planned</div><div class="kv" id="k-csPl">—</div><div class="ks">Production</div></div>
     <div class="kpi loading"><div class="kk">Cases Produced</div><div class="kv" id="k-csAc">—</div><div class="ks">Production</div></div>
-    <div class="kpi loading"><div class="kk">Cases Variance</div><div class="kv" id="k-csVar">—</div><div class="ks">Production</div></div>
+    <div class="kpi loading"><div class="kk">Week Behind / Ahead</div><div class="kv" id="k-csVar">—</div><div class="ks">Cases · Production</div></div>
     <div class="kpi-divider"></div>
     <div class="kpi loading"><div class="kk">Lbs Planned</div><div class="kv" id="k-bLbsPl">—</div><div class="ks">Batching</div></div>
     <div class="kpi loading"><div class="kk">Lbs Produced</div><div class="kv" id="k-bLbsAc">—</div><div class="ks">Batching</div></div>
@@ -386,21 +396,26 @@ function todayCol(){
 }
 function isoDate(d){ return d.toISOString().slice(0,10); }
 
-// ── Build daily input grid ──
+// ── Build daily input grids ──
 function buildDailyGrid(){
   const todayC = todayCol();
-  let html = '';
+  let lbsHtml = '', hcHtml = '';
   DAY_COLS.forEach((col, i)=>{
     const isToday = col === todayC;
-    html += `<div class="daily-cell">
+    lbsHtml += `<div class="daily-cell">
       <label class="${isToday?'today-lbl':''}">${DAY_LABELS[i]}${isToday?' ★':''}</label>
       <input type="number" id="tgt-${col}" min="0" placeholder="0"
         class="${isToday?'today-input':''}"
         onblur="updateDailyActual('${col}')">
       <div class="daily-actual da-none" id="act-${col}">—</div>
     </div>`;
+    hcHtml += `<div class="daily-cell">
+      <input type="number" id="hc-${col}" min="0" placeholder="0"
+        class="hc-input${isToday?' today-input':''}">
+    </div>`;
   });
-  document.getElementById('dailyGrid').innerHTML = html;
+  document.getElementById('dailyGrid').innerHTML = lbsHtml;
+  document.getElementById('hcGrid').innerHTML = hcHtml;
 }
 
 // ── Update actual display under a day's input ──
@@ -430,15 +445,18 @@ let currentProdByDate = null;
 
 async function loadTarget(){
   try{
-    const cols = DAY_COLS.map(c=>'lbs_target_'+c).join(',');
+    const lbsCols = DAY_COLS.map(c=>'lbs_target_'+c).join(',');
+    const hcCols  = DAY_COLS.map(c=>'hc_target_'+c).join(',');
     const rows = await sbGet('eos_weekly_targets',
-      `week_start=eq.${monday}&select=${cols},set_by,updated_at`,
+      `week_start=eq.${monday}&select=${lbsCols},${hcCols},set_by,updated_at`,
       'updated_at.desc');
     if(rows.length){
       currentTarget = rows[0];
       DAY_COLS.forEach(col=>{
-        const el = document.getElementById('tgt-'+col);
-        if(el) el.value = rows[0]['lbs_target_'+col]||'';
+        const lbsEl = document.getElementById('tgt-'+col);
+        if(lbsEl) lbsEl.value = rows[0]['lbs_target_'+col]||'';
+        const hcEl = document.getElementById('hc-'+col);
+        if(hcEl) hcEl.value = rows[0]['hc_target_'+col]||'';
       });
       document.getElementById('targetSetBy').value = rows[0].set_by||'';
       const updStr = rows[0].updated_at
@@ -456,6 +474,7 @@ window.saveTarget = async function(){
   const row = { week_start: monday, set_by: setBy, updated_at: new Date().toISOString() };
   DAY_COLS.forEach(col=>{
     row['lbs_target_'+col] = parseInt(document.getElementById('tgt-'+col)?.value)||0;
+    row['hc_target_'+col]  = parseInt(document.getElementById('hc-'+col)?.value)||0;
   });
   const btn = document.getElementById('saveTargetBtn');
   btn.disabled=true; btn.textContent='Saving…';
@@ -572,11 +591,12 @@ async function loadAll(){
     prodRows.forEach(r=>{ currentProdByDate[r.shift_date]=r; });
 
     // Production KPIs
-    let csPl=0,csAc=0,csVar=0;
-    prodRows.forEach(r=>{csPl+=r.cases_planned||0;csAc+=r.cases_produced||0;csVar+=r.cases_variance||0;});
-    setKpi('k-csPl', n(csPl),  null);
-    setKpi('k-csAc', n(csAc),  null);
-    setKpi('k-csVar',(csVar>0?'+':'')+n(csVar), csVar>=0?'pos':'neg');
+    let csPl=0,csAc=0;
+    prodRows.forEach(r=>{csPl+=r.cases_planned||0;csAc+=r.cases_produced||0;});
+    const csVar=csAc-csPl;
+    setKpi('k-csPl', n(csPl), null);
+    setKpi('k-csAc', n(csAc), null);
+    setKpi('k-csVar', (csVar>0?'+':'')+n(csVar)+' cs', csVar>=0?'pos':'neg');
 
     // Batching KPIs
     let bPl=0,bAc=0;
