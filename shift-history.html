@@ -480,7 +480,7 @@ function renderProdSummaryCards(rows, label){
       <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
       <div class="sum-card"><div class="sk">Cases Planned</div><div class="sv">${n(csPl)}</div></div>
       <div class="sum-card"><div class="sk">Cases Produced</div><div class="sv">${n(csAc)}</div></div>
-      <div class="sum-card ${csVar>=0?'pos':'neg'}"><div class="sk">Cases Variance</div><div class="sv">${csVar>0?'+':''}${n(csVar)}</div></div>
+      <div class="sum-card ${csVar>=0?'pos':'neg'}"><div class="sk">${rows.length===1?'Day':'Week'} ${csVar>=0?'Ahead':'Behind'}</div><div class="sv">${csVar>0?'+':''}${n(csVar)} cs</div></div>
       <div class="sum-card ${avgAtt!==null?(avgAtt>=90?'pos':avgAtt>=70?'':'neg'):''}">
         <div class="sk">Attainment</div><div class="sv">${avgAtt!==null?avgAtt+'%':'—'}</div>
         <div class="ss">${rows.length} shift${rows.length!==1?'s':''}</div>
