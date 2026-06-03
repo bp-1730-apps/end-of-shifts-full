@@ -59,28 +59,31 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .sum-card.pos .sv{color:var(--brand)}
 .sum-card.neg .sv{color:#dc2626}
 
-/* day grid */
-.day-grid{display:flex;flex-direction:column;gap:.5rem}
-.day-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
-.day-card.day-empty{opacity:.55}
-.day-card-hdr{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.1rem;cursor:pointer;user-select:none;gap:.75rem;flex-wrap:wrap;transition:background .15s}
-.day-card-hdr:hover{background:var(--g50)}
-.day-empty .day-card-hdr{cursor:default}
-.day-empty .day-card-hdr:hover{background:var(--white)}
-.day-hdr-left{display:flex;align-items:center;gap:.85rem;flex-wrap:wrap}
-.day-name{font-size:1rem;font-weight:700;color:var(--g900);min-width:100px}
-.day-date{font-size:.78rem;color:var(--g500);font-family:var(--fm);font-weight:600}
-.day-sup{font-size:.8rem;color:var(--g500);font-weight:500}
-.day-no-shift{font-size:.75rem;color:var(--g400);font-style:italic}
-.day-chips{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-left:auto}
-.day-toggle{font-size:.8rem;color:var(--g400);flex-shrink:0;margin-left:.25rem}
-.day-card-body{border-top:1px solid var(--g200)}
-.chip{font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:3px}
-.chip-green{background:var(--brand-l);color:var(--brand)}
-.chip-amber{background:var(--accent-l);color:var(--accent)}
-.chip-red{background:#fef2f2;color:#dc2626}
-.chip-gray{background:var(--g100);color:var(--g600)}
-.chip-neu{background:var(--g100);color:var(--g600)}
+/* week strip — horizontal day cards */
+.week-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem;margin-bottom:1rem}
+.day-btn{background:var(--white);border:1px solid var(--g200);border-radius:var(--rs);padding:.65rem .5rem;text-align:center;cursor:pointer;transition:border-color .15s,background .15s,box-shadow .15s;user-select:none;position:relative}
+.day-btn:hover:not(.day-btn-empty){border-color:var(--brand-m);background:var(--brand-l)}
+.day-btn.active{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 4px 12px rgba(26,86,50,.25)}
+.day-btn.active .db-name,.day-btn.active .db-date,.day-btn.active .db-sup{color:#fff!important;opacity:.9}
+.day-btn.active .db-chip{background:rgba(255,255,255,.2);color:#fff}
+.day-btn-empty{opacity:.45;cursor:default;border-style:dashed}
+.db-name{font-size:.78rem;font-weight:700;color:var(--g800);margin-bottom:.15rem}
+.db-date{font-size:.68rem;color:var(--g400);font-family:var(--fm);margin-bottom:.35rem}
+.db-sup{font-size:.65rem;color:var(--g500);margin-bottom:.3rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.db-chip{display:inline-block;font-size:.65rem;font-weight:700;padding:.15rem .4rem;border-radius:3px;margin-top:.1rem}
+.db-chip-green{background:var(--brand-l);color:var(--brand)}
+.db-chip-amber{background:var(--accent-l);color:var(--accent)}
+.db-chip-red{background:#fef2f2;color:#dc2626}
+.db-chip-gray{background:var(--g100);color:var(--g500)}
+.db-no-shift{font-size:.65rem;color:var(--g400);font-style:italic;margin-top:.25rem}
+
+/* detail panel */
+.detail-panel{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.detail-panel-hdr{background:var(--g800);color:#fff;padding:.75rem 1.2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.dp-title{font-size:.95rem;font-weight:700;letter-spacing:-.01em}
+.dp-meta{font-size:.75rem;opacity:.7}
+.detail-panel-empty{padding:3rem;text-align:center;color:var(--g400);font-size:.88rem}
+.detail-panel-empty svg{display:block;margin:0 auto .75rem;opacity:.3}
 
 /* detail sections inside a shift */
 .detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--g200)}
@@ -141,9 +144,11 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   .summary-row.batch{grid-template-columns:repeat(3,1fr)}
   .detail-grid{grid-template-columns:1fr}
   .detail-section{border-right:none;border-bottom:1px solid var(--g200)}
+  .week-strip{grid-template-columns:repeat(4,1fr)}
 }
 @media(max-width:480px){
   .summary-row.prod,.summary-row.batch{grid-template-columns:1fr 1fr}
+  .week-strip{grid-template-columns:repeat(4,1fr)}
 }
 
 /* print */
@@ -255,11 +260,14 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
       </div>
     </div>
 
-    <!-- Summary cards -->
+    <!-- Summary cards (week totals) -->
     <div style="padding:1.1rem 1.4rem 0" id="summaryArea"></div>
 
-    <!-- Shift list -->
-    <div style="padding:.5rem 1.4rem 1.4rem" id="shiftListArea">
+    <!-- Week strip — horizontal day buttons -->
+    <div style="padding:.75rem 1.4rem 0" id="weekStripArea"></div>
+
+    <!-- Detail panel — swaps on day click -->
+    <div style="padding:.75rem 1.4rem 1.4rem" id="detailPanelArea">
       <div class="state-box">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
         Select a date range and click Load to view shift history.
@@ -392,8 +400,9 @@ window.loadShifts = async function(){
     to   = isoDate(addDays(activeWeekMonday, 6));
   }
 
-  const listArea    = document.getElementById('shiftListArea');
+  const listArea    = document.getElementById('detailPanelArea');
   const summaryArea = document.getElementById('summaryArea');
+  document.getElementById('weekStripArea').innerHTML = '';
   listArea.innerHTML    = '<div class="state-box">Loading…</div>';
   summaryArea.innerHTML = '';
   document.getElementById('exportBtn').disabled = true;
@@ -443,24 +452,301 @@ window.loadShifts = async function(){
 
 // ── Day name helper ──
 const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-function dayName(isoDate){
-  const d = new Date(isoDate + 'T12:00:00');
-  return DAY_NAMES[d.getDay()];
-}
-function shortDate(isoDate){
-  const d = new Date(isoDate + 'T12:00:00');
-  return d.toLocaleDateString([], {month:'short', day:'numeric'});
+const DAY_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function dayName(iso){ return DAY_NAMES[new Date(iso+'T12:00:00').getDay()]; }
+function dayShort(iso){ return DAY_SHORT[new Date(iso+'T12:00:00').getDay()]; }
+function shortDate(iso){
+  const d=new Date(iso+'T12:00:00');
+  return d.toLocaleDateString([],{month:'short',day:'numeric'});
 }
 
-// ── Toggle: collapsed by default, expand on click ──
-window.toggleShift = function(idx){
-  const body = document.getElementById('body-'+idx);
-  const tog  = document.getElementById('tog-'+idx);
-  if(!body) return;
-  const isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : 'block';
-  if(tog) tog.textContent = isOpen ? '▼' : '▲';
+// Active selected day
+let selectedDayIdx = null;
+let currentByDate  = {};
+
+// ── Select a day and render its detail panel ──
+window.selectDay = function(idx, dateStr){
+  // Deselect if already selected
+  if(selectedDayIdx === idx){
+    selectedDayIdx = null;
+    document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('detailPanelArea').innerHTML =
+      `<div class="detail-panel"><div class="detail-panel-empty">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Click a day to view its details.
+      </div></div>`;
+    return;
+  }
+  selectedDayIdx = idx;
+  document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('day-btn-'+idx)?.classList.add('active');
+
+  const r = currentByDate[dateStr];
+  if(!r){
+    document.getElementById('detailPanelArea').innerHTML =
+      `<div class="detail-panel">
+        <div class="detail-panel-hdr">
+          <span class="dp-title">${dayName(dateStr)}</span>
+          <span class="dp-meta">${shortDate(dateStr)}</span>
+        </div>
+        <div class="detail-panel-empty">No shift submitted for this day.</div>
+      </div>`;
+    return;
+  }
+
+  if(currentType === 'production') renderProdDetail(r);
+  else renderBatchDetail(r);
 };
+
+// ═══════════════════════════════════════
+// PRODUCTION RENDER
+// ═══════════════════════════════════════
+function renderProdSummary(rows){
+  let lbsPl=0,lbsAc=0,csPl=0,csAc=0,uc=0,nm=0,fa=0,ab=0,hn=0,hp=0;
+  rows.forEach(r=>{
+    lbsPl+=r.lbs_planned||0; lbsAc+=r.lbs_produced||0;
+    csPl+=r.cases_planned||0; csAc+=r.cases_produced||0;
+    uc+=r.unsafe_conditions||0; nm+=r.near_misses||0; fa+=r.first_aid||0;
+    ab+=r.absences||0; hn+=r.headcount_needed||0; hp+=r.headcount_present||0;
+  });
+  const lbsVar=lbsAc-lbsPl, csVar=csAc-csPl;
+  const avgAttArr=rows.filter(r=>r.cases_planned>0).map(r=>Math.round((r.cases_produced/r.cases_planned)*100*PE));
+  const avgAtt=avgAttArr.length?Math.round(avgAttArr.reduce((a,b)=>a+b)/avgAttArr.length):null;
+  document.getElementById('summaryArea').innerHTML += `
+    <div class="summary-row prod">
+      <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
+      <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
+      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
+      <div class="sum-card"><div class="sk">Cases Planned</div><div class="sv">${n(csPl)}</div></div>
+      <div class="sum-card"><div class="sk">Cases Produced</div><div class="sv">${n(csAc)}</div></div>
+      <div class="sum-card ${csVar>=0?'pos':'neg'}"><div class="sk">Cases Variance</div><div class="sv">${csVar>0?'+':''}${n(csVar)}</div></div>
+      <div class="sum-card ${avgAtt!==null?(avgAtt>=90?'pos':avgAtt>=70?'':'neg'):''}">
+        <div class="sk">Avg Attainment</div><div class="sv">${avgAtt!==null?avgAtt+'%':'—'}</div>
+        <div class="ss">${rows.length} shifts</div>
+      </div>
+    </div>`;
+}
+
+function renderProdList(rows){
+  currentByDate = {};
+  rows.forEach(r=>{ currentByDate[r.shift_date]=r; });
+
+  const days=[];
+  for(let i=0;i<7;i++) days.push(isoDate(addDays(activeWeekMonday,i)));
+
+  // Build week strip
+  let strip = '<div class="week-strip">';
+  days.forEach((dateStr,idx)=>{
+    const r=currentByDate[dateStr];
+    if(!r){
+      strip+=`<div class="day-btn day-btn-empty" id="day-btn-${idx}">
+        <div class="db-name">${dayShort(dateStr)}</div>
+        <div class="db-date">${shortDate(dateStr)}</div>
+        <div class="db-no-shift">No shift</div>
+      </div>`;
+      return;
+    }
+    const csAtt=r.cases_planned>0?Math.round((r.cases_produced/r.cases_planned)*100*PE):null;
+    const chipCls=csAtt!==null?(csAtt>=90?'db-chip-green':csAtt>=70?'db-chip-amber':'db-chip-red'):'db-chip-gray';
+    strip+=`<div class="day-btn" id="day-btn-${idx}" onclick="selectDay(${idx},'${dateStr}')">
+      <div class="db-name">${dayShort(dateStr)}</div>
+      <div class="db-date">${shortDate(dateStr)}</div>
+      <div class="db-sup">${r.supervisor||'—'}</div>
+      ${csAtt!==null?`<span class="db-chip ${chipCls}">${csAtt}%</span>`:''}
+    </div>`;
+  });
+  strip+='</div>';
+  document.getElementById('weekStripArea').innerHTML=strip;
+
+  // Default detail panel
+  document.getElementById('detailPanelArea').innerHTML=
+    `<div class="detail-panel"><div class="detail-panel-empty">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      Click a day above to view its details.
+    </div></div>`;
+  selectedDayIdx=null;
+}
+
+function renderProdDetail(r){
+  const lv=(r.lbs_produced||0)-(r.lbs_planned||0);
+  const cv=(r.cases_produced||0)-(r.cases_planned||0);
+  const csAtt=r.cases_planned>0?Math.round((r.cases_produced/r.cases_planned)*100*PE):null;
+
+  const lines=Array.isArray(r.lines)?r.lines:(typeof r.lines==='string'?JSON.parse(r.lines||'[]'):[]);
+  let lineRows='';
+  lines.forEach(l=>{
+    const isOff=!l.lbs_planned&&!l.lbs_produced&&!l.cases_planned&&!l.cases_produced;
+    if(isOff){lineRows+=`<tr><td class="line-name">${l.line}</td><td class="c line-offline" colspan="7">Offline</td><td></td></tr>`;return;}
+    const lv2=l.lbs_variance||0,cv2=l.cases_variance||0;
+    const a2=l.cases_planned>0?Math.round((l.cases_produced/l.cases_planned)*100*PE):null;
+    lineRows+=`<tr>
+      <td class="line-name">${l.line}</td>
+      <td class="c">${n(l.lbs_planned)}</td><td class="c">${n(l.lbs_produced)}</td>
+      <td class="c ${lv2>=0?'var-pos':'var-neg'}">${lv2>=0?'+':''}${n(lv2)}</td>
+      <td class="c">${n(l.cases_planned)}</td><td class="c">${n(l.cases_produced)}</td>
+      <td class="c ${cv2>=0?'var-pos':'var-neg'}">${cv2>=0?'+':''}${n(cv2)}</td>
+      <td class="c">${a2!==null?`<span class="badge-sm ${a2>=90?'badge-green':a2>=70?'badge-amber':'badge-red'}">${a2}%</span>`:'—'}</td>
+      <td style="font-size:.75rem;color:var(--g500)">${l.notes||''}</td>
+    </tr>`;
+  });
+
+  document.getElementById('detailPanelArea').innerHTML=`
+  <div class="detail-panel">
+    <div class="detail-panel-hdr">
+      <span class="dp-title">${dayName(r.shift_date)} — ${shortDate(r.shift_date)}</span>
+      <span class="dp-meta">Supervisor: ${r.supervisor||'—'}</span>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-section">
+        <div class="ds-title">Safety</div>
+        <div class="ds-row"><span class="ds-lbl">Unsafe Conditions</span><span class="ds-val ${parseInt(r.unsafe_conditions)>0?'neg':''}">${r.unsafe_conditions||0}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Near Misses</span><span class="ds-val ${parseInt(r.near_misses)>0?'neg':''}">${r.near_misses||0}</span></div>
+        <div class="ds-row"><span class="ds-lbl">First Aid</span><span class="ds-val ${parseInt(r.first_aid)>0?'neg':''}">${r.first_aid||0}</span></div>
+        ${r.safety_comments?`<div class="ds-text">${r.safety_comments}</div>`:''}
+      </div>
+      <div class="detail-section">
+        <div class="ds-title">Attendance</div>
+        <div class="ds-row"><span class="ds-lbl">Needed</span><span class="ds-val">${r.headcount_needed||'—'}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Present</span><span class="ds-val">${r.headcount_present||'—'}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Absences</span><span class="ds-val ${parseInt(r.absences)>0?'neg':''}">${r.absences||0}</span></div>
+        ${(r.headcount_needed&&r.headcount_present)?`<div class="ds-row"><span class="ds-lbl">Staffed</span><span class="ds-val">${Math.round((r.headcount_present/r.headcount_needed)*100)}%</span></div>`:''}
+      </div>
+      <div class="detail-section">
+        <div class="ds-title">SAP</div>
+        <div class="ds-row"><span class="ds-lbl">Completed</span><span class="ds-val">${r.sap_completed||'—'}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Open</span><span class="ds-val ${parseInt(r.sap_open)>0?'neg':''}">${r.sap_open||0}</span></div>
+        ${r.sap_reason?`<div class="ds-text">${r.sap_reason}</div>`:''}
+      </div>
+      <div class="detail-section">
+        <div class="ds-title">Materials</div>
+        ${r.shortages?`<div class="ds-text"><strong>Shortages:</strong> ${r.shortages}</div>`:`<div class="ds-empty">No shortages</div>`}
+        ${r.stos?`<div class="ds-text" style="margin-top:.35rem"><strong>STOs:</strong> ${r.stos}</div>`:''}
+      </div>
+      <div class="detail-section">
+        <div class="ds-title">Training &amp; Quality</div>
+        ${r.training_notes?`<div class="ds-text"><strong>Training:</strong> ${r.training_notes}</div>`:`<div class="ds-empty">No training notes</div>`}
+        ${r.quality_notes?`<div class="ds-text" style="margin-top:.35rem"><strong>Quality:</strong> ${r.quality_notes}</div>`:''}
+      </div>
+      <div class="detail-section">
+        <div class="ds-title">Production Totals</div>
+        <div class="ds-row"><span class="ds-lbl">Lbs Planned</span><span class="ds-val">${n(r.lbs_planned)}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Lbs Produced</span><span class="ds-val">${n(r.lbs_produced)}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Lbs Variance</span>${varSpan(lv)}</div>
+        <div class="ds-row"><span class="ds-lbl">Cases Planned</span><span class="ds-val">${n(r.cases_planned)}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Cases Produced</span><span class="ds-val">${n(r.cases_produced)}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Cases Variance</span>${varSpan(cv)}</div>
+        <div class="ds-row"><span class="ds-lbl">Attainment</span><span class="ds-val">${csAtt!==null?csAtt+'%':'—'}</span></div>
+      </div>
+    </div>
+    <div style="padding:.9rem 1.2rem 1rem">
+      <div class="ds-title" style="margin-bottom:.6rem">Line Breakdown</div>
+      <table class="line-table"><thead><tr>
+        <th>Line</th>
+        <th class="c">Lbs Pl</th><th class="c">Lbs Ac</th><th class="c">Lbs Var</th>
+        <th class="c">Cs Pl</th><th class="c">Cs Ac</th><th class="c">Cs Var</th>
+        <th class="c">Att.</th><th>Notes</th>
+      </tr></thead><tbody>${lineRows}</tbody></table>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+// BATCHING RENDER
+// ═══════════════════════════════════════
+function renderBatchSummary(rows){
+  let lbsPl=0,lbsAc=0,uc=0,nm=0,fa=0;
+  rows.forEach(r=>{lbsPl+=r.lbs_planned||0;lbsAc+=r.lbs_produced||0;uc+=r.unsafe_conditions||0;nm+=r.near_misses||0;fa+=r.first_aid||0;});
+  const lbsVar=lbsAc-lbsPl;
+  const att=lbsPl>0?Math.round((lbsAc/lbsPl)*100):null;
+  document.getElementById('summaryArea').innerHTML += `
+    <div class="summary-row batch">
+      <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
+      <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
+      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
+      <div class="sum-card ${att!==null?(att>=90?'pos':att>=70?'':'neg'):''}">
+        <div class="sk">Attainment</div><div class="sv">${att!==null?att+'%':'—'}</div>
+        <div class="ss">${rows.length} shifts</div>
+      </div>
+      <div class="sum-card ${(uc+nm+fa)>0?'neg':''}">
+        <div class="sk">Safety Incidents</div><div class="sv">${uc+nm+fa}</div>
+        <div class="ss">${uc} UC &bull; ${nm} NM &bull; ${fa} FA</div>
+      </div>
+    </div>`;
+}
+
+function renderBatchList(rows){
+  currentByDate={};
+  rows.forEach(r=>{ currentByDate[r.shift_date]=r; });
+
+  const days=[];
+  for(let i=0;i<7;i++) days.push(isoDate(addDays(activeWeekMonday,i)));
+
+  let strip='<div class="week-strip">';
+  days.forEach((dateStr,idx)=>{
+    const r=currentByDate[dateStr];
+    if(!r){
+      strip+=`<div class="day-btn day-btn-empty" id="day-btn-${idx}">
+        <div class="db-name">${dayShort(dateStr)}</div>
+        <div class="db-date">${shortDate(dateStr)}</div>
+        <div class="db-no-shift">No shift</div>
+      </div>`;
+      return;
+    }
+    const att=r.lbs_planned>0?Math.round((r.lbs_produced/r.lbs_planned)*100):null;
+    const chipCls=att!==null?(att>=90?'db-chip-green':att>=70?'db-chip-amber':'db-chip-red'):'db-chip-gray';
+    strip+=`<div class="day-btn" id="day-btn-${idx}" onclick="selectDay(${idx},'${dateStr}')">
+      <div class="db-name">${dayShort(dateStr)}</div>
+      <div class="db-date">${shortDate(dateStr)}</div>
+      <div class="db-sup">${r.supervisor||'—'}</div>
+      ${att!==null?`<span class="db-chip ${chipCls}">${att}%</span>`:''}
+    </div>`;
+  });
+  strip+='</div>';
+  document.getElementById('weekStripArea').innerHTML=strip;
+
+  document.getElementById('detailPanelArea').innerHTML=
+    `<div class="detail-panel"><div class="detail-panel-empty">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      Click a day above to view its details.
+    </div></div>`;
+  selectedDayIdx=null;
+}
+
+function renderBatchDetail(r){
+  const lv=(r.lbs_produced||0)-(r.lbs_planned||0);
+  const att=r.lbs_planned>0?Math.round((r.lbs_produced/r.lbs_planned)*100):null;
+
+  document.getElementById('detailPanelArea').innerHTML=`
+  <div class="detail-panel">
+    <div class="detail-panel-hdr">
+      <span class="dp-title">${dayName(r.shift_date)} — ${shortDate(r.shift_date)}</span>
+      <span class="dp-meta">Supervisor: ${r.supervisor||'—'}</span>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-section">
+        <div class="ds-title">Safety</div>
+        <div class="ds-row"><span class="ds-lbl">Unsafe Conditions</span><span class="ds-val ${parseInt(r.unsafe_conditions)>0?'neg':''}">${r.unsafe_conditions||0}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Near Misses</span><span class="ds-val ${parseInt(r.near_misses)>0?'neg':''}">${r.near_misses||0}</span></div>
+        <div class="ds-row"><span class="ds-lbl">First Aid</span><span class="ds-val ${parseInt(r.first_aid)>0?'neg':''}">${r.first_aid||0}</span></div>
+        ${r.safety_comments?`<div class="ds-text">${r.safety_comments}</div>`:''}
+      </div>
+      <div class="detail-section">
+        <div class="ds-title">Batching Totals</div>
+        <div class="ds-row"><span class="ds-lbl">Lbs Planned</span><span class="ds-val">${n(r.lbs_planned)}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Lbs Produced</span><span class="ds-val">${n(r.lbs_produced)}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Variance</span>${varSpan(lv)}</div>
+        <div class="ds-row"><span class="ds-lbl">Attainment</span><span class="ds-val">${att!==null?att+'%':'—'}</span></div>
+      </div>
+      <div class="detail-section">
+        <div class="ds-title">Attendance</div>
+        <div class="ds-row"><span class="ds-lbl">Needed</span><span class="ds-val">${r.headcount_needed||'—'}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Actual</span><span class="ds-val">${r.headcount_actual||'—'}</span></div>
+        <div class="ds-row"><span class="ds-lbl">Absences</span><span class="ds-val ${parseInt(r.absences)>0?'neg':''}">${r.absences||0}</span></div>
+        ${r.comments?`<div class="ds-text" style="margin-top:.4rem">${r.comments}</div>`:''}
+      </div>
+    </div>
+  </div>`;
+}
 
 // ═══════════════════════════════════════
 // PRODUCTION RENDER
