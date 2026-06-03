@@ -345,7 +345,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 // ── CONFIG ──────────────────────────────
 const SUPABASE_URL  = 'https://mnvveafizcirdutkficj.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1udnZlYWZpemNpcmR1dGtmaWNqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0MDk3MzMsImV4cCI6MjA5NTk4NTczM30.unTqlW_e5Z0eaY3aMR8jdyKKUbk3bV_aMVUMcduPJqg';
-const PE = 0.85;
+const PE = 0.98;
 // ────────────────────────────────────────
 
 let currentType  = 'production';
@@ -878,6 +878,46 @@ async function renderProjection(dateStr){
           </div>
         </div>
         ${renderTrendChart(chartRows,ensemble,ciLow,ciHigh)}
+        <div class="model-card" style="grid-column:1/-1;margin-top:.25rem">
+          <div class="mc-title">What the Math Is Doing</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1.5rem;font-size:.8rem;color:var(--g700);line-height:1.6">
+            <div>
+              <strong style="color:var(--g800);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em">Step 1 — Three independent estimates</strong><br>
+              Each model produces a lbs estimate independently:<br>
+              <span style="font-family:var(--fm);font-size:.75rem;color:var(--g600)">
+                EWMA: ${Math.round(avgEff).toLocaleString()} lbs/person × ${scheduledHC||'?'} people = ${hcProj?hcProj.toLocaleString():'—'}<br>
+                DOW:  baseline × ${(dowMult*100).toFixed(1)}% = ${Math.round(dowProj).toLocaleString()}<br>
+                WLS:  ${reg?`(${reg.a.toFixed(3)} × ${typPlan.toLocaleString()}) + (${reg.b.toFixed(1)} × ${scheduledHC||'?'}) + ${Math.round(reg.c).toLocaleString()} = ${regProj?regProj.toLocaleString():'—'}`:'insufficient data'}
+              </span>
+            </div>
+            <div>
+              <strong style="color:var(--g800);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em">Step 2 — Ensemble average</strong><br>
+              The three estimates are averaged equally:<br>
+              <span style="font-family:var(--fm);font-size:.75rem;color:var(--g600)">
+                (${projs.map(v=>Math.round(v).toLocaleString()).join(' + ')}) ÷ ${projs.length} = ${ensemble.toLocaleString()} lbs
+              </span><br><br>
+              <strong style="color:var(--g800);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em">Step 3 — Attainment</strong><br>
+              <span style="font-family:var(--fm);font-size:.75rem;color:var(--g600)">
+                (${ensemble.toLocaleString()} ÷ ${typPlan.toLocaleString()}) × ${PE} = ${projAtt!==null?projAtt+'%':'—'}
+              </span>
+            </div>
+            <div>
+              <strong style="color:var(--g800);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em">Step 4 — Confidence interval</strong><br>
+              After fitting, the regression measures how far off it was on each historical shift (residuals). The standard deviation of those errors (σ) sets the range:<br>
+              <span style="font-family:var(--fm);font-size:.75rem;color:var(--g600)">
+                ${ensemble.toLocaleString()} ± ${Math.round(resStd).toLocaleString()} = ${ciLow.toLocaleString()} – ${ciHigh.toLocaleString()}
+              </span>
+            </div>
+            <div>
+              <strong style="color:var(--g800);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em">Step 5 — Deficit recovery</strong><br>
+              Scans all shifts where the previous shift had negative variance. Measures the average lbs gain on the following shift. Divides the current week gap by that rate:<br>
+              <span style="font-family:var(--fm);font-size:.75rem;color:var(--g600)">
+                ${rec?`${Math.abs(wkVar).toLocaleString()} lbs gap ÷ ${Math.round(rec.avgGainPerShift).toLocaleString()} avg gain = ${rec.avgGainPerShift>0?Math.ceil(Math.abs(wkVar)/rec.avgGainPerShift)+' shifts':'—'}`:'No recovery events in history'}
+              </span>
+            </div>
+          </div>
+        </div>
+
         <div class="data-notice">Statistical estimates based on ${n} historical shifts. Accuracy improves as more data accumulates. Not a production guarantee.</div>
       </div>
     </div>`;
