@@ -645,6 +645,7 @@ window.toggleEntry=function(idx){
 
 // ── Helpers ──
 function fD(iso){if(!iso)return'—';const[y,m,d]=iso.split('-');return`${m}/${d}/${y}`;}
+function isoDate(d){ return d.toISOString().slice(0,10); }
 function barColor(p){return p>=90?'#1a5632':p>=70?'#b8860b':'#dc2626';}
 function badgeClass(p){return p>=90?'badge-green':p>=70?'badge-amber':'badge-red';}
 function varCell(val){const n=parseFloat(val);if(isNaN(n))return'—';const color=n>0?'#1a5632':n<0?'#dc2626':'#6b7a8d';return`<span style="font-weight:700;color:${color}">${n>0?'+':''}${n.toLocaleString()}</span>`;}
@@ -831,32 +832,44 @@ function showToast(m,w){
 // ── Pace strip ──
 async function loadPaceStrip(){
   try{
+    const DAY_COLS=['mon','tue','wed','thu','fri','sat','sun'];
+    const todayDow=new Date().getDay(); // 0=Sun
+    const todayCol='lbs_target_'+DAY_COLS[todayDow===0?6:todayDow-1];
+    const cols=DAY_COLS.map(c=>'lbs_target_'+c).join(',');
     const [targetRows, shiftRows] = await Promise.all([
-      sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=lbs_target,set_by`, 'updated_at.desc'),
-      sbGet('eos_production_shifts', `shift_date=gte.${monday}&shift_date=lte.${sunday}&select=lbs_produced`)
+      sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=${cols}`, 'updated_at.desc'),
+      sbGet('eos_production_shifts', `shift_date=gte.${monday}&shift_date=lte.${sunday}&select=lbs_produced,shift_date`)
     ]);
     if(!targetRows.length) return;
-    const lbsTarget   = targetRows[0].lbs_target;
-    const lbsProduced = shiftRows.reduce((s,r)=>s+(r.lbs_produced||0),0);
-    const dow = new Date().getDay();
-    const daysElapsed = Math.max(dow===0?7:dow,1);
-    const projected   = Math.round((lbsProduced/daysElapsed)*7);
-    const delta       = projected-lbsTarget;
-    const pct         = Math.min((lbsProduced/lbsTarget)*100,100);
-    const ahead       = delta>=0;
-    const chipCls     = ahead?'ahead':(Math.abs(delta)<lbsTarget*0.05?'warn':'behind');
-
-    const strip = document.getElementById('paceStrip');
+    const t=targetRows[0];
+    const todayTarget=parseInt(t[todayCol])||0;
+    const todayDateStr=isoDate(new Date());
+    const byDate={};shiftRows.forEach(r=>{byDate[r.shift_date]=r.lbs_produced||0;});
+    const todayActual=byDate[todayDateStr]||0;
+    // WTD
+    const todayIdx=todayDow===0?6:todayDow-1;
+    let wtdTarget=0,wtdActual=0;
+    for(let i=0;i<=todayIdx;i++){
+      wtdTarget+=parseInt(t['lbs_target_'+DAY_COLS[i]])||0;
+      const dt=new Date(monday+'T12:00:00');dt.setDate(dt.getDate()+i);
+      wtdActual+=byDate[isoDate(dt)]||0;
+    }
+    const gap=todayActual-todayTarget;
+    const wtdGap=wtdActual-wtdTarget;
+    const pct=todayTarget>0?Math.min((todayActual/todayTarget)*100,100):0;
+    const ahead=gap>=0;
+    const chipCls=ahead?'ahead':(Math.abs(gap)<todayTarget*0.05?'warn':'behind');
+    const strip=document.getElementById('paceStrip');
     strip.style.display='flex';
-    document.getElementById('ps-left').textContent  = lbsProduced.toLocaleString()+' lbs produced';
-    document.getElementById('ps-right').textContent = 'Target: '+lbsTarget.toLocaleString();
-    const fill = document.getElementById('ps-fill');
-    fill.style.width = pct.toFixed(1)+'%';
-    fill.className = 'pace-strip-fill'+(pct>=90?'':(pct>=70?' warn':' danger'));
-    document.getElementById('ps-chip').className = 'pace-chip '+chipCls;
-    document.getElementById('ps-delta').textContent = (ahead?'+':'')+delta.toLocaleString()+' lbs';
-    document.getElementById('ps-sub').textContent   = 'proj. '+projected.toLocaleString()+' / '+lbsTarget.toLocaleString();
-  }catch(e){ console.warn('Pace strip:', e); }
+    document.getElementById('ps-left').textContent=todayActual.toLocaleString()+' lbs today';
+    document.getElementById('ps-right').textContent='Today target: '+todayTarget.toLocaleString();
+    const fill=document.getElementById('ps-fill');
+    fill.style.width=pct.toFixed(1)+'%';
+    fill.className='pace-strip-fill'+(ahead?'':(Math.abs(gap)<todayTarget*0.05?' warn':' danger'));
+    document.getElementById('ps-chip').className='pace-chip '+chipCls;
+    document.getElementById('ps-delta').textContent=(ahead?'+':'')+gap.toLocaleString()+' lbs today';
+    document.getElementById('ps-sub').textContent='WTD: '+(wtdGap>=0?'+':'')+wtdGap.toLocaleString()+' vs '+wtdTarget.toLocaleString();
+  }catch(e){ console.warn('Pace strip:',e); }
 }
 
 loadWeekPanel();
