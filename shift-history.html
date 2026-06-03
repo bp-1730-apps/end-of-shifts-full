@@ -54,7 +54,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 
 /* summary cards */
 .summary-row{display:grid;gap:.75rem;margin-bottom:1.25rem}
-.summary-row.prod{grid-template-columns:repeat(7,1fr)}
+.summary-row.prod{grid-template-columns:repeat(5,1fr)}
 .summary-row.batch{grid-template-columns:repeat(5,1fr)}
 .sum-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--rs);padding:.7rem .9rem;box-shadow:var(--sh)}
 .sum-card .sk{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400);margin-bottom:.25rem}
@@ -477,10 +477,8 @@ function renderProdSummaryCards(rows, label){
     <div class="summary-row prod">
       <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
       <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
-      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
+      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs ${lbsVar>=0?'Ahead':'Behind'}</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div><div class="ss">vs planned</div></div>
       <div class="sum-card"><div class="sk">Cases Planned</div><div class="sv">${n(csPl)}</div></div>
-      <div class="sum-card"><div class="sk">Cases Produced</div><div class="sv">${n(csAc)}</div></div>
-      <div class="sum-card ${csVar>=0?'pos':'neg'}"><div class="sk">${rows.length===1?'Day':'Week'} ${csVar>=0?'Ahead':'Behind'}</div><div class="sv">${csVar>0?'+':''}${n(csVar)} cs</div></div>
       <div class="sum-card ${avgAtt!==null?(avgAtt>=90?'pos':avgAtt>=70?'':'neg'):''}">
         <div class="sk">Attainment</div><div class="sv">${avgAtt!==null?avgAtt+'%':'—'}</div>
         <div class="ss">${rows.length} shift${rows.length!==1?'s':''}</div>
