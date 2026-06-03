@@ -406,12 +406,10 @@ window.loadShifts = async function(){
     to   = isoDate(addDays(activeWeekMonday, 6));
   }
 
-  const listArea    = document.getElementById('detailPanelArea');
-  const summaryArea = document.getElementById('summaryArea');
+  const listArea = document.getElementById('detailPanelArea');
   document.getElementById('weekStripArea').innerHTML = '';
   document.getElementById('summaryCards').innerHTML  = '';
   listArea.innerHTML = '<div class="state-box">Loading…</div>';
-  summaryArea.innerHTML = '';
   document.getElementById('exportBtn').disabled = true;
   document.getElementById('printBtn').disabled  = true;
   document.getElementById('recordCount').textContent = '';
