@@ -81,7 +81,60 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .db-chip-gray{background:var(--g100);color:var(--g500)}
 .db-no-shift{font-size:.65rem;color:var(--g400);font-style:italic;margin-top:.25rem}
 
-/* detail panel */
+/* future day buttons */
+.day-btn-future{border-style:dashed;border-color:var(--accent-b);background:var(--accent-l)}
+.day-btn-future:hover{border-color:var(--accent)!important;background:#faebc6!important}
+.day-btn-future.active{background:var(--g800)!important;border-color:var(--g800)!important;border-style:solid}
+.day-btn-future .db-name{color:var(--accent)}
+.db-future-tag{font-size:.6rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.04em;margin-top:.2rem}
+
+/* projection panel */
+.proj-panel{background:var(--white);border:1px solid var(--accent-b);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.proj-hdr{background:var(--g800);color:#fff;padding:.75rem 1.2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.proj-hdr-left{display:flex;align-items:center;gap:.65rem}
+.proj-icon{font-size:1.1rem}
+.proj-title{font-size:.95rem;font-weight:700}
+.proj-subtitle{font-size:.72rem;opacity:.6;margin-top:.1rem}
+.proj-badge{background:var(--accent);color:#fff;border-radius:10px;padding:.2rem .65rem;font-size:.68rem;font-weight:700}
+.proj-body{padding:1.2rem 1.3rem}
+
+/* projection stat cards */
+.proj-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.25rem}
+.proj-stat{background:var(--g50);border:1px solid var(--g200);border-radius:var(--rs);padding:.7rem .85rem}
+.proj-stat .pk{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g400);margin-bottom:.25rem}
+.proj-stat .pv{font-family:var(--fm);font-weight:700;font-size:1.05rem;color:var(--g800);line-height:1}
+.proj-stat .ps{font-size:.68rem;color:var(--g400);margin-top:.2rem}
+.proj-stat.proj-good .pv{color:var(--brand)}
+.proj-stat.proj-warn .pv{color:var(--accent)}
+.proj-stat.proj-bad  .pv{color:#dc2626}
+
+/* confidence band */
+.conf-band{display:flex;align-items:center;gap:.5rem;background:var(--accent-l);border:1px solid var(--accent-b);border-radius:var(--rs);padding:.55rem .85rem;margin-bottom:1.25rem;font-size:.8rem;flex-wrap:wrap;gap:.75rem}
+.conf-band .cb-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);flex-shrink:0}
+.conf-band .cb-range{font-family:var(--fm);font-weight:700;font-size:.95rem;color:var(--g800)}
+.conf-band .cb-sub{font-size:.7rem;color:var(--g500)}
+
+/* model insights */
+.model-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.25rem}
+.model-card{background:var(--g50);border:1px solid var(--g200);border-radius:var(--rs);padding:.8rem 1rem}
+.model-card .mc-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g500);margin-bottom:.5rem;display:flex;align-items:center;gap:.4rem}
+.model-card .mc-title::after{content:'';flex:1;height:1px;background:var(--g200)}
+.model-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.3rem;font-size:.8rem}
+.model-lbl{color:var(--g500)}
+.model-val{font-family:var(--fm);font-weight:700;font-size:.82rem;color:var(--g800)}
+.model-val.good{color:var(--brand)}
+.model-val.bad{color:#dc2626}
+.model-val.warn{color:var(--accent)}
+
+/* trend chart */
+.trend-chart-wrap{background:var(--g50);border:1px solid var(--g200);border-radius:var(--rs);padding:.8rem 1rem}
+.trend-chart-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g500);margin-bottom:.65rem}
+.trend-svg{width:100%;display:block}
+
+/* data notice */
+.data-notice{font-size:.72rem;color:var(--g400);font-style:italic;margin-top:.75rem;text-align:center}
+
+
 .detail-panel{background:var(--white);border:1px solid var(--g200);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
 .detail-panel-hdr{background:var(--g800);color:#fff;padding:.75rem 1.2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
 .dp-title{font-size:.95rem;font-weight:700;letter-spacing:-.01em}
@@ -535,6 +588,9 @@ function renderBatchSummaryCards(rows, label){
 
 // ── Select a day ──
 window.selectDay = function(idx, dateStr){
+  const todayStr = isoDate(new Date());
+  const isFuture = dateStr > todayStr;
+
   // Deselect → revert to week totals
   if(selectedDayIdx === idx){
     selectedDayIdx = null;
@@ -547,7 +603,7 @@ window.selectDay = function(idx, dateStr){
     document.getElementById('detailPanelArea').innerHTML =
       `<div class="detail-panel"><div class="detail-panel-empty">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-        Click a day to view its details.
+        Click a past day for actuals · Click a future day for ML projection.
       </div></div>`;
     return;
   }
@@ -556,12 +612,16 @@ window.selectDay = function(idx, dateStr){
   document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('day-btn-'+idx)?.classList.add('active');
 
-  const r = currentByDate[dateStr];
+  // ── Future day → projection ──
+  if(isFuture){
+    renderProjection(dateStr);
+    return;
+  }
 
-  // Update summary cards to this day
+  const r = currentByDate[dateStr];
   const dayLabel = dayName(dateStr)+' · '+shortDate(dateStr);
+
   if(!r){
-    // No shift — show zeros
     if(currentType==='production') renderProdSummaryCards([], dayLabel+' — No shift');
     else renderBatchSummaryCards([], dayLabel+' — No shift');
     document.getElementById('detailPanelArea').innerHTML =
@@ -584,6 +644,225 @@ window.selectDay = function(idx, dateStr){
   }
 };
 
+// ═══════════════════════════════════════════════════════
+// ML PROJECTION ENGINE
+// ═══════════════════════════════════════════════════════
+
+let historicalCache = null;
+const DAY_NAMES_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+async function fetchHistorical(){
+  if(historicalCache) return historicalCache;
+  const rows = await sbGet('eos_production_shifts',
+    'select=shift_date,lbs_planned,lbs_produced,lbs_variance,headcount_needed,headcount_present,cases_planned,cases_produced');
+  historicalCache = rows.sort((a,b)=>a.shift_date.localeCompare(b.shift_date));
+  return historicalCache;
+}
+
+function expWeights(n, alpha=0.12){
+  const w=[];
+  for(let i=0;i<n;i++) w.push(Math.exp(-alpha*(n-1-i)));
+  const s=w.reduce((a,b)=>a+b,0);
+  return w.map(v=>v/s);
+}
+function wMean(vals,weights){ return vals.reduce((s,v,i)=>s+v*weights[i],0); }
+function wStd(vals,mean,weights){ return Math.sqrt(vals.reduce((s,v,i)=>s+weights[i]*(v-mean)**2,0)); }
+
+function cramersRule3(A,b){
+  const det=M=>M[0][0]*(M[1][1]*M[2][2]-M[1][2]*M[2][1])-M[0][1]*(M[1][0]*M[2][2]-M[1][2]*M[2][0])+M[0][2]*(M[1][0]*M[2][1]-M[1][1]*M[2][0]);
+  const d=det(A); if(Math.abs(d)<1e-10) return null;
+  const rep=(col,v)=>A.map((row,i)=>row.map((val,j)=>j===col?v[i]:val));
+  return [det(rep(0,b))/d,det(rep(1,b))/d,det(rep(2,b))/d];
+}
+
+function wls(data,weights){
+  const n=data.length; if(n<3) return null;
+  let sx1=0,sx2=0,sy=0,sx1x1=0,sx1x2=0,sx2x2=0,sx1y=0,sx2y=0,sw=0;
+  data.forEach(({x1,x2,y},i)=>{
+    const w=weights[i];
+    sx1+=w*x1;sx2+=w*x2;sy+=w*y;sx1x1+=w*x1*x1;sx1x2+=w*x1*x2;
+    sx2x2+=w*x2*x2;sx1y+=w*x1*y;sx2y+=w*x2*y;sw+=w;
+  });
+  const coeffs=cramersRule3([[sw,sx1,sx2],[sx1,sx1x1,sx1x2],[sx2,sx1x2,sx2x2]],[sy,sx1y,sx2y]);
+  if(!coeffs) return null;
+  const [c,a,b]=coeffs;
+  const predict=(x1,x2)=>a*x1+b*x2+c;
+  const residuals=data.map(({x1,x2,y})=>y-predict(x1,x2));
+  return {a,b,c,predict,residuals};
+}
+
+function dowMultipliers(rows){
+  const byDow={0:[],1:[],2:[],3:[],4:[],5:[],6:[]};
+  rows.forEach(r=>{ if(!r.lbs_planned||!r.lbs_produced) return; const dow=new Date(r.shift_date+'T12:00:00').getDay(); byDow[dow].push(r.lbs_produced/r.lbs_planned); });
+  const gAll=rows.filter(r=>r.lbs_planned).map(r=>r.lbs_produced/r.lbs_planned);
+  const gm=gAll.length?gAll.reduce((a,b)=>a+b,0)/gAll.length:1;
+  const mult={};
+  for(let d=0;d<7;d++) mult[d]=byDow[d].length>=2?byDow[d].reduce((a,b)=>a+b,0)/byDow[d].length/gm:1;
+  return mult;
+}
+
+function deficitRecovery(rows){
+  const gains=[];
+  for(let i=1;i<rows.length;i++){
+    if((rows[i-1].lbs_variance||0)<0) gains.push((rows[i].lbs_produced||0)-(rows[i-1].lbs_produced||0));
+  }
+  if(!gains.length) return null;
+  return {avgGainPerShift:gains.reduce((a,b)=>a+b,0)/gains.length, n:gains.length};
+}
+
+function renderTrendChart(rows,projVal,ciLow,ciHigh){
+  if(!rows.length) return '';
+  const W=760,H=165,PL=46,PR=18,PT=14,PB=30,IW=W-PL-PR,IH=H-PT-PB;
+  const vals=rows.map(r=>r.lbs_produced||0);
+  const allV=[...vals,projVal,ciLow,ciHigh];
+  const minV=Math.min(...allV)*0.92, maxV=Math.max(...allV)*1.06;
+  const sy=v=>PT+IH-((v-minV)/(maxV-minV))*IH;
+  const sx=(i,tot)=>PL+(i/(tot-1))*IW;
+  const total=rows.length+1;
+  const pts=rows.map((r,i)=>({x:sx(i,total),y:sy(r.lbs_produced||0),lbl:dayShort(r.shift_date)}));
+  const projX=sx(rows.length,total),projY=sy(projVal),ciLY=sy(ciLow),ciHY=sy(ciHigh);
+  const ticks=3; let yT='';
+  for(let i=0;i<=ticks;i++){const v=minV+(maxV-minV)*(i/ticks);const y=sy(v);yT+=`<line x1="${PL-4}" y1="${y}" x2="${PL}" y2="${y}" stroke="var(--g300)" stroke-width="1"/><text x="${PL-7}" y="${y+4}" font-size="9" text-anchor="end" fill="var(--g400)">${Math.round(v/1000)}k</text>`;}
+  const line=pts.map((p,i)=>`${i===0?'M':'L'}${p.x},${p.y}`).join(' ');
+  const lp=pts[pts.length-1];
+  let xL='';
+  pts.forEach((p,i)=>{if(i%2===0||i===pts.length-1)xL+=`<text x="${p.x}" y="${H-5}" font-size="8.5" text-anchor="middle" fill="var(--g400)">${p.lbl}</text>`;});
+  xL+=`<text x="${projX}" y="${H-5}" font-size="8.5" text-anchor="middle" fill="var(--accent)" font-weight="700">Proj</text>`;
+  return `<div class="trend-chart-wrap"><div class="trend-chart-title">Last ${rows.length} Shifts — Lbs Produced + Projection</div>
+  <svg class="trend-svg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <rect x="${projX-9}" y="${ciHY}" width="18" height="${ciLY-ciHY}" fill="var(--accent-l)" stroke="var(--accent-b)" stroke-width="1" rx="2"/>
+    <line x1="${PL}" y1="${H-PB}" x2="${W-PR}" y2="${H-PB}" stroke="var(--g200)" stroke-width="1"/>
+    <line x1="${PL}" y1="${PT}" x2="${PL}" y2="${H-PB}" stroke="var(--g200)" stroke-width="1"/>
+    ${yT}
+    <path d="${line}" fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+    <line x1="${lp.x}" y1="${lp.y}" x2="${projX}" y2="${projY}" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5,4"/>
+    ${pts.map(p=>`<circle cx="${p.x}" cy="${p.y}" r="3.5" fill="var(--brand)" stroke="white" stroke-width="1.5"/>`).join('')}
+    <circle cx="${projX}" cy="${projY}" r="5.5" fill="var(--accent)" stroke="white" stroke-width="2"/>
+    ${xL}
+  </svg></div>`;
+}
+
+async function renderProjection(dateStr){
+  const panel=document.getElementById('detailPanelArea');
+  panel.innerHTML=`<div class="proj-panel"><div class="proj-hdr"><div class="proj-hdr-left">
+    <span class="proj-icon">🤖</span><div><div class="proj-title">${dayName(dateStr)} · ${shortDate(dateStr)}</div>
+    <div class="proj-subtitle">Loading historical data…</div></div></div></div>
+    <div class="proj-body"><div style="text-align:center;padding:2.5rem;color:var(--g400)">Fitting models…</div></div></div>`;
+  try{
+    const hist=await fetchHistorical();
+    if(hist.length<5){
+      panel.innerHTML=`<div class="proj-panel"><div class="proj-hdr"><div class="proj-hdr-left"><span class="proj-icon">🤖</span><div><div class="proj-title">${dayName(dateStr)} · ${shortDate(dateStr)}</div></div></div></div>
+      <div class="proj-body"><div class="data-notice">Need at least 5 historical shifts to generate projections. Keep submitting!</div></div></div>`;
+      return;
+    }
+    const n=hist.length, w=expWeights(n,0.12), dow=new Date(dateStr+'T12:00:00').getDay();
+    const mult=dowMultipliers(hist), dowMult=mult[dow]||1;
+
+    // HC efficiency
+    const effR=hist.filter(r=>r.headcount_present>0&&r.lbs_produced>0).map(r=>r.lbs_produced/r.headcount_present);
+    const effW=expWeights(effR.length,0.12);
+    const avgEff=wMean(effR,effW), effStd=wStd(effR,avgEff,effW);
+
+    // WLS regression
+    const rd=hist.filter(r=>r.lbs_planned>0&&r.headcount_present>0&&r.lbs_produced>0).map(r=>({x1:r.lbs_planned,x2:r.headcount_present,y:r.lbs_produced}));
+    const reg=wls(rd,expWeights(rd.length,0.12));
+
+    // Baseline
+    const bVals=hist.filter(r=>r.lbs_produced>0).map(r=>r.lbs_produced);
+    const bW=expWeights(bVals.length,0.08), baseMean=wMean(bVals,bW), baseStd=wStd(bVals,baseMean,bW);
+    const dowProj=baseMean*dowMult;
+
+    // Typical headcount & plan for this DOW
+    const recentHC=hist.slice(-10).filter(r=>r.headcount_present>0).map(r=>r.headcount_present);
+    const typHC=recentHC.length?recentHC.sort((a,b)=>a-b)[Math.floor(recentHC.length/2)]:null;
+    const sdRows=hist.filter(r=>new Date(r.shift_date+'T12:00:00').getDay()===dow).slice(-6);
+    const typPlan=sdRows.length?Math.round(sdRows.reduce((s,r)=>s+(r.lbs_planned||0),0)/sdRows.length):Math.round(baseMean);
+
+    const hcProj=typHC?Math.round(avgEff*typHC):null;
+    const regProj=reg&&typHC?Math.round(reg.predict(typPlan,typHC)):null;
+    const projs=[dowProj,hcProj,regProj].filter(v=>v&&v>0);
+    const ensemble=Math.round(projs.reduce((a,b)=>a+b,0)/projs.length);
+
+    const resStd=reg?Math.sqrt(reg.residuals.map(r=>r*r).reduce((a,b)=>a+b,0)/reg.residuals.length):baseStd;
+    const ciLow=Math.round(ensemble-resStd), ciHigh=Math.round(ensemble+resStd);
+
+    // Deficit recovery
+    const wkVar=allCurrentRows.reduce((s,r)=>s+(r.lbs_variance||0),0);
+    const rec=deficitRecovery(hist);
+    let catchup='';
+    if(wkVar<0&&rec){
+      const shifts=rec.avgGainPerShift>0?Math.ceil(Math.abs(wkVar)/rec.avgGainPerShift):null;
+      catchup=shifts?`At current recovery rate, ~${shifts} more shift${shifts!==1?'s':''} to close the gap.`:'Recovery trend inconsistent.';
+    } else if(wkVar>=0){ catchup='Currently ahead of plan — no deficit.'; }
+    else { catchup='Not enough recovery data to project catch-up.'; }
+
+    const projAtt=typPlan>0?Math.round((ensemble/typPlan)*100*PE):null;
+    const attCls=projAtt!==null?(projAtt>=90?'proj-good':projAtt>=70?'proj-warn':'proj-bad'):'';
+    const chartRows=hist.slice(-14);
+
+    panel.innerHTML=`<div class="proj-panel">
+      <div class="proj-hdr">
+        <div class="proj-hdr-left"><span class="proj-icon">🤖</span>
+          <div><div class="proj-title">${dayName(dateStr)} · ${shortDate(dateStr)} — ML Projection</div>
+          <div class="proj-subtitle">Ensemble of ${projs.length} models · ${n} historical shifts · Exponential recency weighting</div></div>
+        </div>
+        <div class="proj-badge">Projection</div>
+      </div>
+      <div class="proj-body">
+        <div class="proj-stats">
+          <div class="proj-stat"><div class="pk">Projected Lbs</div><div class="pv">${ensemble.toLocaleString()}</div><div class="ps">${projs.length}-model ensemble</div></div>
+          <div class="proj-stat"><div class="pk">Typical Plan (${DAY_NAMES_FULL[dow]})</div><div class="pv">${typPlan.toLocaleString()}</div><div class="ps">${sdRows.length} ${DAY_NAMES_FULL[dow]} shifts</div></div>
+          <div class="proj-stat ${attCls}"><div class="pk">Projected Attainment</div><div class="pv">${projAtt!==null?projAtt+'%':'—'}</div><div class="ps">at PE=${PE}</div></div>
+          <div class="proj-stat ${wkVar>=0?'proj-good':'proj-bad'}"><div class="pk">Week Gap (so far)</div><div class="pv">${wkVar>0?'+':''}${wkVar.toLocaleString()}</div><div class="ps">lbs vs plan</div></div>
+        </div>
+        <div class="conf-band">
+          <span class="cb-lbl">Confidence Range</span>
+          <span class="cb-range">${ciLow.toLocaleString()} – ${ciHigh.toLocaleString()} lbs</span>
+          <span class="cb-sub">±${Math.round(resStd).toLocaleString()} lbs σ based on historical residuals</span>
+        </div>
+        <div class="model-grid">
+          <div class="model-card">
+            <div class="mc-title">Headcount Efficiency</div>
+            <div class="model-row"><span class="model-lbl">Avg lbs / person</span><span class="model-val">${Math.round(avgEff).toLocaleString()}</span></div>
+            <div class="model-row"><span class="model-lbl">Std dev</span><span class="model-val">±${Math.round(effStd).toLocaleString()}</span></div>
+            <div class="model-row"><span class="model-lbl">Typical HC</span><span class="model-val">${typHC||'—'}</span></div>
+            <div class="model-row"><span class="model-lbl">HC Projection</span><span class="model-val ${hcProj?'good':''}">${hcProj?hcProj.toLocaleString():'—'}</span></div>
+          </div>
+          <div class="model-card">
+            <div class="mc-title">Day-of-Week Pattern</div>
+            <div class="model-row"><span class="model-lbl">${DAY_NAMES_FULL[dow]} multiplier</span><span class="model-val ${dowMult>=1?'good':dowMult>=0.92?'warn':'bad'}">${(dowMult*100).toFixed(1)}%</span></div>
+            <div class="model-row"><span class="model-lbl">vs avg day</span><span class="model-val">${dowMult>=1?'Above avg':'Below avg'}</span></div>
+            <div class="model-row"><span class="model-lbl">DOW Projection</span><span class="model-val">${Math.round(dowProj).toLocaleString()}</span></div>
+          </div>
+          <div class="model-card">
+            <div class="mc-title">Regression (Lbs + HC)</div>
+            ${reg?`
+            <div class="model-row"><span class="model-lbl">Plan coeff</span><span class="model-val">${reg.a.toFixed(3)}</span></div>
+            <div class="model-row"><span class="model-lbl">HC coeff</span><span class="model-val">${reg.b.toFixed(1)} lbs/person</span></div>
+            <div class="model-row"><span class="model-lbl">Intercept</span><span class="model-val">${Math.round(reg.c).toLocaleString()}</span></div>
+            <div class="model-row"><span class="model-lbl">Reg Projection</span><span class="model-val ${regProj?'good':''}">${regProj?regProj.toLocaleString():'—'}</span></div>
+            `:`<div class="model-row"><span class="model-lbl">Insufficient data</span><span class="model-val bad">—</span></div>`}
+          </div>
+          <div class="model-card">
+            <div class="mc-title">Deficit Recovery</div>
+            ${rec?`
+            <div class="model-row"><span class="model-lbl">Avg gain / recovery shift</span><span class="model-val ${rec.avgGainPerShift>0?'good':'bad'}">${rec.avgGainPerShift>0?'+':''}${Math.round(rec.avgGainPerShift).toLocaleString()}</span></div>
+            <div class="model-row"><span class="model-lbl">Recovery events</span><span class="model-val">${rec.n}</span></div>
+            <div class="model-row"><span class="model-lbl">Outlook</span><span class="model-val" style="font-size:.72rem">${catchup}</span></div>
+            `:`<div class="model-row"><span class="model-lbl">Insufficient recovery data</span><span class="model-val bad">—</span></div>`}
+          </div>
+        </div>
+        ${renderTrendChart(chartRows,ensemble,ciLow,ciHigh)}
+        <div class="data-notice">Statistical estimates based on ${n} historical shifts. Accuracy improves as more data accumulates. Not a production guarantee.</div>
+      </div>
+    </div>`;
+  }catch(err){
+    console.error(err);
+    panel.innerHTML=`<div class="proj-panel"><div class="proj-hdr"><div class="proj-hdr-left"><span class="proj-icon">🤖</span><div><div class="proj-title">Projection Error</div></div></div></div>
+    <div class="proj-body"><div class="data-notice">Could not load historical data: ${err.message}</div></div></div>`;
+  }
+}
+
 // ═══════════════════════════════════════
 // PRODUCTION RENDER
 // ═══════════════════════════════════════
@@ -599,25 +878,38 @@ function renderProdList(rows){
   currentByDate = {};
   rows.forEach(r=>{ currentByDate[r.shift_date]=r; });
 
+  const todayStr = isoDate(new Date());
   const days=[];
   for(let i=0;i<7;i++) days.push(isoDate(addDays(activeWeekMonday,i)));
 
   // Build week strip
   let strip = '<div class="week-strip">';
   days.forEach((dateStr,idx)=>{
-    const r=currentByDate[dateStr];
+    const r        = currentByDate[dateStr];
+    const isFuture = dateStr > todayStr;
+    const isToday  = dateStr === todayStr;
+
+    if(isFuture){
+      strip+=`<div class="day-btn day-btn-future" id="day-btn-${idx}" onclick="selectDay(${idx},'${dateStr}')">
+        <div class="db-name">${dayShort(dateStr)}</div>
+        <div class="db-date">${shortDate(dateStr)}</div>
+        <div class="db-future-tag">Projection</div>
+      </div>`;
+      return;
+    }
+
     if(!r){
       strip+=`<div class="day-btn day-btn-empty" id="day-btn-${idx}">
         <div class="db-name">${dayShort(dateStr)}</div>
         <div class="db-date">${shortDate(dateStr)}</div>
-        <div class="db-no-shift">No shift</div>
+        <div class="db-no-shift">${isToday?'In progress':'No shift'}</div>
       </div>`;
       return;
     }
     const csAtt=r.cases_planned>0?Math.round((r.cases_produced/r.cases_planned)*100*PE):null;
     const chipCls=csAtt!==null?(csAtt>=90?'db-chip-green':csAtt>=70?'db-chip-amber':'db-chip-red'):'db-chip-gray';
-    strip+=`<div class="day-btn" id="day-btn-${idx}" onclick="selectDay(${idx},'${dateStr}')">
-      <div class="db-name">${dayShort(dateStr)}</div>
+    strip+=`<div class="day-btn${isToday?' day-btn-today':''}" id="day-btn-${idx}" onclick="selectDay(${idx},'${dateStr}')">
+      <div class="db-name">${dayShort(dateStr)}${isToday?' ·':''}</div>
       <div class="db-date">${shortDate(dateStr)}</div>
       <div class="db-sup">${r.supervisor||'—'}</div>
       ${csAtt!==null?`<span class="db-chip ${chipCls}">${csAtt}%</span>`:''}
@@ -630,7 +922,7 @@ function renderProdList(rows){
   document.getElementById('detailPanelArea').innerHTML=
     `<div class="detail-panel"><div class="detail-panel-empty">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-      Click a day above to view its details.
+      Click a past day for actuals · Click a future day for ML projection.
     </div></div>`;
   selectedDayIdx=null;
 }
