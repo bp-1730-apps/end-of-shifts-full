@@ -51,42 +51,44 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .pace-icon{font-size:1.1rem}
 .pace-title{font-size:.92rem;font-weight:700;color:var(--g800)}
 .pace-sub{font-size:.72rem;color:var(--g500);margin-top:.05rem}
-.pace-body{padding:1.2rem 1.3rem;display:grid;grid-template-columns:1fr 2fr;gap:1.25rem}
-.pace-left{display:flex;flex-direction:column;gap:.85rem}
-.pace-right{display:flex;flex-direction:column;gap:.75rem;justify-content:center}
+.pace-body{padding:1.1rem 1.3rem;display:flex;flex-direction:column;gap:1rem}
 
-/* target setter */
-.target-setter{display:flex;align-items:flex-end;gap:.5rem}
-.target-setter .f{flex:1}
-.target-setter .f label{display:block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);margin-bottom:.3rem}
-.target-setter input{width:100%;background:var(--white);border:1px solid var(--g300);border-radius:var(--rs);color:var(--g800);font-family:var(--fm);font-size:.95rem;padding:.5rem .65rem;outline:none;transition:border-color .15s,box-shadow .15s}
-.target-setter input:focus{border-color:var(--brand-m);box-shadow:0 0 0 3px var(--brand-l)}
-.target-setter .set-by{flex:1}
-.target-setter .set-by input{font-family:var(--fb);font-size:.85rem}
-.save-target-btn{background:var(--brand);color:#fff;border:none;border-radius:var(--rs);padding:.5rem .95rem;font-family:var(--fb);font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s}
+/* daily target grid */
+.daily-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.5rem}
+.daily-cell{display:flex;flex-direction:column;gap:.3rem}
+.daily-cell label{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);text-align:center}
+.daily-cell label.today-lbl{color:var(--brand)}
+.daily-cell input{width:100%;background:var(--white);border:1px solid var(--g300);border-radius:var(--rs);color:var(--g800);font-family:var(--fm);font-size:.82rem;padding:.45rem .4rem;outline:none;text-align:center;transition:border-color .15s,box-shadow .15s}
+.daily-cell input:focus{border-color:var(--brand-m);box-shadow:0 0 0 3px var(--brand-l)}
+.daily-cell input.today-input{border-color:var(--brand-m);background:var(--brand-l)}
+.daily-cell .daily-actual{font-size:.68rem;text-align:center;font-family:var(--fm);font-weight:700;padding:.2rem 0;border-radius:3px;margin-top:.1rem}
+.daily-cell .da-pos{color:var(--brand)}
+.daily-cell .da-neg{color:#dc2626}
+.daily-cell .da-none{color:var(--g300)}
+.target-row{display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.set-by-wrap{display:flex;align-items:center;gap:.5rem;flex:1;min-width:180px}
+.set-by-wrap label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g500);white-space:nowrap}
+.set-by-wrap input{flex:1;background:var(--white);border:1px solid var(--g300);border-radius:var(--rs);color:var(--g800);font-family:var(--fb);font-size:.85rem;padding:.45rem .6rem;outline:none;transition:border-color .15s}
+.set-by-wrap input:focus{border-color:var(--brand-m);box-shadow:0 0 0 3px var(--brand-l)}
+.save-target-btn{background:var(--brand);color:#fff;border:none;border-radius:var(--rs);padding:.5rem 1rem;font-family:var(--fb);font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0}
 .save-target-btn:hover{background:var(--brand-m)}
 .save-target-btn:disabled{opacity:.5;cursor:not-allowed}
-.target-meta{font-size:.7rem;color:var(--g400);margin-top:.15rem}
+.target-meta{font-size:.7rem;color:var(--g400)}
 
-/* progress bar */
-.pace-bar-wrap{display:flex;flex-direction:column;gap:.4rem}
-.pace-bar-labels{display:flex;justify-content:space-between;font-size:.72rem;font-weight:600;color:var(--g600)}
-.pace-bar-track{background:var(--g100);border-radius:100px;height:14px;overflow:hidden;position:relative}
-.pace-bar-fill{height:100%;border-radius:100px;transition:width .6s ease;background:var(--brand)}
-.pace-bar-fill.warn{background:var(--accent)}
-.pace-bar-fill.danger{background:#dc2626}
-.pace-bar-proj{position:absolute;top:0;height:100%;border-left:2px dashed rgba(0,0,0,.25);transition:left .6s ease}
-
-/* pace stat cards */
-.pace-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem}
-.pace-stat{background:var(--g50);border:1px solid var(--g200);border-radius:var(--rs);padding:.6rem .8rem}
-.pace-stat .ps-lbl{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g400);margin-bottom:.2rem}
-.pace-stat .ps-val{font-family:var(--fm);font-weight:700;font-size:1rem;color:var(--g800);line-height:1}
-.pace-stat .ps-sub{font-size:.68rem;color:var(--g400);margin-top:.15rem}
+/* pace stats */
+.pace-stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:.75rem}
+.pace-block{background:var(--g50);border:1px solid var(--g200);border-radius:var(--rs);padding:.85rem 1rem}
+.pb-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g500);margin-bottom:.65rem;display:flex;align-items:center;gap:.4rem}
+.pb-title::after{content:'';flex:1;height:1px;background:var(--g200)}
+.pb-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+.pace-stat{background:var(--white);border:1px solid var(--g200);border-radius:var(--rs);padding:.55rem .7rem}
+.pace-stat .ps-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g400);margin-bottom:.2rem}
+.pace-stat .ps-val{font-family:var(--fm);font-weight:700;font-size:.95rem;color:var(--g800);line-height:1}
+.pace-stat .ps-sub{font-size:.65rem;color:var(--g400);margin-top:.15rem}
 .pace-stat.ahead .ps-val{color:var(--brand)}
 .pace-stat.behind .ps-val{color:#dc2626}
 .pace-stat.warn .ps-val{color:var(--accent)}
-.pace-no-target{grid-column:1/-1;text-align:center;padding:1.5rem;color:var(--g400);font-size:.83rem}
+.pace-no-target{text-align:center;padding:1.25rem;color:var(--g400);font-size:.83rem}
 
 /* KPI row */
 .section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g500);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
@@ -160,14 +162,14 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   .hdr-right{display:none}
   .kpi-row{grid-template-columns:repeat(3,1fr)}
   .cards{grid-template-columns:1fr}
-  .pace-body{grid-template-columns:1fr}
-  .pace-stats{grid-template-columns:repeat(3,1fr)}
-  .target-setter{flex-wrap:wrap}
+  .daily-grid{grid-template-columns:repeat(4,1fr)}
+  .pace-stats-row{grid-template-columns:1fr}
 }
 @media(max-width:480px){
   .kpi-row{grid-template-columns:repeat(2,1fr)}
   .kpi-divider{display:none}
-  .pace-stats{grid-template-columns:repeat(2,1fr)}
+  .daily-grid{grid-template-columns:repeat(4,1fr)}
+  .pb-stats{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -202,47 +204,39 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   </div>
 
   <!-- ══ PACE TRACKER ══ -->
-  <div class="section-label">Weekly Pounds Target</div>
+  <div class="section-label">Daily Pounds Targets</div>
   <div class="pace-card">
     <div class="pace-hdr">
       <div class="pace-hdr-left">
         <span class="pace-icon">🎯</span>
         <div>
           <div class="pace-title">Production Lbs Pace Tracker</div>
-          <div class="pace-sub">Set a weekly pounds target — track actual vs projected through the week</div>
+          <div class="pace-sub">Set a target for each day — track today vs target and cumulative week-to-date</div>
         </div>
       </div>
     </div>
     <div class="pace-body">
-      <div class="pace-left">
-        <div class="target-setter">
-          <div class="f">
-            <label>Weekly Lbs Target</label>
-            <input type="number" id="targetInput" min="1" placeholder="e.g. 500000">
-          </div>
-          <div class="f set-by">
-            <label>Set by</label>
-            <input type="text" id="targetSetBy" placeholder="Your name">
-          </div>
-          <button class="save-target-btn" id="saveTargetBtn" onclick="saveTarget()">Set Target</button>
-        </div>
-        <div class="target-meta" id="targetMeta"></div>
-        <div class="pace-bar-wrap" id="paceBarWrap" style="display:none">
-          <div class="pace-bar-labels">
-            <span id="paceBarLeft">0 lbs produced</span>
-            <span id="paceBarRight">Target: —</span>
-          </div>
-          <div class="pace-bar-track">
-            <div class="pace-bar-fill" id="paceBarFill" style="width:0%"></div>
-            <div class="pace-bar-proj" id="paceBarProj" style="left:0%;display:none"></div>
-          </div>
-        </div>
+
+      <!-- Daily input grid -->
+      <div class="daily-grid" id="dailyGrid">
+        <!-- Rendered by JS -->
       </div>
-      <div class="pace-right">
-        <div class="pace-stats" id="paceStats">
-          <div class="pace-no-target">Set a weekly target above to see pace projection.</div>
+
+      <!-- Set by + Save -->
+      <div class="target-row">
+        <div class="set-by-wrap">
+          <label>Set by</label>
+          <input type="text" id="targetSetBy" placeholder="Your name">
         </div>
+        <button class="save-target-btn" id="saveTargetBtn" onclick="saveTarget()">Save Targets</button>
+        <span class="target-meta" id="targetMeta"></span>
       </div>
+
+      <!-- Pace stats: Today + Week to Date -->
+      <div class="pace-stats-row" id="paceStatsRow">
+        <div class="pace-no-target">Set daily targets above to see pace tracking.</div>
+      </div>
+
     </div>
   </div>
 
@@ -377,154 +371,187 @@ async function sbInsert(table,row){
   if(!res.ok)throw new Error(await res.text());
 }
 
-// ── Pace computation ──
-function computePace(lbsProduced, lbsTarget){
-  const now        = new Date();
-  const dayOfWeek  = now.getDay(); // 0=Sun
-  const daysElapsed = Math.max(dayOfWeek === 0 ? 7 : dayOfWeek, 1);
-  const daysLeft    = Math.max(7 - daysElapsed, 0);
+// ── Daily target helpers ──
+const DAY_COLS = ['mon','tue','wed','thu','fri','sat','sun'];
+const DAY_LABELS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-  // Daily target assuming 5 production days (Mon–Fri)
-  const workDaysTotal   = 5;
-  const workDayRate     = lbsTarget / workDaysTotal;
-
-  // How many work days have elapsed so far (Mon=1…Fri=5, cap at 5)
-  const workDaysElapsed = Math.min(daysElapsed, workDaysTotal);
-
-  // Where the schedule says you SHOULD be right now
-  const scheduledSoFar = Math.round(workDayRate * workDaysElapsed);
-
-  // The key number: how far ahead or behind schedule RIGHT NOW
-  const scheduleGap    = lbsProduced - scheduledSoFar;
-
-  // End-of-week projection based on actual run rate
-  const dailyRate  = lbsProduced / daysElapsed;
-  const projected  = Math.round(dailyRate * 7);
-  const projDelta  = projected - lbsTarget;
-
-  const pct        = lbsTarget > 0 ? Math.min((lbsProduced  / lbsTarget) * 100, 100) : 0;
-  const schedPct   = lbsTarget > 0 ? Math.min((scheduledSoFar / lbsTarget) * 100, 100) : 0;
-  const projPct    = lbsTarget > 0 ? Math.min((projected     / lbsTarget) * 100, 100) : 0;
-
-  return { daysElapsed, daysLeft, workDaysElapsed, workDaysTotal,
-           workDayRate, scheduledSoFar, scheduleGap,
-           dailyRate, projected, projDelta, pct, schedPct, projPct };
+// Map ISO date's day-of-week to col name
+function dateToCol(isoDate){
+  const dow = new Date(isoDate+'T12:00:00').getDay(); // 0=Sun
+  return DAY_COLS[dow===0?6:dow-1];
 }
+// Today's col
+function todayCol(){
+  return dateToCol(isoDate(new Date()));
+}
+function isoDate(d){ return d.toISOString().slice(0,10); }
 
-function renderPace(lbsProduced, lbsTarget){
-  const barWrap   = document.getElementById('paceBarWrap');
-  const paceStats = document.getElementById('paceStats');
-
-  if(!lbsTarget){
-    barWrap.style.display = 'none';
-    paceStats.innerHTML = '<div class="pace-no-target">Set a weekly target above to see pace tracking.</div>';
-    return;
-  }
-
-  const {
-    daysElapsed, daysLeft, workDaysElapsed, workDaysTotal,
-    workDayRate, scheduledSoFar, scheduleGap,
-    dailyRate, projected, projDelta, pct, schedPct, projPct
-  } = computePace(lbsProduced, lbsTarget);
-
-  const onSchedule   = scheduleGap >= 0;
-  const scheduleCls  = onSchedule ? 'ahead' : Math.abs(scheduleGap) < lbsTarget * 0.03 ? 'warn' : 'behind';
-  const projAhead    = projDelta >= 0;
-  const projCls      = projAhead ? 'ahead' : Math.abs(projDelta) < lbsTarget * 0.05 ? 'warn' : 'behind';
-
-  // Progress bar — actual fill + a schedule marker tick
-  barWrap.style.display = 'flex';
-  document.getElementById('paceBarLeft').textContent  = n(lbsProduced)+' lbs produced';
-  document.getElementById('paceBarRight').textContent = 'Weekly target: '+n(lbsTarget)+' lbs';
-  const fill = document.getElementById('paceBarFill');
-  fill.style.width = pct.toFixed(1)+'%';
-  fill.className = 'pace-bar-fill'+(onSchedule?'':(scheduleGap > -(lbsTarget*0.03)?' warn':' danger'));
-
-  // Dashed marker = where you SHOULD be on the bar right now
-  const proj = document.getElementById('paceBarProj');
-  if(schedPct > 0 && schedPct < 100){
-    proj.style.display = 'block';
-    proj.style.left = schedPct.toFixed(1)+'%';
-    proj.title = 'Schedule: '+n(scheduledSoFar)+' lbs by now';
-  } else {
-    proj.style.display = 'none';
-  }
-
-  // Five stat cards
-  const daysLeftLabel = daysLeft === 0 ? 'last day' : daysLeft+'d left';
-  const lbsPerDayStillNeeded = daysLeft > 0
-    ? Math.round((lbsTarget - lbsProduced) / daysLeft)
-    : 0;
-
-  paceStats.innerHTML = `
-    <div class="pace-stat">
-      <div class="ps-lbl">Produced this week</div>
-      <div class="ps-val">${n(lbsProduced)}</div>
-      <div class="ps-sub">${pct.toFixed(1)}% of ${n(lbsTarget)} target</div>
-    </div>
-    <div class="pace-stat ${scheduleCls}">
-      <div class="ps-lbl">${onSchedule ? '▲ Ahead of schedule' : '▼ Behind schedule'}</div>
-      <div class="ps-val">${onSchedule?'+':''}${n(scheduleGap)} lbs</div>
-      <div class="ps-sub">vs ${n(scheduledSoFar)} expected by day ${workDaysElapsed}</div>
-    </div>
-    <div class="pace-stat">
-      <div class="ps-lbl">Daily target</div>
-      <div class="ps-val">${n(Math.round(workDayRate))}</div>
-      <div class="ps-sub">lbs / work day &bull; ${workDaysTotal}d week</div>
-    </div>
-    <div class="pace-stat">
-      <div class="ps-lbl">Projected EoW</div>
-      <div class="ps-val">${n(projected)}</div>
-      <div class="ps-sub">${daysLeftLabel} &bull; need ${n(lbsPerDayStillNeeded)} lbs/day</div>
-    </div>
-    <div class="pace-stat ${projCls}">
-      <div class="ps-lbl">Projected vs target</div>
-      <div class="ps-val">${projAhead?'+':''}${n(projDelta)}</div>
-      <div class="ps-sub">${projAhead?'On pace to meet target':'Off pace — unlikely to hit'}</div>
+// ── Build daily input grid ──
+function buildDailyGrid(){
+  const todayC = todayCol();
+  let html = '';
+  DAY_COLS.forEach((col, i)=>{
+    const isToday = col === todayC;
+    html += `<div class="daily-cell">
+      <label class="${isToday?'today-lbl':''}">${DAY_LABELS[i]}${isToday?' ★':''}</label>
+      <input type="number" id="tgt-${col}" min="0" placeholder="0"
+        class="${isToday?'today-input':''}"
+        onblur="updateDailyActual('${col}')">
+      <div class="daily-actual da-none" id="act-${col}">—</div>
     </div>`;
+  });
+  document.getElementById('dailyGrid').innerHTML = html;
 }
 
-// ── Target load/save ──
+// ── Update actual display under a day's input ──
+function updateDailyActual(col){
+  if(!currentProdByDate) return;
+  // Find the shift for that weekday
+  const dateStr = mondayPlus(DAY_COLS.indexOf(col));
+  const row = currentProdByDate[dateStr];
+  const actual = row ? (row.lbs_produced||0) : null;
+  const target = parseInt(document.getElementById('tgt-'+col)?.value)||0;
+  const el = document.getElementById('act-'+col);
+  if(!el) return;
+  if(actual===null){ el.textContent='—'; el.className='daily-actual da-none'; return; }
+  el.textContent = actual.toLocaleString()+' lbs';
+  el.className = 'daily-actual '+(target>0?(actual>=target?'da-pos':'da-neg'):'da-none');
+}
+
+function mondayPlus(offset){
+  const dt = new Date(monday+'T12:00:00');
+  dt.setDate(dt.getDate()+offset);
+  return isoDate(dt);
+}
+
+// ── Load target ──
 let currentTarget = null;
+let currentProdByDate = null;
 
 async function loadTarget(){
   try{
-    const rows = await sbGet('eos_weekly_targets', `week_start=eq.${monday}&select=lbs_target,set_by,updated_at`, 'updated_at.desc');
+    const cols = DAY_COLS.map(c=>'lbs_target_'+c).join(',');
+    const rows = await sbGet('eos_weekly_targets',
+      `week_start=eq.${monday}&select=${cols},set_by,updated_at`,
+      'updated_at.desc');
     if(rows.length){
       currentTarget = rows[0];
-      document.getElementById('targetInput').value  = rows[0].lbs_target;
-      document.getElementById('targetSetBy').value  = rows[0].set_by||'';
-      const updStr = rows[0].updated_at ? new Date(rows[0].updated_at).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      DAY_COLS.forEach(col=>{
+        const el = document.getElementById('tgt-'+col);
+        if(el) el.value = rows[0]['lbs_target_'+col]||'';
+      });
+      document.getElementById('targetSetBy').value = rows[0].set_by||'';
+      const updStr = rows[0].updated_at
+        ? new Date(rows[0].updated_at).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})
+        : '';
       document.getElementById('targetMeta').textContent =
-        `Last set by ${rows[0].set_by||'—'} on ${updStr}`;
+        `Last saved by ${rows[0].set_by||'—'} · ${updStr}`;
     }
-  }catch(e){console.warn('Could not load target:',e);}
+  }catch(e){ console.warn('Could not load target:',e); }
 }
 
+// ── Save targets ──
 window.saveTarget = async function(){
-  const lbsTarget = parseInt(document.getElementById('targetInput').value);
-  const setBy     = document.getElementById('targetSetBy').value.trim();
-  if(!lbsTarget || lbsTarget < 1){ alert('Enter a valid lbs target.'); return; }
+  const setBy = document.getElementById('targetSetBy').value.trim();
+  const row = { week_start: monday, set_by: setBy, updated_at: new Date().toISOString() };
+  DAY_COLS.forEach(col=>{
+    row['lbs_target_'+col] = parseInt(document.getElementById('tgt-'+col)?.value)||0;
+  });
   const btn = document.getElementById('saveTargetBtn');
-  btn.disabled = true; btn.textContent = 'Saving…';
+  btn.disabled=true; btn.textContent='Saving…';
   try{
-    await sbUpsert('eos_weekly_targets',
-      { week_start: monday, lbs_target: lbsTarget, set_by: setBy, updated_at: new Date().toISOString() },
-      'week_start'
-    );
-    currentTarget = { lbs_target: lbsTarget, set_by: setBy };
-    document.getElementById('targetMeta').textContent =
-      `Set by ${setBy||'—'} just now`;
-    btn.textContent = '✓ Saved';
-    setTimeout(()=>{ btn.disabled=false; btn.textContent='Set Target'; },2000);
-    // Re-render pace with current lbs data
+    await sbUpsert('eos_weekly_targets', row, 'week_start');
+    currentTarget = row;
+    document.getElementById('targetMeta').textContent = `Saved by ${setBy||'—'} just now`;
+    btn.textContent='✓ Saved';
+    setTimeout(()=>{ btn.disabled=false; btn.textContent='Save Targets'; },2000);
     await loadAll();
   }catch(err){
     console.error(err);
-    alert('Could not save target: '+err.message);
-    btn.disabled=false; btn.textContent='Set Target';
+    alert('Could not save: '+err.message);
+    btn.disabled=false; btn.textContent='Save Targets';
   }
 };
+
+// ── Render pace stats ──
+function renderPace(prodRows){
+  const statsRow = document.getElementById('paceStatsRow');
+  if(!currentTarget){ statsRow.innerHTML='<div class="pace-no-target">Set daily targets above to see pace tracking.</div>'; return; }
+
+  const todayC   = todayCol();
+  const todayIdx = DAY_COLS.indexOf(todayC);
+
+  // Build date→actual map from submitted production rows
+  const byDate = {};
+  prodRows.forEach(r=>{ byDate[r.shift_date] = r.lbs_produced||0; });
+
+  // Today
+  const todayDateStr = mondayPlus(todayIdx);
+  const todayTarget  = currentTarget['lbs_target_'+todayC]||0;
+  const todayActual  = byDate[todayDateStr]||0;
+  const todayVar     = todayActual - todayTarget;
+  const todayCls     = todayTarget>0 ? (todayVar>=0?'ahead':Math.abs(todayVar)<todayTarget*0.05?'warn':'behind') : '';
+
+  // Week to date (Mon through today)
+  let wtdTarget=0, wtdActual=0;
+  for(let i=0; i<=Math.min(todayIdx, DAY_COLS.length-1); i++){
+    wtdTarget += currentTarget['lbs_target_'+DAY_COLS[i]]||0;
+    wtdActual += byDate[mondayPlus(i)]||0;
+  }
+  const wtdVar = wtdActual - wtdTarget;
+  const wtdPct = wtdTarget>0 ? Math.round((wtdActual/wtdTarget)*100) : null;
+  const wtdCls = wtdTarget>0 ? (wtdVar>=0?'ahead':Math.abs(wtdVar)<wtdTarget*0.03?'warn':'behind') : '';
+
+  // Weekly total target
+  const weekTotalTarget = DAY_COLS.reduce((s,c)=>s+(currentTarget['lbs_target_'+c]||0),0);
+  const weekTotalActual = prodRows.reduce((s,r)=>s+(r.lbs_produced||0),0);
+  const weekRemaining   = Math.max(weekTotalTarget - weekTotalActual, 0);
+
+  statsRow.innerHTML = `
+    <div class="pace-block">
+      <div class="pb-title">Today — ${DAY_LABELS[todayIdx]}</div>
+      <div class="pb-stats">
+        <div class="pace-stat">
+          <div class="ps-lbl">Target</div>
+          <div class="ps-val">${n(todayTarget)||'—'}</div>
+          <div class="ps-sub">lbs today</div>
+        </div>
+        <div class="pace-stat">
+          <div class="ps-lbl">Produced</div>
+          <div class="ps-val">${n(todayActual)}</div>
+          <div class="ps-sub">lbs today</div>
+        </div>
+        <div class="pace-stat ${todayCls}">
+          <div class="ps-lbl">${todayVar>=0?'▲ Ahead':'▼ Behind'}</div>
+          <div class="ps-val">${todayTarget>0?(todayVar>=0?'+':'')+n(todayVar):'—'}</div>
+          <div class="ps-sub">vs today's target</div>
+        </div>
+      </div>
+    </div>
+    <div class="pace-block">
+      <div class="pb-title">Week to Date — Mon thru ${DAY_LABELS[todayIdx]}</div>
+      <div class="pb-stats">
+        <div class="pace-stat">
+          <div class="ps-lbl">WTD Target</div>
+          <div class="ps-val">${n(wtdTarget)||'—'}</div>
+          <div class="ps-sub">${wtdPct!==null?wtdPct+'% attained':''}</div>
+        </div>
+        <div class="pace-stat">
+          <div class="ps-lbl">WTD Produced</div>
+          <div class="ps-val">${n(wtdActual)}</div>
+          <div class="ps-sub">of ${n(weekTotalTarget)} weekly</div>
+        </div>
+        <div class="pace-stat ${wtdCls}">
+          <div class="ps-lbl">${wtdVar>=0?'▲ Ahead':'▼ Behind'}</div>
+          <div class="ps-val">${wtdTarget>0?(wtdVar>=0?'+':'')+n(wtdVar):'—'}</div>
+          <div class="ps-sub">${n(weekRemaining)} lbs left this week</div>
+        </div>
+      </div>
+    </div>`;
+
+  // Update actuals under each day input
+  DAY_COLS.forEach(c => updateDailyActual(c));
+}
 
 // ── Main data load ──
 async function loadAll(){
@@ -540,9 +567,13 @@ async function loadAll(){
       sbGet('eos_batching_shifts',   weekFilter)
     ]);
 
+    // Cache prod rows by date for actuals display
+    currentProdByDate = {};
+    prodRows.forEach(r=>{ currentProdByDate[r.shift_date]=r; });
+
     // Production KPIs
-    let csPl=0,csAc=0,csVar=0,prodLbsAc=0;
-    prodRows.forEach(r=>{csPl+=r.cases_planned||0;csAc+=r.cases_produced||0;csVar+=r.cases_variance||0;prodLbsAc+=r.lbs_produced||0;});
+    let csPl=0,csAc=0,csVar=0;
+    prodRows.forEach(r=>{csPl+=r.cases_planned||0;csAc+=r.cases_produced||0;csVar+=r.cases_variance||0;});
     setKpi('k-csPl', n(csPl),  null);
     setKpi('k-csAc', n(csAc),  null);
     setKpi('k-csVar',(csVar>0?'+':'')+n(csVar), csVar>=0?'pos':'neg');
@@ -561,9 +592,8 @@ async function loadAll(){
     document.getElementById('prodLogBadge').textContent    = prodRows.length+' this week';
     document.getElementById('batchLogBadge').textContent   = batchRows.length+' this week';
 
-    // Pace tracker — use production lbs produced vs weekly target
-    const target = currentTarget ? currentTarget.lbs_target : null;
-    renderPace(prodLbsAc, target);
+    // Pace tracker
+    renderPace(prodRows);
 
     renderProdLog(prodRows);
     renderBatchLog(batchRows);
@@ -677,6 +707,7 @@ window.exportData = async function(table){
 
 // Init
 (async()=>{
+  buildDailyGrid();
   await loadTarget();
   await loadAll();
 })();
