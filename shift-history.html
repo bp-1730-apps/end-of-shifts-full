@@ -777,14 +777,34 @@ async function renderProjection(dateStr){
     const bW=expWeights(bVals.length,0.08), baseMean=wMean(bVals,bW), baseStd=wStd(bVals,baseMean,bW);
     const dowProj=baseMean*dowMult;
 
-    // Typical headcount & plan for this DOW
-    const recentHC=hist.slice(-10).filter(r=>r.headcount_present>0).map(r=>r.headcount_present);
-    const typHC=recentHC.length?recentHC.sort((a,b)=>a-b)[Math.floor(recentHC.length/2)]:null;
+    // Typical plan for this DOW
     const sdRows=hist.filter(r=>new Date(r.shift_date+'T12:00:00').getDay()===dow).slice(-6);
     const typPlan=sdRows.length?Math.round(sdRows.reduce((s,r)=>s+(r.lbs_planned||0),0)/sdRows.length):Math.round(baseMean);
 
-    const hcProj=typHC?Math.round(avgEff*typHC):null;
-    const regProj=reg&&typHC?Math.round(reg.predict(typPlan,typHC)):null;
+    // ── Scheduled headcount: prefer target over historical median ──
+    const DAY_COLS_PROJ=['mon','tue','wed','thu','fri','sat','sun'];
+    const dowColName = 'hc_target_'+DAY_COLS_PROJ[dow===0?6:dow-1];
+    const monStr = isoDate(activeWeekMonday);
+    let scheduledHC = null;
+    let hcSource = 'historical median';
+    try{
+      const tgtRows = await sbGet('eos_weekly_targets',
+        `week_start=eq.${monStr}&select=${DAY_COLS_PROJ.map(c=>'hc_target_'+c).join(',')}`,
+        'updated_at.desc');
+      if(tgtRows.length){
+        const hcVal = parseInt(tgtRows[0][dowColName])||0;
+        if(hcVal>0){ scheduledHC=hcVal; hcSource='scheduled'; }
+      }
+    }catch(e){ /* fall through to historical */ }
+
+    // Fall back to historical median if no scheduled HC
+    if(!scheduledHC){
+      const recentHC=hist.slice(-10).filter(r=>r.headcount_present>0).map(r=>r.headcount_present);
+      scheduledHC=recentHC.length?recentHC.sort((a,b)=>a-b)[Math.floor(recentHC.length/2)]:null;
+    }
+
+    const hcProj=scheduledHC?Math.round(avgEff*scheduledHC):null;
+    const regProj=reg&&scheduledHC?Math.round(reg.predict(typPlan,scheduledHC)):null;
     const projs=[dowProj,hcProj,regProj].filter(v=>v&&v>0);
     const ensemble=Math.round(projs.reduce((a,b)=>a+b,0)/projs.length);
 
@@ -830,7 +850,7 @@ async function renderProjection(dateStr){
             <div class="mc-title">Headcount Efficiency</div>
             <div class="model-row"><span class="model-lbl">Avg lbs / person</span><span class="model-val">${Math.round(avgEff).toLocaleString()}</span></div>
             <div class="model-row"><span class="model-lbl">Std dev</span><span class="model-val">±${Math.round(effStd).toLocaleString()}</span></div>
-            <div class="model-row"><span class="model-lbl">Typical HC</span><span class="model-val">${typHC||'—'}</span></div>
+            <div class="model-row"><span class="model-lbl">HC used (${hcSource})</span><span class="model-val ${hcSource==='scheduled'?'good':''}">${scheduledHC||'—'}</span></div>
             <div class="model-row"><span class="model-lbl">HC Projection</span><span class="model-val ${hcProj?'good':''}">${hcProj?hcProj.toLocaleString():'—'}</span></div>
           </div>
           <div class="model-card">
