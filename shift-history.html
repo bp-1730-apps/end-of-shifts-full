@@ -54,7 +54,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 
 /* summary cards */
 .summary-row{display:grid;gap:.75rem;margin-bottom:1.25rem}
-.summary-row.prod{grid-template-columns:repeat(5,1fr)}
+.summary-row.prod{grid-template-columns:repeat(auto-fit,minmax(110px,1fr))}
 .summary-row.batch{grid-template-columns:repeat(5,1fr)}
 .sum-card{background:var(--white);border:1px solid var(--g200);border-radius:var(--rs);padding:.7rem .9rem;box-shadow:var(--sh)}
 .sum-card .sk{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400);margin-bottom:.25rem}
@@ -462,22 +462,47 @@ let allCurrentRows = []; // full week rows — for reverting summary on deselect
 
 // ── Render summary cards for any set of rows + label ──
 function renderProdSummaryCards(rows, label){
-  let lbsPl=0,lbsAc=0,csPl=0,csAc=0,uc=0,nm=0,fa=0,ab=0,hn=0,hp=0;
+  let lbsPl=0,lbsAc=0,csPl=0,csAc=0;
   rows.forEach(r=>{
     lbsPl+=r.lbs_planned||0; lbsAc+=r.lbs_produced||0;
     csPl+=r.cases_planned||0; csAc+=r.cases_produced||0;
-    uc+=r.unsafe_conditions||0; nm+=r.near_misses||0; fa+=r.first_aid||0;
-    ab+=r.absences||0; hn+=r.headcount_needed||0; hp+=r.headcount_present||0;
   });
-  const lbsVar=lbsAc-lbsPl, csVar=csAc-csPl;
+  const lbsVar=lbsAc-lbsPl;
   const avgAttArr=rows.filter(r=>r.cases_planned>0).map(r=>Math.round((r.cases_produced/r.cases_planned)*100*PE));
   const avgAtt=avgAttArr.length?Math.round(avgAttArr.reduce((a,b)=>a+b)/avgAttArr.length):null;
+
+  // Week totals — always from full week regardless of day selection
+  const isDayView = rows.length === 1 && allCurrentRows.length > 1;
+  let wkLbsPl=0, wkLbsAc=0;
+  allCurrentRows.forEach(r=>{ wkLbsPl+=r.lbs_planned||0; wkLbsAc+=r.lbs_produced||0; });
+  const wkLbsVar = wkLbsAc - wkLbsPl;
+
+  const dayCard = isDayView ? `
+      <div class="sum-card ${lbsVar>=0?'pos':'neg'}">
+        <div class="sk">Day ${lbsVar>=0?'Ahead':'Behind'}</div>
+        <div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div>
+        <div class="ss">lbs vs day plan</div>
+      </div>` : `
+      <div class="sum-card ${lbsVar>=0?'pos':'neg'}">
+        <div class="sk">Lbs ${lbsVar>=0?'Ahead':'Behind'}</div>
+        <div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div>
+        <div class="ss">vs planned</div>
+      </div>`;
+
+  const weekCard = isDayView ? `
+      <div class="sum-card ${wkLbsVar>=0?'pos':'neg'}">
+        <div class="sk">Week ${wkLbsVar>=0?'Ahead':'Behind'}</div>
+        <div class="sv">${wkLbsVar>0?'+':''}${n(wkLbsVar)}</div>
+        <div class="ss">lbs · all shifts</div>
+      </div>` : '';
+
   document.getElementById('summaryCards').innerHTML = `
     <div class="sum-context">${label}</div>
     <div class="summary-row prod">
       <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
       <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
-      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs ${lbsVar>=0?'Ahead':'Behind'}</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div><div class="ss">vs planned</div></div>
+      ${dayCard}
+      ${weekCard}
       <div class="sum-card"><div class="sk">Cases Planned</div><div class="sv">${n(csPl)}</div></div>
       <div class="sum-card ${avgAtt!==null?(avgAtt>=90?'pos':avgAtt>=70?'':'neg'):''}">
         <div class="sk">Attainment</div><div class="sv">${avgAtt!==null?avgAtt+'%':'—'}</div>
