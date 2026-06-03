@@ -564,13 +564,13 @@ function renderProdSummaryCards(rows, label){
   document.getElementById('summaryCards').innerHTML = `
     <div class="sum-context">${label}</div>
     <div class="summary-row prod">
-      <div class="sum-card"><div class="sk">Lbs Planned <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Planned</strong><hr>Total lbs scheduled. <hr><span class="tt-action">Consistently under-planned?</span> Capture actual capacity for better scheduling.',event)">?</button></div><div class="sv">${n(lbsPl)}</div></div>
+      <div class="sum-card"><div class="sk">Lbs Planned <button class="tt-btn" onclick="showTT(this,TT.sumLbsPlanned,event)">?</button></div><div class="sv">${n(lbsPl)}</div></div>
       <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
       ${dayCard}
       ${weekCard}
-      <div class="sum-card"><div class="sk">Cases Planned <button class="tt-btn" onclick="showTT(this,'<strong>Cases Planned</strong><hr>Total cases scheduled. Use to track customer order fulfillment pace.',event)">?</button></div><div class="sv">${n(csPl)}</div></div>
+      <div class="sum-card"><div class="sk">Cases Planned <button class="tt-btn" onclick="showTT(this,TT.sumCasesPlanned,event)">?</button></div><div class="sv">${n(csPl)}</div></div>
       <div class="sum-card ${avgAtt!==null?(avgAtt>=90?'pos':avgAtt>=70?'':'neg'):''}">
-        <div class="sk">Attainment <button class="tt-btn" onclick="showTT(this,'<strong>Attainment</strong><hr>(Cases Produced / Cases Planned) x 0.98. <hr><span class="tt-good">90%+: Strong.</span> <span class="tt-bad">Under 80%: Investigate</span> -- headcount, line issues, or planning mismatch. <span class="tt-action">Trending down?</span> Check correlation with specific days, lines, or supervisors.',event)">?</button></div><div class="sv">${avgAtt!==null?avgAtt+'%':'—'}</div>
+        <div class="sk">Attainment <button class="tt-btn" onclick="showTT(this,TT.sumAttainment,event)">?</button></div><div class="sv">${avgAtt!==null?avgAtt+'%':'—'}</div>
         <div class="ss">${rows.length} shift${rows.length!==1?'s':''}</div>
       </div>
     </div>`;
@@ -584,15 +584,15 @@ function renderBatchSummaryCards(rows, label){
   document.getElementById('summaryCards').innerHTML = `
     <div class="sum-context">${label}</div>
     <div class="summary-row batch">
-      <div class="sum-card"><div class="sk">Lbs Planned <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Planned</strong><hr>Total lbs scheduled. <hr><span class="tt-action">Consistently under-planned?</span> Capture actual capacity for better scheduling.',event)">?</button></div><div class="sv">${n(lbsPl)}</div></div>
+      <div class="sum-card"><div class="sk">Lbs Planned <button class="tt-btn" onclick="showTT(this,TT.sumLbsPlanned,event)">?</button></div><div class="sv">${n(lbsPl)}</div></div>
       <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
-      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Variance</strong><hr>Lbs produced minus lbs planned. Positive = ahead, Negative = behind. Check whether driven by headcount, a specific line, or plan accuracy.',event)">?</button></div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
+      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance <button class="tt-btn" onclick="showTT(this,TT.sumLbsVar,event)">?</button></div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
       <div class="sum-card ${att!==null?(att>=90?'pos':att>=70?'':'neg'):''}">
-        <div class="sk">Attainment <button class="tt-btn" onclick="showTT(this,'<strong>Attainment</strong><hr>(Cases Produced / Cases Planned) x 0.98. <hr><span class="tt-good">90%+: Strong.</span> <span class="tt-bad">Under 80%: Investigate</span> -- headcount, line issues, or planning mismatch. <span class="tt-action">Trending down?</span> Check correlation with specific days, lines, or supervisors.',event)">?</button></div><div class="sv">${att!==null?att+'%':'—'}</div>
+        <div class="sk">Attainment <button class="tt-btn" onclick="showTT(this,TT.sumAttainment,event)">?</button></div><div class="sv">${att!==null?att+'%':'—'}</div>
         <div class="ss">${rows.length} shift${rows.length!==1?'s':''}</div>
       </div>
       <div class="sum-card ${(uc+nm+fa)>0?'neg':''}">
-        <div class="sk">Safety Incidents <button class="tt-btn" onclick="showTT(this,'<strong>Safety Incidents</strong><hr>Sum of Unsafe Conditions + Near Misses + First Aid. <hr><span class="tt-bad">Near Misses are the most critical.</span> They are accidents that almost happened -- root cause immediately. <span class="tt-action">Clustering on specific days or supervisors?</span> Operational signal, not random.',event)">?</button></div><div class="sv">${uc+nm+fa}</div>
+        <div class="sk">Safety Incidents <button class="tt-btn" onclick="showTT(this,TT.sumSafety,event)">?</button></div><div class="sv">${uc+nm+fa}</div>
         <div class="ss">${uc} UC &bull; ${nm} NM &bull; ${fa} FA</div>
       </div>
     </div>`;
@@ -1070,37 +1070,37 @@ function renderProdDetail(r){
     </div>
     <div class="detail-grid">
       <div class="detail-section">
-        <div class="ds-title">Safety <button class="tt-btn" onclick="showTT(this,'<strong>Safety Section</strong><hr>Three types: Unsafe Conditions (physical hazards), Near Misses (almost-injuries -- most critical), First Aid (actual injuries). <hr><span class="tt-action">High near misses?</span> Address root cause before the next shift -- these are your leading safety indicator.',event)">?</button></div>
+        <div class="ds-title">Safety <button class="tt-btn" onclick="showTT(this,TT.detSafety,event)">?</button></div>
         <div class="ds-row"><span class="ds-lbl">Unsafe Conditions</span><span class="ds-val ${parseInt(r.unsafe_conditions)>0?'neg':''}">${r.unsafe_conditions||0}</span></div>
         <div class="ds-row"><span class="ds-lbl">Near Misses</span><span class="ds-val ${parseInt(r.near_misses)>0?'neg':''}">${r.near_misses||0}</span></div>
         <div class="ds-row"><span class="ds-lbl">First Aid</span><span class="ds-val ${parseInt(r.first_aid)>0?'neg':''}">${r.first_aid||0}</span></div>
         ${r.safety_comments?`<div class="ds-text">${r.safety_comments}</div>`:''}
       </div>
       <div class="detail-section">
-        <div class="ds-title">Attendance <button class="tt-btn" onclick="showTT(this,'<strong>Attendance</strong><hr>Compares scheduled vs actual headcount. <hr>Staffed % = present / needed. Below 90% has measurable output impact. <span class="tt-action">Recurring Mon/Fri absences?</span> Common pattern worth addressing. Each absence costs ~3,000-4,000 lbs based on your regression.',event)">?</button></div>
+        <div class="ds-title">Attendance <button class="tt-btn" onclick="showTT(this,TT.detAttendance,event)">?</button></div>
         <div class="ds-row"><span class="ds-lbl">Needed</span><span class="ds-val">${r.headcount_needed||'—'}</span></div>
         <div class="ds-row"><span class="ds-lbl">Present</span><span class="ds-val">${r.headcount_present||'—'}</span></div>
         <div class="ds-row"><span class="ds-lbl">Absences</span><span class="ds-val ${parseInt(r.absences)>0?'neg':''}">${r.absences||0}</span></div>
         ${(r.headcount_needed&&r.headcount_present)?`<div class="ds-row"><span class="ds-lbl">Staffed</span><span class="ds-val">${Math.round((r.headcount_present/r.headcount_needed)*100)}%</span></div>`:''}
       </div>
       <div class="detail-section">
-        <div class="ds-title">SAP <button class="tt-btn" onclick="showTT(this,'<strong>SAP Orders</strong><hr>Tracks whether process orders were closed after production. <hr><span class="tt-bad">Chronic open orders:</span> Creates inventory discrepancies. <span class="tt-good">All completed:</span> Inventory records match production reality.',event)">?</button></div>
+        <div class="ds-title">SAP <button class="tt-btn" onclick="showTT(this,TT.detSAP,event)">?</button></div>
         <div class="ds-row"><span class="ds-lbl">Completed</span><span class="ds-val">${r.sap_completed||'—'}</span></div>
         <div class="ds-row"><span class="ds-lbl">Open</span><span class="ds-val ${parseInt(r.sap_open)>0?'neg':''}">${r.sap_open||0}</span></div>
         ${r.sap_reason?`<div class="ds-text">${r.sap_reason}</div>`:''}
       </div>
       <div class="detail-section">
-        <div class="ds-title">Materials <button class="tt-btn" onclick="showTT(this,'<strong>Materials</strong><hr>Shortages = materials that ran out or arrived late -- direct cause of lost production. STOs = stock movements. Frequent STOs suggest poor pre-shift staging. <hr><span class="tt-action">Same shortage item repeatedly?</span> Procurement issue -- escalate out of the floor.',event)">?</button></div>
+        <div class="ds-title">Materials <button class="tt-btn" onclick="showTT(this,TT.detMaterials,event)">?</button></div>
         ${r.shortages?`<div class="ds-text"><strong>Shortages:</strong> ${r.shortages}</div>`:`<div class="ds-empty">No shortages</div>`}
         ${r.stos?`<div class="ds-text" style="margin-top:.35rem"><strong>STOs:</strong> ${r.stos}</div>`:''}
       </div>
       <div class="detail-section">
-        <div class="ds-title">Training &amp; Quality <button class="tt-btn" onclick="showTT(this,'<strong>Training and Quality</strong><hr>Training notes = compliance audit trail. Quality notes = holds, deviations, consumer triggers. <hr><span class="tt-action">Quality issues on one line only?</span> That line needs a CIL or equipment inspection.',event)">?</button></div>
+        <div class="ds-title">Training &amp; Quality <button class="tt-btn" onclick="showTT(this,TT.detTraining,event)">?</button></div>
         ${r.training_notes?`<div class="ds-text"><strong>Training:</strong> ${r.training_notes}</div>`:`<div class="ds-empty">No training notes</div>`}
         ${r.quality_notes?`<div class="ds-text" style="margin-top:.35rem"><strong>Quality:</strong> ${r.quality_notes}</div>`:''}
       </div>
       <div class="detail-section">
-        <div class="ds-title">Production Totals <button class="tt-btn" onclick="showTT(this,'<strong>Production Totals</strong><hr>Shift-level aggregates across all running lines. <hr><span class="tt-action">Large negative variance with full headcount?</span> One underperforming line is dragging the whole shift -- check line breakdown below.',event)">?</button></div>
+        <div class="ds-title">Production Totals <button class="tt-btn" onclick="showTT(this,TT.detProdTotals,event)">?</button></div>
         <div class="ds-row"><span class="ds-lbl">Lbs Planned</span><span class="ds-val">${n(r.lbs_planned)}</span></div>
         <div class="ds-row"><span class="ds-lbl">Lbs Produced</span><span class="ds-val">${n(r.lbs_produced)}</span></div>
         <div class="ds-row"><span class="ds-lbl">Lbs Variance</span>${varSpan(lv)}</div>
@@ -1114,9 +1114,9 @@ function renderProdDetail(r){
       <div class="ds-title" style="margin-bottom:.6rem">Line Breakdown</div>
       <table class="line-table"><thead><tr>
         <th>Line <button class="tt-btn" onclick="showTT(this,TT.lineName,event)">?</button></th>
-        <th class="c">Lbs Pl <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Planned</strong><hr>Lbs scheduled for this line.',event)">?</button></th><th class="c">Lbs Ac <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Actual</strong><hr>Lbs produced. Consistently below plan on one line? That line is your bottleneck -- investigate equipment or operator assignment.',event)">?</button></th><th class="c">Lbs Var <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Variance</strong><hr>Actual minus planned. Negative on one line only = isolated issue. Negative across all lines = plant-wide problem.',event)">?</button></th>
-        <th class="c">Cs Pl <button class="tt-btn" onclick="showTT(this,'<strong>Cases Planned</strong><hr>Case target for this line.',event)">?</button></th><th class="c">Cs Ac <button class="tt-btn" onclick="showTT(this,'<strong>Cases Actual</strong><hr>Cases produced on this line.',event)">?</button></th><th class="c">Cs Var <button class="tt-btn" onclick="showTT(this,'<strong>Cases Variance</strong><hr>Cases produced minus planned. Negative cases + positive lbs? Product is heavier than expected -- check fill weights.',event)">?</button></th>
-        <th class="c">Att. <button class="tt-btn" onclick="showTT(this,'<strong>Line Attainment</strong><hr>(Cs Produced / Cs Planned) x 0.98. 90%+ means line performing well. Under 70% means dragging the shift. High variance across lines? Some lines are not pulling their weight.',event)">?</button></th><th>Notes</th>
+        <th class="c">Lbs Pl <button class="tt-btn" onclick="showTT(this,TT.sumLbsPlanned,event)">?</button></th><th class="c">Lbs Ac <button class="tt-btn" onclick="showTT(this,TT.lineLbsAc,event)">?</button></th><th class="c">Lbs Var <button class="tt-btn" onclick="showTT(this,TT.sumLbsVar,event)">?</button></th>
+        <th class="c">Cs Pl <button class="tt-btn" onclick="showTT(this,TT.sumCasesPlanned,event)">?</button></th><th class="c">Cs Ac <button class="tt-btn" onclick="showTT(this,TT.lineCsAc,event)">?</button></th><th class="c">Cs Var <button class="tt-btn" onclick="showTT(this,TT.lineCsVar,event)">?</button></th>
+        <th class="c">Att. <button class="tt-btn" onclick="showTT(this,TT.lineAtt,event)">?</button></th><th>Notes</th>
       </tr></thead><tbody>${lineRows}</tbody></table>
     </div>
   </div>`;
@@ -1183,21 +1183,21 @@ function renderBatchDetail(r){
     </div>
     <div class="detail-grid">
       <div class="detail-section">
-        <div class="ds-title">Safety <button class="tt-btn" onclick="showTT(this,'<strong>Safety Section</strong><hr>Three types: Unsafe Conditions (physical hazards), Near Misses (almost-injuries -- most critical), First Aid (actual injuries). <hr><span class="tt-action">High near misses?</span> Address root cause before the next shift -- these are your leading safety indicator.',event)">?</button></div>
+        <div class="ds-title">Safety <button class="tt-btn" onclick="showTT(this,TT.detSafety,event)">?</button></div>
         <div class="ds-row"><span class="ds-lbl">Unsafe Conditions</span><span class="ds-val ${parseInt(r.unsafe_conditions)>0?'neg':''}">${r.unsafe_conditions||0}</span></div>
         <div class="ds-row"><span class="ds-lbl">Near Misses</span><span class="ds-val ${parseInt(r.near_misses)>0?'neg':''}">${r.near_misses||0}</span></div>
         <div class="ds-row"><span class="ds-lbl">First Aid</span><span class="ds-val ${parseInt(r.first_aid)>0?'neg':''}">${r.first_aid||0}</span></div>
         ${r.safety_comments?`<div class="ds-text">${r.safety_comments}</div>`:''}
       </div>
       <div class="detail-section">
-        <div class="ds-title">Batching Totals <button class="tt-btn" onclick="showTT(this,'<strong>Batching Totals</strong><hr>Lbs planned vs produced in batching. <hr><span class="tt-bad">Batching frequently behind production?</span> Batching is the upstream constraint -- production will run short of input material.',event)">?</button></div>
+        <div class="ds-title">Batching Totals <button class="tt-btn" onclick="showTT(this,TT.detBatchTotals,event)">?</button></div>
         <div class="ds-row"><span class="ds-lbl">Lbs Planned</span><span class="ds-val">${n(r.lbs_planned)}</span></div>
         <div class="ds-row"><span class="ds-lbl">Lbs Produced</span><span class="ds-val">${n(r.lbs_produced)}</span></div>
         <div class="ds-row"><span class="ds-lbl">Variance</span>${varSpan(lv)}</div>
         <div class="ds-row"><span class="ds-lbl">Attainment</span><span class="ds-val">${att!==null?att+'%':'—'}</span></div>
       </div>
       <div class="detail-section">
-        <div class="ds-title">Attendance <button class="tt-btn" onclick="showTT(this,'<strong>Attendance</strong><hr>Compares scheduled vs actual headcount. <hr>Staffed % = present / needed. Below 90% has measurable output impact. <span class="tt-action">Recurring Mon/Fri absences?</span> Common pattern worth addressing. Each absence costs ~3,000-4,000 lbs based on your regression.',event)">?</button></div>
+        <div class="ds-title">Attendance <button class="tt-btn" onclick="showTT(this,TT.detAttendance,event)">?</button></div>
         <div class="ds-row"><span class="ds-lbl">Needed</span><span class="ds-val">${r.headcount_needed||'—'}</span></div>
         <div class="ds-row"><span class="ds-lbl">Actual</span><span class="ds-val">${r.headcount_actual||'—'}</span></div>
         <div class="ds-row"><span class="ds-lbl">Absences</span><span class="ds-val ${parseInt(r.absences)>0?'neg':''}">${r.absences||0}</span></div>
@@ -1368,8 +1368,8 @@ window.printReport = function(){
       const lines=Array.isArray(r.lines)?r.lines:(typeof r.lines==='string'?JSON.parse(r.lines||'[]'):[]);
       if(lines.length){
         html+=`<table class="pr-table"><thead><tr>
-          <th>Line</th><th class="c">Lbs Pl <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Planned</strong><hr>Lbs scheduled for this line.',event)">?</button></th><th class="c">Lbs Ac <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Actual</strong><hr>Lbs produced. Consistently below plan on one line? That line is your bottleneck -- investigate equipment or operator assignment.',event)">?</button></th><th class="c">Lbs Var <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Variance</strong><hr>Actual minus planned. Negative on one line only = isolated issue. Negative across all lines = plant-wide problem.',event)">?</button></th>
-          <th class="c">Cs Pl <button class="tt-btn" onclick="showTT(this,'<strong>Cases Planned</strong><hr>Case target for this line.',event)">?</button></th><th class="c">Cs Ac <button class="tt-btn" onclick="showTT(this,'<strong>Cases Actual</strong><hr>Cases produced on this line.',event)">?</button></th><th class="c">Cs Var <button class="tt-btn" onclick="showTT(this,'<strong>Cases Variance</strong><hr>Cases produced minus planned. Negative cases + positive lbs? Product is heavier than expected -- check fill weights.',event)">?</button></th><th class="c">Att. <button class="tt-btn" onclick="showTT(this,'<strong>Line Attainment</strong><hr>(Cs Produced / Cs Planned) x 0.98. 90%+ means line performing well. Under 70% means dragging the shift. High variance across lines? Some lines are not pulling their weight.',event)">?</button></th><th>Notes</th>
+          <th>Line</th><th class="c">Lbs Pl <button class="tt-btn" onclick="showTT(this,TT.sumLbsPlanned,event)">?</button></th><th class="c">Lbs Ac <button class="tt-btn" onclick="showTT(this,TT.lineLbsAc,event)">?</button></th><th class="c">Lbs Var <button class="tt-btn" onclick="showTT(this,TT.sumLbsVar,event)">?</button></th>
+          <th class="c">Cs Pl <button class="tt-btn" onclick="showTT(this,TT.sumCasesPlanned,event)">?</button></th><th class="c">Cs Ac <button class="tt-btn" onclick="showTT(this,TT.lineCsAc,event)">?</button></th><th class="c">Cs Var <button class="tt-btn" onclick="showTT(this,TT.lineCsVar,event)">?</button></th><th class="c">Att. <button class="tt-btn" onclick="showTT(this,TT.lineAtt,event)">?</button></th><th>Notes</th>
         </tr></thead><tbody>`;
         lines.forEach(l=>{
           const isOff=!l.lbs_planned&&!l.lbs_produced&&!l.cases_planned&&!l.cases_produced;
@@ -1401,7 +1401,7 @@ window.printReport = function(){
         <div class="pr-kpi ${att!==null?(att>=90?'green':att>=70?'amber':'red'):'neutral'}"><div class="kk">Attainment</div><div class="kv">${att!==null?att+'%':'—'}</div></div>
       </div></div>`;
     html+=`<table class="pr-table"><thead><tr>
-      <th>Date</th><th>Supervisor</th><th class="c">Lbs Pl <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Planned</strong><hr>Lbs scheduled for this line.',event)">?</button></th><th class="c">Lbs Ac <button class="tt-btn" onclick="showTT(this,'<strong>Lbs Actual</strong><hr>Lbs produced. Consistently below plan on one line? That line is your bottleneck -- investigate equipment or operator assignment.',event)">?</button></th>
+      <th>Date</th><th>Supervisor</th><th class="c">Lbs Pl <button class="tt-btn" onclick="showTT(this,TT.sumLbsPlanned,event)">?</button></th><th class="c">Lbs Ac <button class="tt-btn" onclick="showTT(this,TT.lineLbsAc,event)">?</button></th>
       <th class="c">Variance</th><th class="c">Att.</th><th class="c">UC</th><th class="c">NM</th><th class="c">FA</th>
     </tr></thead><tbody>`;
     currentRows.forEach(r=>{
@@ -1457,6 +1457,26 @@ const TT = {
   mcDOWProj: '<strong>DOW Projection</strong><hr>DOW = Day of Week. This is the day-of-week model standalone estimate before combining with the other two. Calculated as: historical average lbs output x this weekday multiplier. Example: if average is 70,000 lbs and Thursday multiplier is 1.03, DOW projection is 72,100. <span class="tt-action">Disagrees sharply with the other models?</span> Usually means today headcount or plan is unusually different from the historical pattern for this weekday.',
 
   lineName: '<strong>Line Name</strong><hr>The production line identifier. Your 6 lines are 2A, PL1, MP4, PXM6, 2E, PL2.<hr><span class="tt-action">Offline frequently?</span> A line that appears offline more than once per week needs a maintenance conversation.',
+
+  sumLbsPlanned: '<strong>Lbs Planned</strong><hr>Total lbs scheduled across submitted shifts. <hr><span class=\"tt-action\">Consistently under-planned?</span> Capture actual capacity for better scheduling.',
+  sumCasesPlanned: '<strong>Cases Planned</strong><hr>Total cases scheduled. Use to track customer order fulfillment pace.',
+  sumAttainment: '<strong>Attainment</strong><hr>(Cases Produced / Cases Planned) x 0.98. <hr><span class=\"tt-good\">90%+: Strong.</span> <span class=\"tt-bad\">Under 80%: Investigate</span> -- headcount, line issues, or planning mismatch. <span class=\"tt-action\">Trending down?</span> Check correlation with specific days, lines, or supervisors.',
+  sumSafety: '<strong>Safety Incidents</strong><hr>Sum of Unsafe Conditions + Near Misses + First Aid. <hr><span class=\"tt-bad\">Near Misses are the most critical.</span> They are accidents that almost happened -- root cause immediately. <span class=\"tt-action\">Clustering on specific days or supervisors?</span> Operational signal, not random.',
+  sumLbsVar: '<strong>Lbs Variance</strong><hr>Lbs produced minus lbs planned. Positive = ahead, Negative = behind. Check whether driven by headcount, a specific line, or plan accuracy.',
+  detSafety: '<strong>Safety Section</strong><hr>Three types: Unsafe Conditions (physical hazards), Near Misses (almost-injuries -- most critical), First Aid (actual injuries). <hr><span class=\"tt-action\">High near misses?</span> Address root cause before the next shift -- these are your leading safety indicator.',
+  detAttendance: '<strong>Attendance</strong><hr>Compares scheduled vs actual headcount. <hr>Staffed % = present / needed. Below 90% has measurable output impact. <span class=\"tt-action\">Recurring Mon/Fri absences?</span> Common pattern worth addressing. Each absence costs ~3,000-4,000 lbs based on your regression.',
+  detSAP: '<strong>SAP Orders</strong><hr>Tracks whether process orders were closed after production. <hr><span class=\"tt-bad\">Chronic open orders:</span> Creates inventory discrepancies. <span class=\"tt-good\">All completed:</span> Inventory records match production reality.',
+  detMaterials: '<strong>Materials</strong><hr>Shortages = materials that ran out or arrived late -- direct cause of lost production. STOs = stock movements. Frequent STOs suggest poor pre-shift staging. <hr><span class=\"tt-action\">Same shortage item repeatedly?</span> Procurement issue -- escalate out of the floor.',
+  detTraining: '<strong>Training and Quality</strong><hr>Training notes = compliance audit trail. Quality notes = holds, deviations, consumer triggers. <hr><span class=\"tt-action\">Quality issues on one line only?</span> That line needs a CIL or equipment inspection.',
+  detProdTotals: '<strong>Production Totals</strong><hr>Shift-level aggregates across all running lines. <hr><span class=\"tt-action\">Large negative variance with full headcount?</span> One underperforming line is dragging the whole shift -- check line breakdown below.',
+  detBatchTotals: '<strong>Batching Totals</strong><hr>Lbs planned vs produced in batching. <hr><span class=\"tt-bad\">Batching frequently behind production?</span> Batching is the upstream constraint -- production will run short of input material.',
+  lineLbsPl: '<strong>Lbs Planned (Line)</strong><hr>Lbs scheduled for this line.',
+  lineLbsAc: '<strong>Lbs Actual (Line)</strong><hr>Lbs produced. Consistently below plan on one line? That line is your bottleneck -- investigate equipment or operator assignment.',
+  lineLbsVar: '<strong>Lbs Variance (Line)</strong><hr>Actual minus planned. Negative on one line only = isolated issue. Negative across all lines = plant-wide problem.',
+  lineCsPl: '<strong>Cases Planned (Line)</strong><hr>Case target for this line.',
+  lineCsAc: '<strong>Cases Actual (Line)</strong><hr>Cases produced on this line.',
+  lineCsVar: '<strong>Cases Variance (Line)</strong><hr>Cases produced minus planned. Negative cases + positive lbs? Product is heavier than expected -- check fill weights.',
+  lineAtt: '<strong>Line Attainment</strong><hr>(Cs Produced / Cs Planned) x 0.98. 90%+ means line performing well. Under 70% means dragging the shift. High variance across lines? Some lines are not pulling their weight.',
   mcRecovery: '<strong>Deficit Recovery Model</strong><hr>Measures how the plant responds when it has been behind.<hr><span class="tt-good">High positive gain:</span> Team rallies well — rally effect is real and measurable. <span class="tt-bad">Near zero or negative:</span> Deficits tend to persist — systemic issue, not motivational. <span class="tt-action">Shifts to close gap exceeds remaining shifts in the week?</span> Escalate now — the week will not self-correct.',
 };
 
