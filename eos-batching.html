@@ -198,6 +198,18 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .badge-red{background:#fef2f2;color:#dc2626}
 .badge-gray{background:#f1f3f6;color:#4a5568}
 .pr-footer{margin-top:14pt;padding-top:6pt;border-top:1pt solid #e2e6ec;display:flex;justify-content:space-between;font-size:7pt;color:#a0aab8}
+/* ── TOOLTIP COMPONENT ── */
+.tt-wrap{display:inline-flex;align-items:center;gap:.3rem}
+.tt-btn{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--g200);color:var(--g500);font-size:.6rem;font-weight:700;cursor:pointer;border:none;line-height:1;flex-shrink:0;transition:background .15s,color .15s;font-family:var(--fb)}
+.tt-btn:hover{background:var(--brand-l);color:var(--brand)}
+.tt-pop{position:fixed;z-index:9999;background:var(--g900);color:#fff;border-radius:8px;padding:.85rem 1rem;font-size:.78rem;line-height:1.55;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.25);pointer-events:none;opacity:0;transition:opacity .15s}
+.tt-pop.visible{opacity:1;pointer-events:auto}
+.tt-pop strong{color:#fff;font-weight:700}
+.tt-pop .tt-good{color:#6ee7b7;font-weight:600}
+.tt-pop .tt-bad{color:#fca5a5;font-weight:600}
+.tt-pop .tt-action{color:#fde68a;font-weight:600}
+.tt-pop hr{border:none;border-top:1px solid rgba(255,255,255,.15);margin:.5rem 0}
+
 </style>
 </head>
 <body>
@@ -217,7 +229,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 
   <!-- Pace strip (production weekly target, read-only) -->
   <div class="pace-strip" id="paceStrip" style="display:none">
-    <div class="pace-strip-label">🎯 Production Pace</div>
+    <div class="pace-strip-label">🎯 Production Pace <button class="tt-btn" onclick="showTT(this,'pace',event)">?</button></div>
     <div class="pace-strip-bar-wrap">
       <div class="pace-strip-labels">
         <span id="ps-left">—</span>
@@ -237,7 +249,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   <form autocomplete="off" id="mainForm">
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Shift Information</div>
+      <div class="sl"><span class="d"></span>Shift Information <button class="tt-btn" onclick="showTT(this,'shiftInfo',event)">?</button></div>
       <div class="fr c2">
         <div class="f"><label>Shift Date</label><input type="date" id="b-date" required></div>
         <div class="f"><label>Supervisor / Manager</label><input type="text" id="b-sup" placeholder="Enter your name" required></div>
@@ -245,7 +257,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Safety</div>
+      <div class="sl"><span class="d"></span>Safety <button class="tt-btn" onclick="showTT(this,'safety',event)">?</button></div>
       <div class="fr c3">
         <div class="f"><label>Unsafe Conditions</label><input type="number" id="b-uc" value="0" min="0"></div>
         <div class="f"><label>Near Misses</label><input type="number" id="b-nm" value="0" min="0"></div>
@@ -255,7 +267,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Batching Information — Total Pounds</div>
+      <div class="sl"><span class="d"></span>Batching Information — Total Pounds <button class="tt-btn" onclick="showTT(this,'lbs',event)">?</button></div>
       <div class="lbs-row">
         <div class="f"><label>Pounds Planned</label><input type="number" id="b-lbsPl" min="0" placeholder="0"></div>
         <div class="f"><label>Pounds Produced</label><input type="number" id="b-lbsAc" min="0" placeholder="0"></div>
@@ -264,7 +276,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Attendance</div>
+      <div class="sl"><span class="d"></span>Attendance <button class="tt-btn" onclick="showTT(this,'attendance',event)">?</button></div>
       <div class="fr c3">
         <div class="f"><label>Headcount Needed</label><input type="number" id="b-hn" min="0"></div>
         <div class="f"><label>Headcount Actual</label><input type="number" id="b-ha" min="0"></div>
@@ -273,7 +285,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Additional Comments</div>
+      <div class="sl"><span class="d"></span>Additional Comments <button class="tt-btn" onclick="showTT(this,'comments',event)">?</button></div>
       <div class="fr"><div class="f"><label>Report any issues or concerns</label><textarea id="b-comments" rows="4" placeholder="Enter any additional notes, issues, or concerns…"></textarea></div></div>
     </div>
 
@@ -634,6 +646,34 @@ async function loadPaceStrip(){
 
 loadWeekPanel();
 loadPaceStrip();
+// ── Tooltip engine ──
+(function(){
+  const TT = {
+    pace:       '<strong>Production Pace (Batching View)</strong><hr>Shows production daily lbs progress against their target. Batching is the upstream constraint — if you are behind, production will run short of input material.',
+    shiftInfo:  '<strong>Shift Information</strong><hr>Date and supervisor name for this batching shift.',
+    safety:     '<strong>Safety (Batching)</strong><hr>All incidents logged — Near Misses are the priority. Batching incidents correlating with production? May indicate a facility-wide condition.',
+    lbs:        '<strong>Batching Lbs</strong><hr>Total pounds planned vs produced. Attainment updates live as you type. <span class="tt-bad">Consistently below plan?</span> Check whether planned quantities match actual order volumes and headcount.',
+    attendance: '<strong>Attendance (Batching)</strong><hr>Headcount needed vs actual. Each batching absence has an outsized impact on a small crew. <span class="tt-action">Short-staffed?</span> Production will feel it within 1-2 shifts as input material runs low.',
+    comments:   '<strong>Additional Comments</strong><hr>Use for equipment issues, recipe deviations, coordination notes with production, or incoming material quality problems. Visible in shift history and exports.',
+  };
+  const pop = document.createElement('div');
+  pop.className = 'tt-pop'; pop.id = 'ttPop';
+  document.body.appendChild(pop);
+  let activeBtn = null;
+  window.showTT = function(btn, key, event){
+    event.stopPropagation();
+    const html = TT[key] || key;
+    if(activeBtn===btn && pop.classList.contains('visible')){ pop.classList.remove('visible'); activeBtn=null; return; }
+    activeBtn=btn; pop.innerHTML=html; pop.classList.add('visible');
+    const r=btn.getBoundingClientRect(), pw=280;
+    let left=r.left+r.width/2-pw/2, top=r.top-10-(pop.offsetHeight||160);
+    if(left<8) left=8;
+    if(left+pw>window.innerWidth-8) left=window.innerWidth-pw-8;
+    if(top<8) top=r.bottom+10;
+    pop.style.cssText += `;left:${left}px;top:${top}px;width:${pw}px`;
+  };
+  document.addEventListener('click', function(e){ if(!e.target.closest('.tt-btn')){ pop.classList.remove('visible'); activeBtn=null; }});
+})();
 </script>
 <div id="printReport"></div>
 </body>
