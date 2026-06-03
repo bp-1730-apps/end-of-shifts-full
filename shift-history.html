@@ -48,6 +48,10 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .toolbar-right{margin-left:auto;display:flex;align-items:center;gap:.6rem}
 .record-count{font-size:.75rem;color:var(--g400);font-weight:500}
 
+/* summary context label */
+.sum-context{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--g500);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+.sum-context::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--brand);flex-shrink:0}
+
 /* summary cards */
 .summary-row{display:grid;gap:.75rem;margin-bottom:1.25rem}
 .summary-row.prod{grid-template-columns:repeat(7,1fr)}
@@ -260,8 +264,10 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
       </div>
     </div>
 
-    <!-- Summary cards (week totals) -->
-    <div style="padding:1.1rem 1.4rem 0" id="summaryArea"></div>
+    <!-- Summary cards (week totals / day selection) -->
+    <div style="padding:1.1rem 1.4rem 0" id="summaryArea">
+      <div id="summaryCards"></div>
+    </div>
 
     <!-- Week strip — horizontal day buttons -->
     <div style="padding:.75rem 1.4rem 0" id="weekStripArea"></div>
@@ -403,7 +409,8 @@ window.loadShifts = async function(){
   const listArea    = document.getElementById('detailPanelArea');
   const summaryArea = document.getElementById('summaryArea');
   document.getElementById('weekStripArea').innerHTML = '';
-  listArea.innerHTML    = '<div class="state-box">Loading…</div>';
+  document.getElementById('summaryCards').innerHTML  = '';
+  listArea.innerHTML = '<div class="state-box">Loading…</div>';
   summaryArea.innerHTML = '';
   document.getElementById('exportBtn').disabled = true;
   document.getElementById('printBtn').disabled  = true;
@@ -415,16 +422,6 @@ window.loadShifts = async function(){
     currentRows   = await sbGet(table, filters);
 
     document.getElementById('recordCount').textContent = currentRows.length + ' shift' + (currentRows.length!==1?'s':'') + ' found';
-
-    // Week context label
-    const weekLabel = usingCustomRange
-      ? `${fD(from)} – ${fD(to)}`
-      : fmtWeekLabel(activeWeekMonday);
-    document.getElementById('summaryArea').innerHTML =
-      `<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--g500);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem">
-        <span style="width:6px;height:6px;border-radius:50%;background:var(--brand);display:inline-block"></span>
-        ${weekLabel}
-       </div>`;
 
     if(!currentRows.length){
       listArea.innerHTML = `<div class="state-box">
@@ -463,13 +460,69 @@ function shortDate(iso){
 // Active selected day
 let selectedDayIdx = null;
 let currentByDate  = {};
+let allCurrentRows = []; // full week rows — for reverting summary on deselect
 
-// ── Select a day and render its detail panel ──
+// ── Render summary cards for any set of rows + label ──
+function renderProdSummaryCards(rows, label){
+  let lbsPl=0,lbsAc=0,csPl=0,csAc=0,uc=0,nm=0,fa=0,ab=0,hn=0,hp=0;
+  rows.forEach(r=>{
+    lbsPl+=r.lbs_planned||0; lbsAc+=r.lbs_produced||0;
+    csPl+=r.cases_planned||0; csAc+=r.cases_produced||0;
+    uc+=r.unsafe_conditions||0; nm+=r.near_misses||0; fa+=r.first_aid||0;
+    ab+=r.absences||0; hn+=r.headcount_needed||0; hp+=r.headcount_present||0;
+  });
+  const lbsVar=lbsAc-lbsPl, csVar=csAc-csPl;
+  const avgAttArr=rows.filter(r=>r.cases_planned>0).map(r=>Math.round((r.cases_produced/r.cases_planned)*100*PE));
+  const avgAtt=avgAttArr.length?Math.round(avgAttArr.reduce((a,b)=>a+b)/avgAttArr.length):null;
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="sum-context">${label}</div>
+    <div class="summary-row prod">
+      <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
+      <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
+      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
+      <div class="sum-card"><div class="sk">Cases Planned</div><div class="sv">${n(csPl)}</div></div>
+      <div class="sum-card"><div class="sk">Cases Produced</div><div class="sv">${n(csAc)}</div></div>
+      <div class="sum-card ${csVar>=0?'pos':'neg'}"><div class="sk">Cases Variance</div><div class="sv">${csVar>0?'+':''}${n(csVar)}</div></div>
+      <div class="sum-card ${avgAtt!==null?(avgAtt>=90?'pos':avgAtt>=70?'':'neg'):''}">
+        <div class="sk">Attainment</div><div class="sv">${avgAtt!==null?avgAtt+'%':'—'}</div>
+        <div class="ss">${rows.length} shift${rows.length!==1?'s':''}</div>
+      </div>
+    </div>`;
+}
+
+function renderBatchSummaryCards(rows, label){
+  let lbsPl=0,lbsAc=0,uc=0,nm=0,fa=0;
+  rows.forEach(r=>{lbsPl+=r.lbs_planned||0;lbsAc+=r.lbs_produced||0;uc+=r.unsafe_conditions||0;nm+=r.near_misses||0;fa+=r.first_aid||0;});
+  const lbsVar=lbsAc-lbsPl;
+  const att=lbsPl>0?Math.round((lbsAc/lbsPl)*100):null;
+  document.getElementById('summaryCards').innerHTML = `
+    <div class="sum-context">${label}</div>
+    <div class="summary-row batch">
+      <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
+      <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
+      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
+      <div class="sum-card ${att!==null?(att>=90?'pos':att>=70?'':'neg'):''}">
+        <div class="sk">Attainment</div><div class="sv">${att!==null?att+'%':'—'}</div>
+        <div class="ss">${rows.length} shift${rows.length!==1?'s':''}</div>
+      </div>
+      <div class="sum-card ${(uc+nm+fa)>0?'neg':''}">
+        <div class="sk">Safety Incidents</div><div class="sv">${uc+nm+fa}</div>
+        <div class="ss">${uc} UC &bull; ${nm} NM &bull; ${fa} FA</div>
+      </div>
+    </div>`;
+}
+
+// ── Select a day ──
 window.selectDay = function(idx, dateStr){
-  // Deselect if already selected
+  // Deselect → revert to week totals
   if(selectedDayIdx === idx){
     selectedDayIdx = null;
     document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
+    const weekLabel = usingCustomRange
+      ? fD(document.getElementById('dateFrom').value)+' – '+fD(document.getElementById('dateTo').value)
+      : fmtWeekLabel(activeWeekMonday);
+    if(currentType==='production') renderProdSummaryCards(allCurrentRows, 'Week: '+weekLabel);
+    else renderBatchSummaryCards(allCurrentRows, 'Week: '+weekLabel);
     document.getElementById('detailPanelArea').innerHTML =
       `<div class="detail-panel"><div class="detail-panel-empty">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
@@ -477,12 +530,19 @@ window.selectDay = function(idx, dateStr){
       </div></div>`;
     return;
   }
+
   selectedDayIdx = idx;
   document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('day-btn-'+idx)?.classList.add('active');
 
   const r = currentByDate[dateStr];
+
+  // Update summary cards to this day
+  const dayLabel = dayName(dateStr)+' · '+shortDate(dateStr);
   if(!r){
+    // No shift — show zeros
+    if(currentType==='production') renderProdSummaryCards([], dayLabel+' — No shift');
+    else renderBatchSummaryCards([], dayLabel+' — No shift');
     document.getElementById('detailPanelArea').innerHTML =
       `<div class="detail-panel">
         <div class="detail-panel-hdr">
@@ -494,37 +554,24 @@ window.selectDay = function(idx, dateStr){
     return;
   }
 
-  if(currentType === 'production') renderProdDetail(r);
-  else renderBatchDetail(r);
+  if(currentType==='production'){
+    renderProdSummaryCards([r], dayLabel);
+    renderProdDetail(r);
+  } else {
+    renderBatchSummaryCards([r], dayLabel);
+    renderBatchDetail(r);
+  }
 };
 
 // ═══════════════════════════════════════
 // PRODUCTION RENDER
 // ═══════════════════════════════════════
 function renderProdSummary(rows){
-  let lbsPl=0,lbsAc=0,csPl=0,csAc=0,uc=0,nm=0,fa=0,ab=0,hn=0,hp=0;
-  rows.forEach(r=>{
-    lbsPl+=r.lbs_planned||0; lbsAc+=r.lbs_produced||0;
-    csPl+=r.cases_planned||0; csAc+=r.cases_produced||0;
-    uc+=r.unsafe_conditions||0; nm+=r.near_misses||0; fa+=r.first_aid||0;
-    ab+=r.absences||0; hn+=r.headcount_needed||0; hp+=r.headcount_present||0;
-  });
-  const lbsVar=lbsAc-lbsPl, csVar=csAc-csPl;
-  const avgAttArr=rows.filter(r=>r.cases_planned>0).map(r=>Math.round((r.cases_produced/r.cases_planned)*100*PE));
-  const avgAtt=avgAttArr.length?Math.round(avgAttArr.reduce((a,b)=>a+b)/avgAttArr.length):null;
-  document.getElementById('summaryArea').innerHTML += `
-    <div class="summary-row prod">
-      <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
-      <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
-      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
-      <div class="sum-card"><div class="sk">Cases Planned</div><div class="sv">${n(csPl)}</div></div>
-      <div class="sum-card"><div class="sk">Cases Produced</div><div class="sv">${n(csAc)}</div></div>
-      <div class="sum-card ${csVar>=0?'pos':'neg'}"><div class="sk">Cases Variance</div><div class="sv">${csVar>0?'+':''}${n(csVar)}</div></div>
-      <div class="sum-card ${avgAtt!==null?(avgAtt>=90?'pos':avgAtt>=70?'':'neg'):''}">
-        <div class="sk">Avg Attainment</div><div class="sv">${avgAtt!==null?avgAtt+'%':'—'}</div>
-        <div class="ss">${rows.length} shifts</div>
-      </div>
-    </div>`;
+  allCurrentRows = rows;
+  const weekLabel = usingCustomRange
+    ? fD(document.getElementById('dateFrom').value)+' – '+fD(document.getElementById('dateTo').value)
+    : fmtWeekLabel(activeWeekMonday);
+  renderProdSummaryCards(rows, 'Week: '+weekLabel);
 }
 
 function renderProdList(rows){
@@ -654,24 +701,11 @@ function renderProdDetail(r){
 // BATCHING RENDER
 // ═══════════════════════════════════════
 function renderBatchSummary(rows){
-  let lbsPl=0,lbsAc=0,uc=0,nm=0,fa=0;
-  rows.forEach(r=>{lbsPl+=r.lbs_planned||0;lbsAc+=r.lbs_produced||0;uc+=r.unsafe_conditions||0;nm+=r.near_misses||0;fa+=r.first_aid||0;});
-  const lbsVar=lbsAc-lbsPl;
-  const att=lbsPl>0?Math.round((lbsAc/lbsPl)*100):null;
-  document.getElementById('summaryArea').innerHTML += `
-    <div class="summary-row batch">
-      <div class="sum-card"><div class="sk">Lbs Planned</div><div class="sv">${n(lbsPl)}</div></div>
-      <div class="sum-card"><div class="sk">Lbs Produced</div><div class="sv">${n(lbsAc)}</div></div>
-      <div class="sum-card ${lbsVar>=0?'pos':'neg'}"><div class="sk">Lbs Variance</div><div class="sv">${lbsVar>0?'+':''}${n(lbsVar)}</div></div>
-      <div class="sum-card ${att!==null?(att>=90?'pos':att>=70?'':'neg'):''}">
-        <div class="sk">Attainment</div><div class="sv">${att!==null?att+'%':'—'}</div>
-        <div class="ss">${rows.length} shifts</div>
-      </div>
-      <div class="sum-card ${(uc+nm+fa)>0?'neg':''}">
-        <div class="sk">Safety Incidents</div><div class="sv">${uc+nm+fa}</div>
-        <div class="ss">${uc} UC &bull; ${nm} NM &bull; ${fa} FA</div>
-      </div>
-    </div>`;
+  allCurrentRows = rows;
+  const weekLabel = usingCustomRange
+    ? fD(document.getElementById('dateFrom').value)+' – '+fD(document.getElementById('dateTo').value)
+    : fmtWeekLabel(activeWeekMonday);
+  renderBatchSummaryCards(rows, 'Week: '+weekLabel);
 }
 
 function renderBatchList(rows){
