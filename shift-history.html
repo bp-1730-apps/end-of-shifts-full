@@ -99,7 +99,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .proj-body{padding:1.2rem 1.3rem}
 
 /* projection stat cards */
-.proj-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.25rem}
+.proj-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:.75rem;margin-bottom:1.25rem}
 .proj-stat{background:var(--g50);border:1px solid var(--g200);border-radius:var(--rs);padding:.7rem .85rem}
 .proj-stat .pk{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g400);margin-bottom:.25rem}
 .proj-stat .pv{font-family:var(--fm);font-weight:700;font-size:1.05rem;color:var(--g800);line-height:1}
@@ -781,23 +781,32 @@ async function renderProjection(dateStr){
     const sdRows=hist.filter(r=>new Date(r.shift_date+'T12:00:00').getDay()===dow).slice(-6);
     const typPlan=sdRows.length?Math.round(sdRows.reduce((s,r)=>s+(r.lbs_planned||0),0)/sdRows.length):Math.round(baseMean);
 
-    // ── Scheduled headcount: prefer target over historical median ──
+    // ── Scheduled headcount + lbs target: prefer set values over historical ──
     const DAY_COLS_PROJ=['mon','tue','wed','thu','fri','sat','sun'];
-    const dowColName = 'hc_target_'+DAY_COLS_PROJ[dow===0?6:dow-1];
-    const monStr = isoDate(activeWeekMonday);
-    let scheduledHC = null;
-    let hcSource = 'historical median';
+    const dowIdx     = dow===0?6:dow-1;
+    const dowColHC   = 'hc_target_'+DAY_COLS_PROJ[dowIdx];
+    const dowColLbs  = 'lbs_target_'+DAY_COLS_PROJ[dowIdx];
+    const monStr     = isoDate(activeWeekMonday);
+    let scheduledHC  = null;
+    let hcSource     = 'historical median';
+    let dayLbsTarget = null;  // the target set on the hub for this specific day
     try{
+      const selectCols = [
+        ...DAY_COLS_PROJ.map(c=>'hc_target_'+c),
+        ...DAY_COLS_PROJ.map(c=>'lbs_target_'+c)
+      ].join(',');
       const tgtRows = await sbGet('eos_weekly_targets',
-        `week_start=eq.${monStr}&select=${DAY_COLS_PROJ.map(c=>'hc_target_'+c).join(',')}`,
+        `week_start=eq.${monStr}&select=${selectCols}`,
         'updated_at.desc');
       if(tgtRows.length){
-        const hcVal = parseInt(tgtRows[0][dowColName])||0;
+        const hcVal  = parseInt(tgtRows[0][dowColHC])||0;
+        const lbsVal = parseInt(tgtRows[0][dowColLbs])||0;
         if(hcVal>0){ scheduledHC=hcVal; hcSource='scheduled'; }
+        if(lbsVal>0){ dayLbsTarget=lbsVal; }
       }
-    }catch(e){ /* fall through to historical */ }
+    }catch(e){ /* fall through */ }
 
-    // Fall back to historical median if no scheduled HC
+    // Fall back to historical median headcount if none scheduled
     if(!scheduledHC){
       const recentHC=hist.slice(-10).filter(r=>r.headcount_present>0).map(r=>r.headcount_present);
       scheduledHC=recentHC.length?recentHC.sort((a,b)=>a-b)[Math.floor(recentHC.length/2)]:null;
@@ -821,9 +830,12 @@ async function renderProjection(dateStr){
     } else if(wkVar>=0){ catchup='Currently ahead of plan — no deficit.'; }
     else { catchup='Not enough recovery data to project catch-up.'; }
 
-    const projAtt=typPlan>0?Math.round((ensemble/typPlan)*100*PE):null;
-    const attCls=projAtt!==null?(projAtt>=90?'proj-good':projAtt>=70?'proj-warn':'proj-bad'):'';
-    const chartRows=hist.slice(-14);
+    const attainmentBase = dayLbsTarget || typPlan;
+    const projVsTarget   = dayLbsTarget ? ensemble - dayLbsTarget : null;
+    const projAtt  = attainmentBase>0?Math.round((ensemble/attainmentBase)*100*PE):null;
+    const attCls   = projAtt!==null?(projAtt>=90?'proj-good':projAtt>=70?'proj-warn':'proj-bad'):'';
+    const gapCls   = projVsTarget!==null?(projVsTarget>=0?'proj-good':'proj-bad'):'';
+    const chartRows= hist.slice(-14);
 
     panel.innerHTML=`<div class="proj-panel">
       <div class="proj-hdr">
@@ -835,10 +847,31 @@ async function renderProjection(dateStr){
       </div>
       <div class="proj-body">
         <div class="proj-stats">
-          <div class="proj-stat"><div class="pk">Projected Lbs</div><div class="pv">${ensemble.toLocaleString()}</div><div class="ps">${projs.length}-model ensemble</div></div>
-          <div class="proj-stat"><div class="pk">Typical Plan (${DAY_NAMES_FULL[dow]})</div><div class="pv">${typPlan.toLocaleString()}</div><div class="ps">${sdRows.length} ${DAY_NAMES_FULL[dow]} shifts</div></div>
-          <div class="proj-stat ${attCls}"><div class="pk">Projected Attainment</div><div class="pv">${projAtt!==null?projAtt+'%':'—'}</div><div class="ps">at PE=${PE}</div></div>
-          <div class="proj-stat ${wkVar>=0?'proj-good':'proj-bad'}"><div class="pk">Week Gap (so far)</div><div class="pv">${wkVar>0?'+':''}${wkVar.toLocaleString()}</div><div class="ps">lbs vs plan</div></div>
+          <div class="proj-stat">
+            <div class="pk">Projected Lbs</div>
+            <div class="pv">${ensemble.toLocaleString()}</div>
+            <div class="ps">${projs.length}-model ensemble</div>
+          </div>
+          <div class="proj-stat">
+            <div class="pk">Day Target${dayLbsTarget?'':' (not set)'}</div>
+            <div class="pv">${dayLbsTarget?dayLbsTarget.toLocaleString():'—'}</div>
+            <div class="ps">${dayLbsTarget?'set on hub':'go to hub to set'}</div>
+          </div>
+          <div class="proj-stat ${gapCls}">
+            <div class="pk">Projected vs Target</div>
+            <div class="pv">${projVsTarget!==null?(projVsTarget>=0?'+':'')+projVsTarget.toLocaleString():'—'}</div>
+            <div class="ps">${projVsTarget===null?'set a day target to see this':'lbs above/below target'}</div>
+          </div>
+          <div class="proj-stat ${attCls}">
+            <div class="pk">Projected Attainment</div>
+            <div class="pv">${projAtt!==null?projAtt+'%':'—'}</div>
+            <div class="ps">vs ${dayLbsTarget?'day target':'typical plan'} · PE=${PE}</div>
+          </div>
+          <div class="proj-stat ${wkVar>=0?'proj-good':'proj-bad'}">
+            <div class="pk">Week Gap (so far)</div>
+            <div class="pv">${wkVar>0?'+':''}${wkVar.toLocaleString()}</div>
+            <div class="ps">lbs vs plan this week</div>
+          </div>
         </div>
         <div class="conf-band">
           <span class="cb-lbl">Confidence Range</span>
@@ -898,7 +931,8 @@ async function renderProjection(dateStr){
               </span><br><br>
               <strong style="color:var(--g800);font-size:.72rem;text-transform:uppercase;letter-spacing:.04em">Step 3 — Attainment</strong><br>
               <span style="font-family:var(--fm);font-size:.75rem;color:var(--g600)">
-                (${ensemble.toLocaleString()} ÷ ${typPlan.toLocaleString()}) × ${PE} = ${projAtt!==null?projAtt+'%':'—'}
+                (${ensemble.toLocaleString()} ÷ ${attainmentBase.toLocaleString()}) × ${PE} = ${projAtt!==null?projAtt+'%':'—'}<br>
+                <span style="color:var(--g400)">${dayLbsTarget?'using day target from hub':'using typical '+DAY_NAMES_FULL[dow]+' plan (no day target set)'}</span>
               </span>
             </div>
             <div>
