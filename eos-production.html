@@ -242,6 +242,18 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 .badge-off{background:#f1f3f6;color:#a0aab8}
 .pr-footer{margin-top:14pt;padding-top:6pt;border-top:1pt solid #e2e6ec;display:flex;justify-content:space-between;font-size:7pt;color:#a0aab8}
 .pe-note{font-size:7pt;color:#6b7a8d;font-style:italic}
+/* ── TOOLTIP COMPONENT ── */
+.tt-wrap{display:inline-flex;align-items:center;gap:.3rem}
+.tt-btn{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--g200);color:var(--g500);font-size:.6rem;font-weight:700;cursor:pointer;border:none;line-height:1;flex-shrink:0;transition:background .15s,color .15s;font-family:var(--fb)}
+.tt-btn:hover{background:var(--brand-l);color:var(--brand)}
+.tt-pop{position:fixed;z-index:9999;background:var(--g900);color:#fff;border-radius:8px;padding:.85rem 1rem;font-size:.78rem;line-height:1.55;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.25);pointer-events:none;opacity:0;transition:opacity .15s}
+.tt-pop.visible{opacity:1;pointer-events:auto}
+.tt-pop strong{color:#fff;font-weight:700}
+.tt-pop .tt-good{color:#6ee7b7;font-weight:600}
+.tt-pop .tt-bad{color:#fca5a5;font-weight:600}
+.tt-pop .tt-action{color:#fde68a;font-weight:600}
+.tt-pop hr{border:none;border-top:1px solid rgba(255,255,255,.15);margin:.5rem 0}
+
 </style>
 </head>
 <body>
@@ -261,7 +273,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
 
   <!-- Pace strip (read-only, loaded from Supabase) -->
   <div class="pace-strip" id="paceStrip" style="display:none">
-    <div class="pace-strip-label">🎯 Weekly Pace</div>
+    <div class="pace-strip-label">🎯 Weekly Pace <button class="tt-btn" onclick="showTT(this,'pace',event)">?</button></div>
     <div class="pace-strip-bar-wrap">
       <div class="pace-strip-labels">
         <span id="ps-left">—</span>
@@ -281,7 +293,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
   <form autocomplete="off" id="mainForm">
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Shift Information</div>
+      <div class="sl"><span class="d"></span>Shift Information <button class="tt-btn" onclick="showTT(this,'shiftInfo',event)">?</button></div>
       <div class="fr c2">
         <div class="f"><label>Shift Date</label><input type="date" id="p-date" required></div>
         <div class="f"><label>Supervisor / Manager</label><input type="text" id="p-sup" placeholder="Enter your name" required></div>
@@ -289,7 +301,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Safety</div>
+      <div class="sl"><span class="d"></span>Safety <button class="tt-btn" onclick="showTT(this,'safety',event)">?</button></div>
       <div class="fr c3">
         <div class="f"><label>Unsafe Conditions</label><input type="number" id="p-uc" value="0" min="0"></div>
         <div class="f"><label>Near Misses</label><input type="number" id="p-nm" value="0" min="0"></div>
@@ -299,7 +311,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Materials</div>
+      <div class="sl"><span class="d"></span>Materials <button class="tt-btn" onclick="showTT(this,'materials',event)">?</button></div>
       <div class="fr c2">
         <div class="f"><label>Shortages</label><textarea id="p-sh" placeholder="List any material shortages…"></textarea></div>
         <div class="f"><label>STOs</label><textarea id="p-sto" placeholder="Stock transfer order notes…"></textarea></div>
@@ -307,7 +319,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Attendance</div>
+      <div class="sl"><span class="d"></span>Attendance <button class="tt-btn" onclick="showTT(this,'attendance',event)">?</button></div>
       <div class="fr c3">
         <div class="f"><label>Absences</label><input type="number" id="p-ab" value="0" min="0"></div>
         <div class="f"><label>Headcount Needed</label><input type="number" id="p-hn" min="0"></div>
@@ -316,7 +328,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>SAP</div>
+      <div class="sl"><span class="d"></span>SAP <button class="tt-btn" onclick="showTT(this,'sap',event)">?</button></div>
       <div class="fr c3">
         <div class="f"><label>Process Orders Completed</label><input type="number" id="p-sapC" min="0"></div>
         <div class="f"><label>Process Orders Open</label><input type="number" id="p-sapO" min="0"></div>
@@ -325,7 +337,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Trainings &amp; Quality</div>
+      <div class="sl"><span class="d"></span>Trainings &amp; Quality <button class="tt-btn" onclick="showTT(this,'training',event)">?</button></div>
       <div class="fr c2">
         <div class="f"><label>Training Notes</label><textarea id="p-tr" placeholder="Training activities completed this shift…"></textarea></div>
         <div class="f"><label>Quality Notes</label><textarea id="p-qa" placeholder="Quality holds, deviations, observations…"></textarea></div>
@@ -333,7 +345,7 @@ body{font-family:var(--fb);background:var(--g100);color:var(--g800);min-height:1
     </div>
 
     <div class="sec">
-      <div class="sl"><span class="d"></span>Production Line Performance</div>
+      <div class="sl"><span class="d"></span>Production Line Performance <button class="tt-btn" onclick="showTT(this,'lines',event)">?</button></div>
       <div class="line-cards" id="lineCards"></div>
     </div>
 
@@ -874,6 +886,37 @@ async function loadPaceStrip(){
 
 loadWeekPanel();
 loadPaceStrip();
+
+// ── Tooltip engine ──
+(function(){
+  const TT = {
+    pace:       '<strong>Weekly Pace Strip</strong><hr>Shows today lbs produced vs today target, and your week-to-date gap. <span class="tt-action">Behind today?</span> Check headcount, a line issue, or materials — while there is still time to act.',
+    shiftInfo:  '<strong>Shift Information</strong><hr>Date and supervisor name. Supervisor field tracks performance patterns — consistent shortfalls under specific supervisors may indicate a training or support opportunity.',
+    safety:     '<strong>Safety Section</strong><hr>Record all events, even minor ones. Near Misses are the most important — accidents that almost happened. A shift with 3 near misses and no injuries is more concerning than 1 first aid. <span class="tt-action">Pattern on the same line?</span> Equipment or workflow review needed.',
+    materials:  '<strong>Materials Section</strong><hr>Document shortages and STOs. <span class="tt-bad">Same shortage item weekly?</span> Escalate to procurement — systemic issue, not a floor issue. <span class="tt-action">Frequent STOs?</span> Pre-shift staging process needs review.',
+    attendance: '<strong>Attendance Section</strong><hr>Headcount gap for this shift. Each absent person costs ~3,000–4,000 lbs based on your regression. <span class="tt-action">Absences above 2 regularly?</span> Investigate patterns — day of week, specific individuals, or scheduling.',
+    sap:        '<strong>SAP Section</strong><hr>Process orders completed vs open. <span class="tt-bad">Open orders mean inventory records do not match production reality</span> — creates downstream scheduling and materials issues. <span class="tt-action">Consistently open?</span> Simplify the closing process or provide targeted training.',
+    training:   '<strong>Training and Quality</strong><hr>Training = compliance audit trail. Quality = holds, deviations, consumer triggers. <span class="tt-action">Quality holds on one line only?</span> Calibration check or CIL needed.',
+    lines:      '<strong>Line Performance</strong><hr>Individual data per line this shift. <span class="tt-bad">One line below plan while others hit target?</span> That line is your constraint. <span class="tt-bad">All lines below plan?</span> Plant-wide issue — headcount or materials. <span class="tt-action">High variance across lines?</span> Some lines are not pulling their weight.',
+  };
+  const pop = document.createElement('div');
+  pop.className = 'tt-pop'; pop.id = 'ttPop';
+  document.body.appendChild(pop);
+  let activeBtn = null;
+  window.showTT = function(btn, key, event){
+    event.stopPropagation();
+    const html = TT[key] || key;
+    if(activeBtn===btn && pop.classList.contains('visible')){ pop.classList.remove('visible'); activeBtn=null; return; }
+    activeBtn=btn; pop.innerHTML=html; pop.classList.add('visible');
+    const r=btn.getBoundingClientRect(), pw=280;
+    let left=r.left+r.width/2-pw/2, top=r.top-10-(pop.offsetHeight||160);
+    if(left<8) left=8;
+    if(left+pw>window.innerWidth-8) left=window.innerWidth-pw-8;
+    if(top<8) top=r.bottom+10;
+    pop.style.cssText += `;left:${left}px;top:${top}px;width:${pw}px`;
+  };
+  document.addEventListener('click', function(e){ if(!e.target.closest('.tt-btn')){ pop.classList.remove('visible'); activeBtn=null; }});
+})();
 </script>
 <div id="printReport"></div>
 </body>
